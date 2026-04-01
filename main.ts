@@ -282,7 +282,28 @@ const server = http.createServer(async (req, res) => {
   try {
     const method = req.method || "GET";
     const url = req.url || "/";
+if (method === "GET" && url === "/render-test") {
+  const pdfBuffer = await generatePdfBuffer({
+    projectId: "600059b1-85f8-4ca1-81dc-ed5339a8a812",
+    signatureCode: "CSB-20260401-001",
+    documentType: "Camasa Signature Book",
+    clientName: "Cliente Teste",
+    projectName: "Residência Alpha",
+    material: "Travertino Turco Light",
+    location: "São Paulo",
+    issueDate: "01/04/2026"
+  });
 
+  res.writeHead(200, {
+    "Content-Type": "application/pdf",
+    "Content-Disposition": "inline; filename=camasa-signature-book-test.pdf",
+    "Content-Length": String(pdfBuffer.length),
+    "Cache-Control": "no-store"
+  });
+
+  res.end(pdfBuffer);
+  return;
+}
     if (method === "GET" && url === "/") {
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       res.end(buildHtml({}));
