@@ -1547,5 +1547,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(port, "0.0.0.0", () => {
-  console.log(\`Camasa Signature Renderer running on port \${port}\`);
+  console.log(`Camasa Signature Renderer running on port ${port}`);
 });
