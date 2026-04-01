@@ -1,93 +1,59 @@
-import { chromium } from 'playwright-extra';
-import StealthPlugin from 'puppeteer-extra-plugin-stealth';
+import http from "http";
 
-// Add stealth plugin - this uses the actual puppeteer stealth plugin!
-chromium.use(StealthPlugin());
+const port = Number(process.env.PORT || 8080);
 
-async function testBotDetection() {
-    console.log('🚀 Starting Playwright Stealth Test...\n');
-
-    // Launch browser with stealth
-    const browser = await chromium.launch({
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-blink-features=AutomationControlled'
-        ]
-    });
-
-    const context = await browser.newContext({
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        viewport: { width: 1366, height: 768 }
-    });
-
-    const page = await context.newPage();
-
-    try {
-        // Test with bot detection site
-        console.log('📍 Testing: https://bot.sannysoft.com/');
-        await page.goto('https://bot.sannysoft.com/', { waitUntil: 'load' });
-
-        // Get page title
-        const title = await page.title();
-        console.log(`📄 Page title: ${title}`);
-
-        // Log key page elements that indicate detection status
-        console.log('\n🧪 Detection Test Results:');
-        try {
-            const results = await page.$$eval('table tr', rows => {
-                return rows
-                    .map(row => {
-                        const cells = row.querySelectorAll('td');
-                        if (cells.length !== 2 && cells.length !== 3) return null;
-
-                        const name = cells[0]?.innerText?.trim();
-                        const result = cells[1]?.innerText?.trim();
-                        const className = cells[1]?.className;
-
-                        return {
-                            name,
-                            result,
-                            status: className?.includes('passed') ? 'passed'
-                                : className?.includes('warn') ? 'warn'
-                                    : className?.includes('failed') ? 'failed'
-                                        : 'unknown'
-                        };
-                    })
-                    .filter(Boolean);
-            });
-
-            // Analyze and report
-            const failed = results.filter(r => r?.status === 'failed');
-            const warned = results.filter(r => r?.status === 'warn');
-            const passed = results.filter(r => r?.status === 'passed');
-
-            console.log(`\n✅ Passed: ${passed.length}`);
-            console.log(`⚠️  Warnings: ${warned.length}`);
-            console.log(`❌ Failed: ${failed.length}`);
-
-            if (failed.length > 0 || warned.length > 0) {
-                console.log('\n🧪 Problematic tests:\n');
-                [...failed, ...warned].forEach(r => {
-                    console.log(`  [${r?.status.toUpperCase()}] ${r?.name} → ${r?.result}`);
-                });
-            } else {
-                console.log('\n🎉 All tests passed with no issues!');
-            }
-        } catch (error) {
-            console.log('ℹ️  Could not extract detailed test results');
-        }
-
-        console.log('\n✅ Test completed successfully!');
-
-    } catch (error) {
-        console.error('❌ Test failed:', error);
-    } finally {
-        await browser.close();
+const html = `<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Camasa Signature Renderer</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #111;
+      color: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
-}
+    .card {
+      max-width: 720px;
+      margin: 24px;
+      padding: 32px;
+      border: 1px solid rgba(197,165,114,.35);
+      border-radius: 20px;
+      background: #1b1b1b;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+    }
+    h1 {
+      margin: 0 0 12px;
+      color: #C5A572;
+      font-size: 40px;
+    }
+    p {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.6;
+      color: #d8d8d8;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Camasa Signature Renderer</h1>
+    <p>Servidor HTTP ativo no Railway. Próximo passo: transformar este endpoint no renderizador premium do Signature Book.</p>
+  </div>
+</body>
+</html>`;
 
-// Run the test
-testBotDetection().catch(console.error);
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+  res.end(html);
+});
+
+server.listen(port, "0.0.0.0", () => {
+  console.log(\`Camasa renderer running on port \${port}\`);
+});
