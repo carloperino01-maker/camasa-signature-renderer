@@ -1,7 +1,6 @@
 import http from "http";
 import fs from "fs";
 import path from "path";
-
 import { chromium } from "playwright-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
@@ -9,7 +8,6 @@ chromium.use(StealthPlugin());
 
 const port = Number(process.env.PORT || 8080);
 const __dirname = process.cwd();
-
 
 type RenderPayload = {
   projectId?: string;
@@ -20,10 +18,31 @@ type RenderPayload = {
   material?: string;
   location?: string;
   issueDate?: string;
+  progressPercent?: number;
+  completedSteps?: number;
+  currentStage?: string;
+  remainingSteps?: number;
+  forecastDate?: string;
+  applicationLabel?: string;
+  applicationPercent?: number;
+  materialCategory?: string;
+  materialFinish?: string;
+  materialUsage?: string;
+  materialCare?: string[];
+  doList?: string[];
+  dontList?: string[];
+  alerts?: string[];
+  carePillars?: Array<{
+    title: string;
+    subtitle: string;
+  }>;
+  certificateFamily?: string;
+  certificateOrigin?: string;
+  certificateBatch?: string;
 };
 
-function escapeHtml(value: string): string {
-  return String(value)
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
@@ -31,1208 +50,1148 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function hashCode(input: string): number {
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    hash = (hash << 5) - hash + input.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
-
-function guessMimeType(filePath: string): string {
-  const ext = path.extname(filePath).toLowerCase();
-  if (ext === ".png") return "image/png";
-  if (ext === ".webp") return "image/webp";
-  return "image/jpeg";
-}
-
-function assetToDataUri(relativePath: string): string | null {
+function assetDataUri(relativePath: string): string | null {
   try {
     const filePath = path.join(__dirname, relativePath);
-    if (!fs.existsSync(filePath)) return null;
     const buffer = fs.readFileSync(filePath);
-    const mime = guessMimeType(filePath);
+    const ext = path.extname(filePath).toLowerCase();
+
+    let mime = "application/octet-stream";
+    if (ext === ".jpg" || ext === ".jpeg") mime = "image/jpeg";
+    if (ext === ".png") mime = "image/png";
+    if (ext === ".webp") mime = "image/webp";
+
     return `data:${mime};base64,${buffer.toString("base64")}`;
   } catch {
     return null;
   }
 }
 
-function buildPseudoQrSvg(value: string): string {
-  const seed = hashCode(value || "camasa");
-  const size = 29;
-  const cell = 6;
-  const pad = 12;
-
-  const isFinder = (x: number, y: number) => {
-    const inTopLeft = x < 7 && y < 7;
-    const inTopRight = x > size - 8 && y < 7;
-    const inBottomLeft = x < 7 && y > size - 8;
-    return inTopLeft || inTopRight || inBottomLeft;
-  };
-
-  const finderFill = (x: number, y: number) => {
-    const localX = x < 7 ? x : x > size - 8 ? x - (size - 7) : x;
-    const localY = y < 7 ? y : y > size - 8 ? y - (size - 7) : y;
-
-    return (
-      localX === 0 ||
-      localX === 6 ||
-      localY === 0 ||
-      localY === 6 ||
-      (localX >= 2 && localX <= 4 && localY >= 2 && localY <= 4)
-    );
-  };
-
-  let rects = "";
-
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
-      let fill = false;
-
-      if (isFinder(x, y)) {
-        fill = finderFill(x, y);
-      } else {
-        const n = (seed + x * 31 + y * 17 + x * y * 13) % 11;
-        fill = n < 5;
-      }
-
-      if (fill) {
-        rects += `<rect x="${pad + x * cell}" y="${pad + y * cell}" width="${cell}" height="${cell}" rx="1" ry="1" fill="#f3e7cf" />`;
-      }
-    }
-  }
-
-  const total = pad * 2 + size * cell;
-
-  return `
-  <svg xmlns="http://www.w3.org/2000/svg" width="${total}" height="${total}" viewBox="0 0 ${total} ${total}">
-    <rect width="${total}" height="${total}" rx="18" fill="#0b0b12"/>
-    <rect x="4" y="4" width="${total - 8}" height="${total - 8}" rx="16" fill="none" stroke="rgba(197,165,114,0.55)" stroke-width="2"/>
-    ${rects}
-  </svg>`;
+function formatDatePtBr(input?: string): string {
+  if (!input) return new Date().toLocaleDateString("pt-BR");
+  const d = new Date(input);
+  if (Number.isNaN(d.getTime())) return escapeHtml(input);
+  return d.toLocaleDateString("pt-BR");
 }
 
-function buildIconSvg(kind: string): string {
-  const stroke = "#d8bf8a";
-  const common = `stroke="${stroke}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
-  const size = 28;
-
-  const map: Record<string, string> = {
-    material: `<path ${common} d="M6 9l8-4 8 4-8 4-8-4zm0 0v8l8 4 8-4V9" />`,
-    category: `<path ${common} d="M6 7h16v14H6z" /><path ${common} d="M10 11h8M10 15h5" />`,
-    blocks: `<path ${common} d="M7 7h6v6H7zM15 7h6v6h-6zM11 15h6v6h-6z" />`,
-    preserve: `<path ${common} d="M14 5c4 3 7 5 7 9a7 7 0 1 1-14 0c0-4 3-6 7-9z" />`,
-    protect: `<path ${common} d="M14 5l7 3v5c0 4-3 7-7 9-4-2-7-5-7-9V8l7-3z" />`,
-    revisit: `<path ${common} d="M20 12a6 6 0 1 0 1.2 4" /><path ${common} d="M20 6v6h-6" />`,
-    check: `<path ${common} d="M6 14l5 5 11-11" />`,
-    play: `<path ${common} d="M10 8l8 6-8 6z" />`,
-    circle: `<circle ${common} cx="14" cy="14" r="8" />`,
-    clock: `<circle ${common} cx="14" cy="14" r="8" /><path ${common} d="M14 10v5l3 2" />`,
-    project: `<path ${common} d="M7 20h14" /><path ${common} d="M9 20V9l5-3 5 3v11" />`,
-    measure: `<path ${common} d="M6 18l12-12 4 4-12 12H6z" /><path ${common} d="M14 8l4 4" />`,
-    finish: `<path ${common} d="M8 18c2-6 5-9 11-11-2 6-5 9-11 11z" />`,
-    install: `<path ${common} d="M7 20h14" /><path ${common} d="M9 20V9l5-3 5 3v11" /><path ${common} d="M12 14h4" />`,
-    final: `<path ${common} d="M7 14l4 4 10-10" />`,
-    warning: `<path ${common} d="M14 6l8 14H6L14 6z" /><path ${common} d="M14 11v4M14 18h.01" />`,
-  };
-
-  return `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 28 28" aria-hidden="true">
-      ${map[kind] || map.category}
-    </svg>
-  `;
+function normalizeArray(input: unknown, fallback: string[]): string[] {
+  if (Array.isArray(input)) {
+    const cleaned = input
+      .map((item) => String(item ?? "").trim())
+      .filter(Boolean);
+    if (cleaned.length) return cleaned;
+  }
+  return fallback;
 }
 
-function buildLogoMarkup(logoDataUri: string | null, small = false): string {
-  if (logoDataUri) {
-    return `<img class="logo-real ${small ? "small" : ""}" src="${logoDataUri}" alt="CPS Camasa Process System" />`;
+function normalizePillars(
+  input: unknown,
+): Array<{ title: string; subtitle: string }> {
+  if (Array.isArray(input)) {
+    const cleaned = input
+      .map((item) => {
+        if (!item || typeof item !== "object") return null;
+        const row = item as Record<string, unknown>;
+        const title = String(row.title ?? "").trim();
+        const subtitle = String(row.subtitle ?? "").trim();
+        if (!title) return null;
+        return { title, subtitle };
+      })
+      .filter(Boolean) as Array<{ title: string; subtitle: string }>;
+
+    if (cleaned.length) return cleaned;
   }
 
-  return `
-    <div class="logo-fallback ${small ? "small" : ""}">
-      <div class="logo-fallback-top">CPS <span>CAMASA</span></div>
-      <div class="logo-fallback-bottom">Process System</div>
-    </div>
-  `;
+  return [
+    { title: "Preservar", subtitle: "Limpeza correta e rotina adequada" },
+    { title: "Proteger", subtitle: "Uso consciente e prevenção de manchas" },
+    { title: "Revisar", subtitle: "Acompanhamento e manutenção preventiva" },
+  ];
+}
+
+function buildSteps(percent: number): string {
+  const steps = [
+    "Projeto",
+    "Medição",
+    "Acabamento",
+    "Instalação",
+    "Finalização",
+  ];
+  const activeIndex =
+    percent >= 100 ? steps.length - 1 : Math.max(0, Math.min(4, Math.floor(percent / 20)));
+
+  return steps
+    .map((label, index) => {
+      const state =
+        index < activeIndex
+          ? "done"
+          : index === activeIndex
+            ? "current"
+            : "pending";
+
+      return `
+        <div class="timeline-step ${state}">
+          <div class="timeline-dot">${state === "done" ? "✓" : state === "current" ? "◔" : ""}</div>
+          <div class="timeline-label">${escapeHtml(label)}</div>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function buildList(items: string[], variant: "good" | "bad" | "alert"): string {
+  return items
+    .map((item) => {
+      const icon = variant === "good" ? "✓" : variant === "bad" ? "✕" : "△";
+      return `<li><span class="bullet ${variant}">${icon}</span><span>${escapeHtml(item)}</span></li>`;
+    })
+    .join("");
+}
+
+function buildCarePillars(items: Array<{ title: string; subtitle: string }>): string {
+  return items
+    .map(
+      (item) => `
+      <div class="pillar-card">
+        <div class="pillar-icon">◌</div>
+        <div class="pillar-title">${escapeHtml(item.title)}</div>
+        <div class="pillar-subtitle">${escapeHtml(item.subtitle)}</div>
+      </div>
+    `,
+    )
+    .join("");
 }
 
 function buildHtml(data: RenderPayload): string {
+  const logoAsset =
+    assetDataUri("assets/logotipo-camasa-process-system.jpg") ||
+    assetDataUri("assets/logotipo-camasa-process-system.jpeg") ||
+    assetDataUri("assets/logotipo-camasa-process-system.png");
+
+  const referenceAsset =
+    assetDataUri("assets/camasa-signature-book-completo.jpg") ||
+    assetDataUri("assets/camasa-signature-book-completo.jpeg") ||
+    assetDataUri("assets/camasa-signature-book-completo.png");
+
   const signatureCode = escapeHtml(data.signatureCode || "CSB-20260331-2344-XBGE");
-  const documentType = escapeHtml(data.documentType || "Camasa Signature Book");
+  const documentType = escapeHtml(data.documentType || "CAMASA SIGNATURE BOOK");
   const clientName = escapeHtml(data.clientName || "Ana");
   const projectName = escapeHtml(data.projectName || "Bancada em L");
   const material = escapeHtml(data.material || "Granito Verde Ubatuba");
   const location = escapeHtml(data.location || "São Paulo, SP");
-  const issueDate = escapeHtml(data.issueDate || new Date().toLocaleDateString("pt-BR"));
-  const projectId = escapeHtml(data.projectId || "600059b1-85f8-4ca1-81dc-ed5339a8a812");
+  const issueDate = formatDatePtBr(data.issueDate);
+  const forecastDate = formatDatePtBr(data.forecastDate || data.issueDate);
+  const progressPercent = Math.max(0, Math.min(100, Number(data.progressPercent ?? 38)));
+  const completedSteps = Math.max(0, Number(data.completedSteps ?? 6));
+  const remainingSteps = Math.max(0, Number(data.remainingSteps ?? 8));
+  const currentStage = escapeHtml(data.currentStage || "Instalação");
+  const applicationLabel = escapeHtml(data.applicationLabel || projectName);
+  const applicationPercent = Math.max(0, Math.min(100, Number(data.applicationPercent ?? 100)));
+  const materialCategory = escapeHtml(data.materialCategory || "Granito");
+  const materialFinish = escapeHtml(data.materialFinish || "Polido");
+  const materialUsage = escapeHtml(data.materialUsage || projectName);
+  const materialCare = escapeHtml(data.materialUsage || "Uso interno e vedado");
+  const certificateFamily = escapeHtml(data.certificateFamily || materialCategory);
+  const certificateOrigin = escapeHtml(data.certificateOrigin || "Brasil");
+  const certificateBatch = escapeHtml(data.certificateBatch || "AM");
 
-  const qrSvg = buildPseudoQrSvg(`${signatureCode}|${projectId}|${clientName}`);
-  const logoDataUri = assetToDataUri("assets/logotipo-camasa-process-system.jpg");
-  const textureDataUri = assetToDataUri("assets/camasa-signature-book-completo.jpg");
+  const doList = normalizeArray(data.doList, [
+    "Limpar com pano macio e detergente neutro.",
+    "Secar após limpeza e contato com líquidos.",
+    "Usar apoios adequados para objetos quentes.",
+    "Manter rotina de cuidado e inspeção visual.",
+  ]);
 
-  const logoMain = buildLogoMarkup(logoDataUri, false);
-  const logoSmall = buildLogoMarkup(logoDataUri, true);
+  const dontList = normalizeArray(data.dontList, [
+    "Não usar ácido, cloro ou produtos abrasivos.",
+    "Não apoiar panelas ou peças superaquecidas diretamente.",
+    "Não deixar líquidos pigmentados por longos períodos.",
+    "Não usar lâmina, palha de aço ou solvente forte.",
+  ]);
 
-  const textureCss = textureDataUri
-    ? `background-image: url('${textureDataUri}');`
-    : `background:
-         radial-gradient(circle at 15% 10%, rgba(255,255,255,0.06), transparent 18%),
-         radial-gradient(circle at 82% 17%, rgba(199,165,105,0.08), transparent 18%),
-         linear-gradient(180deg, rgba(8,8,12,0.88), rgba(15,15,22,0.94)),
-         #090a0e;`;
+  const alerts = normalizeArray(data.alerts, [
+    "Heróis da limpeza agressiva causam dano silencioso.",
+    "Óleo, vinho e café devem ser removidos rapidamente.",
+    "Choques mecânicos em quinas exigem atenção permanente.",
+  ]);
+
+  const carePillars = normalizePillars(data.carePillars);
+
+  const coverBackground = referenceAsset
+    ? `
+      linear-gradient(180deg, rgba(8,8,10,0.72), rgba(10,10,12,0.88)),
+      radial-gradient(circle at top center, rgba(255,255,255,0.06), transparent 36%),
+      url("${referenceAsset}")
+    `
+    : `
+      linear-gradient(180deg, rgba(8,8,10,0.86), rgba(10,10,12,0.96)),
+      radial-gradient(circle at top center, rgba(255,255,255,0.06), transparent 36%)
+    `;
+
+  const pageTexture = referenceAsset
+    ? `
+      linear-gradient(180deg, rgba(8,8,10,0.84), rgba(12,12,14,0.92)),
+      radial-gradient(circle at top center, rgba(255,255,255,0.04), transparent 30%),
+      url("${referenceAsset}")
+    `
+    : `
+      linear-gradient(180deg, rgba(8,8,10,0.94), rgba(12,12,14,0.98)),
+      radial-gradient(circle at top center, rgba(255,255,255,0.04), transparent 30%)
+    `;
+
+  const logoHtml = logoAsset
+    ? `<img class="brand-logo" src="${logoAsset}" alt="CPS Camasa Process System" />`
+    : `
+      <div class="brand-fallback">
+        <div class="brand-fallback-top">CPS</div>
+        <div class="brand-fallback-right">
+          <div>CAMASA</div>
+          <div class="small">Process System</div>
+        </div>
+      </div>
+    `;
 
   return `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>${documentType}</title>
+  <title>Camasa Signature Book</title>
   <style>
-    * {
-      box-sizing: border-box;
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #0a0a0c;
+      color: #f1e5c8;
+      font-family: "Helvetica Neue", Arial, sans-serif;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
 
-    :root {
-      --bg: #0a0b10;
-      --panel: rgba(18, 18, 24, 0.88);
-      --panel-2: rgba(24, 24, 31, 0.94);
-      --gold: #c7a569;
-      --gold-2: #dfc58d;
-      --line: rgba(199, 165, 105, 0.22);
-      --line-strong: rgba(199, 165, 105, 0.42);
-      --text: #f3e7d3;
-      --muted: rgba(243, 231, 211, 0.72);
-      --soft: rgba(243, 231, 211, 0.52);
-      --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
-      --ok: #96b084;
-      --danger: #b86f64;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #171717;
-      color: var(--text);
-      font-family: Arial, Helvetica, sans-serif;
+    body {
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.03), transparent 22%),
+        linear-gradient(180deg, #070708 0%, #111114 100%);
     }
 
     .page {
       width: 210mm;
       min-height: 297mm;
+      padding: 14mm;
       margin: 0 auto;
       position: relative;
-      overflow: hidden;
       page-break-after: always;
-      background: #090a0e;
-    }
-
-    .texture {
-      position: absolute;
-      inset: 0;
-      ${textureCss}
+      overflow: hidden;
+      background: ${pageTexture};
       background-size: cover;
       background-position: center;
-      opacity: ${textureDataUri ? "0.14" : "1"};
-      filter: ${textureDataUri ? "saturate(0.35) contrast(1.02) brightness(0.52)" : "none"};
-      pointer-events: none;
     }
 
-    .overlay {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(circle at 22% 12%, rgba(255,255,255,0.05), transparent 16%),
-        radial-gradient(circle at 76% 18%, rgba(199,165,105,0.08), transparent 18%),
-        radial-gradient(circle at 52% 78%, rgba(255,255,255,0.03), transparent 20%),
-        linear-gradient(180deg, rgba(7,8,12,0.72), rgba(10,10,16,0.88));
-      pointer-events: none;
+    .page:last-child {
+      page-break-after: auto;
     }
 
-    .grain {
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(115deg, rgba(255,255,255,0.04) 0%, transparent 18%, transparent 82%, rgba(255,255,255,0.03) 100%);
-      opacity: 0.55;
-      pointer-events: none;
-    }
-
-    .vein-a,
-    .vein-b,
-    .vein-c {
-      position: absolute;
-      background: linear-gradient(90deg, transparent, rgba(199,165,105,0.78), transparent);
-      opacity: 0.16;
-      filter: blur(0.4px);
-      pointer-events: none;
-    }
-
-    .vein-a { width: 2px; height: 150%; right: 18mm; top: -18mm; transform: rotate(18deg); }
-    .vein-b { width: 2px; height: 136%; right: 26mm; top: -12mm; transform: rotate(18deg); opacity: 0.11; }
-    .vein-c { width: 2px; height: 122%; right: 34mm; top: -6mm; transform: rotate(18deg); opacity: 0.07; }
-
-    .page-frame {
-      position: absolute;
-      inset: 10mm;
-      border: 1px solid rgba(199,165,105,0.16);
-      pointer-events: none;
-    }
-
-    .content {
-      position: relative;
-      z-index: 3;
-      padding: 14mm 15mm 12mm;
-    }
-
-    .logo-real {
-      width: 108mm;
-      max-width: 100%;
-      display: block;
-      object-fit: contain;
-      filter: drop-shadow(0 10px 28px rgba(0,0,0,0.48));
-    }
-
-    .logo-real.small {
-      width: 72mm;
-    }
-
-    .logo-fallback {
-      display: inline-flex;
-      flex-direction: column;
-      gap: 6px;
-      color: #f3e7cf;
-      text-shadow: 0 10px 24px rgba(0,0,0,0.5);
-    }
-
-    .logo-fallback.small {
-      transform: scale(0.82);
-      transform-origin: left top;
-    }
-
-    .logo-fallback-top {
-      font-size: 30px;
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: #e8dcc5;
-    }
-
-    .logo-fallback-top span {
-      color: var(--gold-2);
-      font-size: 18px;
-      margin-left: 8px;
-      vertical-align: middle;
-    }
-
-    .logo-fallback-bottom {
-      font-size: 18px;
-      color: rgba(243,231,211,0.78);
-      letter-spacing: 1px;
-    }
-
-    .cover-wrap {
-      min-height: 268mm;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: center;
-      text-align: center;
-    }
-
-    .cover-top {
-      width: 100%;
-      display: flex;
-      justify-content: flex-start;
-    }
-
-    .cover-middle {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 6mm;
-    }
-
-    .line {
-      width: 86px;
-      height: 2px;
-      background: linear-gradient(90deg, rgba(199,165,105,0.28), var(--gold), rgba(199,165,105,0.28));
-      margin: 14px auto 20px;
-      box-shadow: 0 0 12px rgba(199,165,105,0.18);
-    }
-
-    .cover-title {
-      font-size: 24px;
-      line-height: 1.34;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin: 0 0 8px;
-      color: #f7eddc;
-    }
-
-    .cover-subtitle {
-      font-size: 12px;
-      letter-spacing: 1.8px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 24px;
-    }
-
-    .hero-project {
-      font-size: 18px;
-      color: #fff3de;
-      margin-bottom: 8px;
-    }
-
-    .hero-client,
-    .hero-location {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-
-    .qr-box {
-      margin-top: 18px;
-      margin-bottom: 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .code-pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 260px;
-      padding: 10px 18px;
-      border-radius: 10px;
-      border: 1px solid rgba(199,165,105,0.38);
-      background: rgba(255,255,255,0.03);
-      color: #f7ebd6;
-      font-size: 14px;
-      letter-spacing: 0.9px;
-      box-shadow: var(--shadow);
-    }
-
-    .issued {
-      font-size: 10px;
-      letter-spacing: 1.6px;
-      text-transform: uppercase;
-      color: rgba(242,231,210,0.56);
-    }
-
-    .page-title {
-      font-size: 19px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin: 0 0 6px;
-      color: #f6ebd8;
-    }
-
-    .page-subtitle {
-      font-size: 12px;
-      line-height: 1.55;
-      color: var(--muted);
-      margin: 0 0 16px;
-    }
-
-    .headline-project {
-      font-size: 17px;
-      color: #fff2da;
-      margin: 0 0 8px;
-    }
-
-    .headline-copy {
-      font-size: 11px;
-      line-height: 1.55;
-      color: rgba(242,231,210,0.68);
-      max-width: 520px;
-      margin-bottom: 14px;
-    }
-
-    .card {
-      background:
-        linear-gradient(180deg, rgba(28,28,36,0.88), rgba(16,16,22,0.92));
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
-
-    .card.soft {
-      background:
-        linear-gradient(180deg, rgba(24,24,31,0.82), rgba(13,13,19,0.90));
-    }
-
-    .card-pad {
-      padding: 14px;
-    }
-
-    .section-kicker {
-      font-size: 10px;
-      letter-spacing: 1.6px;
-      text-transform: uppercase;
-      color: var(--gold-2);
-      margin-bottom: 8px;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1.2fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .stat-box {
-      min-height: 108px;
-      padding: 14px;
-    }
-
-    .stat-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 12px;
-      border: 1px solid rgba(199,165,105,0.30);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--gold-2);
-      background: rgba(255,255,255,0.02);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.015);
-      margin-bottom: 12px;
-    }
-
-    .stat-icon svg,
-    .care-icon svg,
-    .stage-dot svg,
-    .step-icon svg,
-    .bullet-mark svg {
-      width: 18px;
-      height: 18px;
-      display: block;
-    }
-
-    .stat-label {
-      font-size: 10px;
-      line-height: 1.35;
-      color: rgba(242,231,210,0.72);
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      min-height: 28px;
-    }
-
-    .stat-value {
-      font-size: 28px;
-      color: #fff4dd;
-      margin-top: 10px;
-      line-height: 1;
-    }
-
-    .progress-card {
-      padding: 14px;
-      min-height: 108px;
-    }
-
-    .progress-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .mini-donut {
-      width: 82px;
-      height: 82px;
-      border-radius: 50%;
-      background: conic-gradient(var(--gold) 0 38%, rgba(255,255,255,0.08) 38% 100%);
-      position: relative;
-      box-shadow: inset 0 0 0 1px rgba(199,165,105,0.24);
-    }
-
-    .mini-donut::before {
+    .page::before {
       content: "";
       position: absolute;
-      inset: 12px;
-      border-radius: 50%;
-      background: #0f1015;
-      box-shadow: inset 0 0 0 1px rgba(199,165,105,0.20);
+      inset: 8mm;
+      border: 1px solid rgba(202, 170, 103, 0.20);
+      pointer-events: none;
     }
 
-    .mini-donut span {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      font-weight: 700;
-      color: #fff3dd;
-      z-index: 2;
-    }
-
-    .meta-list {
-      font-size: 11px;
-      line-height: 1.65;
-      color: var(--muted);
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: 1.08fr 0.92fr;
-      gap: 10px;
-    }
-
-    .distribution-card,
-    .material-card-large {
-      min-height: 130px;
-    }
-
-    .dist-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 12px;
-      color: #f5ead6;
-      margin-bottom: 8px;
-    }
-
-    .bar {
-      height: 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.08);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .bar::after {
+    .page::after {
       content: "";
       position: absolute;
       inset: 0;
-      width: 100%;
-      background: linear-gradient(90deg, #8f7a50, #c7a569);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.02), transparent 18%, transparent 82%, rgba(255,255,255,0.018)),
+        radial-gradient(circle at top center, rgba(255,255,255,0.04), transparent 40%);
+      pointer-events: none;
     }
 
-    .material-grid {
-      display: grid;
-      grid-template-columns: 94px 1fr;
-      gap: 12px;
+    .cover {
+      background: ${coverBackground};
+      background-size: cover;
+      background-position: center;
+      display: flex;
       align-items: stretch;
     }
 
-    .stone-sample {
-      min-height: 96px;
-      border-radius: 10px;
-      border: 1px solid rgba(199,165,105,0.22);
-      background:
-        radial-gradient(circle at 22% 26%, rgba(216,228,200,0.25), transparent 16%),
-        radial-gradient(circle at 68% 36%, rgba(121,156,122,0.18), transparent 14%),
-        radial-gradient(circle at 38% 68%, rgba(255,255,255,0.08), transparent 18%),
-        linear-gradient(135deg, #2c3b2f 0%, #141b14 42%, #0d100d 100%);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    .cover-grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr;
+      width: 100%;
+      min-height: calc(297mm - 28mm);
+      border: 1px solid rgba(203, 171, 106, 0.18);
+      background: linear-gradient(180deg, rgba(8,8,10,0.34), rgba(8,8,10,0.54));
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.35);
+      padding: 18mm 16mm 14mm 16mm;
     }
 
-    .photo-sample {
-      min-height: 158px;
-      border-radius: 10px;
-      border: 1px solid rgba(199,165,105,0.22);
-      background:
-        linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.42)),
-        linear-gradient(135deg, #c6b89d 0%, #8a735c 38%, #3c3027 100%);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+    .gold-line {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(0,0,0,0), #d0ab63, rgba(0,0,0,0));
+      opacity: 0.95;
+      margin: 9mm 0 7mm 0;
+    }
+
+    .brand-box {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: 38mm;
+      margin-bottom: 10mm;
+    }
+
+    .brand-logo {
+      max-width: 132mm;
+      max-height: 34mm;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.35));
+    }
+
+    .brand-fallback {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #f2efe9;
+    }
+
+    .brand-fallback-top {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #d0ab63;
+    }
+
+    .brand-fallback-right {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.05;
+    }
+
+    .brand-fallback-right .small {
+      font-size: 13px;
+      font-weight: 400;
+      color: #d8d0c2;
+    }
+
+    .cover-title-wrap {
+      text-align: center;
+      margin-top: 10mm;
+    }
+
+    .cover-title {
+      font-size: 17px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #f5efe1;
+      margin-bottom: 3mm;
+    }
+
+    .cover-title strong {
+      display: block;
+      font-size: 23px;
+      letter-spacing: 2.2px;
+      margin-top: 2mm;
+    }
+
+    .cover-subtitle {
+      text-align: center;
+      color: #d8cfbf;
+      font-size: 11px;
+      letter-spacing: 1.6px;
+      text-transform: uppercase;
+      margin-bottom: 13mm;
+    }
+
+    .cover-project {
+      text-align: center;
+      margin-top: 2mm;
+    }
+
+    .cover-project-name {
+      font-size: 20px;
+      color: #f6f0e3;
+      margin-bottom: 3mm;
+    }
+
+    .cover-client,
+    .cover-location {
+      color: #d8cfbf;
+      font-size: 13px;
+      margin-bottom: 2mm;
+    }
+
+    .qr-box {
+      display: flex;
+      justify-content: center;
+      margin-top: 10mm;
+      margin-bottom: 8mm;
+    }
+
+    .qr-shell {
+      width: 34mm;
+      height: 34mm;
+      background: rgba(255,255,255,0.95);
+      border: 1px solid rgba(208,171,99,0.55);
+      border-radius: 5mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+    }
+
+    .code-pill {
+      margin: 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4mm 8mm;
+      border: 1px solid rgba(208,171,99,0.45);
+      border-radius: 3mm;
+      font-size: 13px;
+      letter-spacing: 1px;
+      color: #ead5a5;
+      background: rgba(0,0,0,0.24);
+      box-shadow: inset 0 0 12px rgba(255,255,255,0.03);
+    }
+
+    .cover-footer-date {
+      text-align: center;
+      margin-top: auto;
+      font-size: 10px;
+      color: #d4cabb;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+    }
+
+    .section-kicker {
+      color: #d0ab63;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      font-size: 10px;
+      margin-bottom: 2mm;
+    }
+
+    .section-title {
+      color: #f5efe1;
+      font-size: 18px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 3mm;
+    }
+
+    .section-subtitle {
+      color: #d5cbba;
+      font-size: 11px;
+      line-height: 1.6;
+      margin-bottom: 6mm;
+      max-width: 120mm;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 6mm;
+      position: relative;
+      z-index: 2;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 5mm;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(25,25,28,0.76), rgba(14,14,16,0.86));
+      border: 1px solid rgba(208,171,99,0.20);
+      border-radius: 4mm;
+      padding: 5mm;
+      box-shadow:
+        inset 0 0 26px rgba(255,255,255,0.02),
+        0 16px 32px rgba(0,0,0,0.22);
       position: relative;
       overflow: hidden;
     }
 
-    .photo-sample::before {
+    .card::before {
       content: "";
       position: absolute;
       inset: 0;
-      background:
-        linear-gradient(90deg, rgba(20,20,20,0.26) 0 18%, transparent 18% 78%, rgba(10,10,10,0.32) 78% 100%);
-      opacity: 0.55;
+      background: linear-gradient(180deg, rgba(255,255,255,0.018), transparent 26%);
+      pointer-events: none;
     }
 
-    .photo-sample::after {
-      content: "";
-      position: absolute;
-      left: 26%;
-      right: 8%;
-      bottom: 14%;
-      height: 14px;
-      background: linear-gradient(180deg, #1d1d22, #0f1015);
-      border-radius: 4px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.35);
-    }
-
-    .donut-layout {
+    .metric-grid {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 12px;
-      align-items: start;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4mm;
+      margin-bottom: 5mm;
     }
 
-    .big-ring-card {
-      padding: 14px;
-      min-height: 230px;
+    .metric-card {
+      min-height: 33mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: rgba(10,10,12,0.34);
+      border: 1px solid rgba(208,171,99,0.18);
+      border-radius: 3.5mm;
+      padding: 3mm;
     }
 
-    .big-ring-wrap {
+    .metric-icon {
+      color: #d0ab63;
+      font-size: 13px;
+      margin-bottom: 2mm;
+    }
+
+    .metric-label {
+      color: #d3c8b8;
+      font-size: 8px;
+      line-height: 1.35;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      min-height: 10mm;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2px 0 8px;
     }
 
-    .big-ring {
-      width: 196px;
-      height: 196px;
+    .metric-value {
+      color: #f5efe1;
+      font-size: 18px;
+      margin-top: 1mm;
+    }
+
+    .mini-ring-panel {
+      display: grid;
+      grid-template-columns: 33mm 1fr;
+      gap: 4mm;
+      align-items: center;
+      min-height: 44mm;
+    }
+
+    .ring {
+      --p: 38;
+      width: 30mm;
+      height: 30mm;
       border-radius: 50%;
-      background: conic-gradient(var(--gold) 0 38%, rgba(255,255,255,0.09) 38% 100%);
-      position: relative;
-      box-shadow: inset 0 0 0 1px rgba(199,165,105,0.24);
+      background:
+        radial-gradient(circle at center, #0d0d11 49%, transparent 50%),
+        conic-gradient(#d0ab63 calc(var(--p) * 1%), rgba(255,255,255,0.08) 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 22px rgba(0,0,0,0.35), inset 0 0 12px rgba(255,255,255,0.04);
+      margin: 0 auto;
     }
 
-    .big-ring::before {
-      content: "";
-      position: absolute;
-      inset: 24px;
+    .ring-inner {
+      width: 18mm;
+      height: 18mm;
       border-radius: 50%;
-      background: #101017;
-      box-shadow: inset 0 0 0 1px rgba(199,165,105,0.18);
+      background: radial-gradient(circle at center, rgba(255,255,255,0.03), rgba(0,0,0,0.42));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f4ead6;
+      font-size: 15px;
+      font-weight: 600;
     }
 
-    .big-ring-center {
-      position: absolute;
-      inset: 0;
-      z-index: 2;
+    .ring-side-title {
+      color: #d0ab63;
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1.4mm;
+    }
+
+    .ring-side-line {
+      color: #f4ead6;
+      font-size: 13px;
+      margin-bottom: 1.2mm;
+    }
+
+    .ring-side-small {
+      color: #cfc5b5;
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .distribution-line {
+      margin-top: 2.5mm;
+      width: 100%;
+      height: 2.8mm;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .distribution-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #d0ab63, #f2d38f);
+      border-radius: 999px;
+    }
+
+    .material-spot {
+      display: grid;
+      grid-template-columns: 34mm 1fr;
+      gap: 4mm;
+      align-items: stretch;
+    }
+
+    .material-thumb {
+      border-radius: 3mm;
+      min-height: 30mm;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.42)),
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.10), transparent 18%),
+        linear-gradient(135deg, #303338 0%, #1b1e22 26%, #495057 48%, #16191d 72%, #2e3338 100%);
+      border: 1px solid rgba(208,171,99,0.18);
+      box-shadow: inset 0 0 24px rgba(255,255,255,0.03);
+    }
+
+    .material-title {
+      color: #f4ead6;
+      font-size: 13px;
+      margin-bottom: 1.5mm;
+    }
+
+    .material-small {
+      color: #cdc2b3;
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .progress-ring-big-wrap {
+      display: grid;
+      grid-template-columns: 1fr 48mm;
+      gap: 5mm;
+      align-items: start;
+    }
+
+    .ring-big {
+      --p: 38;
+      width: 47mm;
+      height: 47mm;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, #0d0d11 43%, transparent 44%),
+        conic-gradient(#d0ab63 calc(var(--p) * 1%), rgba(255,255,255,0.08) 0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.28), inset 0 0 14px rgba(255,255,255,0.04);
+    }
+
+    .ring-big-inner {
+      width: 24mm;
+      height: 24mm;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(18,18,20,0.96), rgba(10,10,12,0.94));
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
+      color: #f4ead6;
       text-align: center;
+      line-height: 1.05;
     }
 
-    .big-percent {
-      font-size: 40px;
-      line-height: 1;
-      color: #fff4df;
-      margin-bottom: 6px;
+    .ring-big-percent {
+      font-size: 17px;
+      font-weight: 700;
     }
 
-    .big-copy {
-      font-size: 11px;
-      line-height: 1.5;
-      color: rgba(242,231,210,0.70);
+    .ring-big-caption {
+      font-size: 7px;
+      color: #d2c8b7;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
-    .stage-side {
-      display: grid;
-      gap: 10px;
+    .status-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3mm;
     }
 
-    .stage-item {
+    .status-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 11px 12px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: rgba(255,255,255,0.02);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.01);
+      gap: 2.8mm;
+      color: #eee3cc;
+      font-size: 11px;
     }
 
-    .stage-dot {
-      width: 18px;
-      height: 18px;
+    .status-icon {
+      width: 6mm;
+      height: 6mm;
       border-radius: 50%;
-      border: 1px solid rgba(199,165,105,0.44);
+      border: 1px solid rgba(208,171,99,0.45);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: var(--gold-2);
-      flex: 0 0 18px;
-    }
-
-    .stage-dot svg {
-      width: 10px;
-      height: 10px;
-    }
-
-    .stage-title {
-      font-size: 10px;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: rgba(242,231,210,0.68);
-    }
-
-    .stage-value {
-      font-size: 16px;
-      color: #fff2dc;
-      margin-top: 2px;
-    }
-
-    .timeline-card {
-      margin-top: 12px;
-      padding: 14px;
-    }
-
-    .timeline-label {
-      font-size: 10px;
-      letter-spacing: 1.4px;
-      text-transform: uppercase;
-      color: var(--gold-2);
-      margin-bottom: 12px;
+      color: #d0ab63;
+      font-size: 9px;
+      background: rgba(255,255,255,0.03);
+      flex: 0 0 auto;
     }
 
     .timeline {
+      margin-top: 5mm;
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
+      gap: 2mm;
       align-items: start;
     }
 
-    .step {
+    .timeline-step {
       text-align: center;
       position: relative;
     }
 
-    .step:not(:last-child)::after {
+    .timeline-step:not(:last-child)::after {
       content: "";
       position: absolute;
-      top: 13px;
-      left: 60%;
-      right: -40%;
+      top: 2.8mm;
+      left: calc(50% + 4mm);
+      width: calc(100% - 8mm);
       height: 1px;
-      background: rgba(199,165,105,0.34);
+      background: rgba(208,171,99,0.35);
     }
 
-    .step-icon {
-      width: 26px;
-      height: 26px;
+    .timeline-dot {
+      width: 7mm;
+      height: 7mm;
+      margin: 0 auto 2mm auto;
       border-radius: 50%;
-      margin: 0 auto 8px;
+      border: 1px solid rgba(208,171,99,0.45);
       display: flex;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(199,165,105,0.36);
-      background: rgba(255,255,255,0.025);
-      color: var(--gold-2);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.01);
+      background: rgba(255,255,255,0.03);
+      color: #d0ab63;
+      font-size: 9px;
+      position: relative;
+      z-index: 2;
     }
 
-    .step-icon svg {
-      width: 12px;
-      height: 12px;
+    .timeline-step.done .timeline-dot,
+    .timeline-step.current .timeline-dot {
+      background: radial-gradient(circle at center, rgba(208,171,99,0.28), rgba(0,0,0,0.35));
+      box-shadow: 0 0 12px rgba(208,171,99,0.18);
     }
 
-    .step.done .step-icon {
-      border-color: rgba(156,184,143,0.48);
-      background: rgba(156,184,143,0.10);
+    .timeline-label {
+      color: #d3c8b8;
+      font-size: 9px;
+      line-height: 1.35;
     }
 
-    .step.active .step-icon {
-      box-shadow: 0 0 0 4px rgba(199,165,105,0.10), inset 0 0 0 1px rgba(255,255,255,0.02);
+    .material-panel-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 5mm;
     }
 
-    .step-label {
+    .material-sheet {
+      min-height: 64mm;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.14)),
+        radial-gradient(circle at 18% 24%, rgba(255,255,255,0.11), transparent 10%),
+        radial-gradient(circle at 60% 30%, rgba(255,255,255,0.08), transparent 9%),
+        linear-gradient(145deg, #1b1e20 0%, #3b4046 18%, #17191c 32%, #5f666d 44%, #202428 56%, #111315 73%, #434850 86%, #16191c 100%);
+      border: 1px solid rgba(208,171,99,0.22);
+      border-radius: 3mm;
+      box-shadow: inset 0 0 28px rgba(255,255,255,0.02);
+      margin-bottom: 4mm;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 2mm;
+      flex-wrap: wrap;
+      margin-top: 3mm;
+      margin-bottom: 3mm;
+    }
+
+    .badge {
+      border: 1px solid rgba(208,171,99,0.28);
+      border-radius: 999px;
+      padding: 1.5mm 3mm;
+      font-size: 9px;
+      color: #e8dcc3;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .photo-panel {
+      min-height: 65mm;
+      border-radius: 3mm;
+      border: 1px solid rgba(208,171,99,0.22);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.08)),
+        url("${referenceAsset || ""}");
+      background-size: cover;
+      background-position: center;
+      box-shadow: inset 0 0 34px rgba(0,0,0,0.25);
+    }
+
+    .panel-caption {
+      color: #d4cab7;
       font-size: 10px;
-      color: rgba(242,231,210,0.80);
+      line-height: 1.55;
+      margin-top: 3mm;
     }
 
-    .split-two {
+    .list-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 5mm;
+      margin-bottom: 5mm;
     }
 
-    .bullet-card {
-      min-height: 178px;
-      padding: 16px;
-    }
-
-    .bullet-card.ok {
-      border-color: rgba(156,184,143,0.24);
-    }
-
-    .bullet-card.no {
-      border-color: rgba(189,114,102,0.24);
-    }
-
-    .bullet-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .list-card-title {
+      color: #f4ead6;
       font-size: 13px;
-      color: #fff0d8;
-      margin-bottom: 12px;
+      margin-bottom: 3mm;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
-    .bullet-mark {
-      width: 18px;
-      height: 18px;
+    .list-card ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 2.2mm;
+    }
+
+    .list-card li {
+      display: flex;
+      gap: 2.5mm;
+      align-items: flex-start;
+      color: #d6ccbb;
+      font-size: 10px;
+      line-height: 1.45;
+    }
+
+    .bullet {
+      flex: 0 0 auto;
+      width: 5mm;
+      height: 5mm;
+      border-radius: 50%;
+      border: 1px solid rgba(208,171,99,0.32);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: var(--gold-2);
+      font-size: 8px;
+      margin-top: 0.4mm;
     }
 
-    .bullet-mark svg {
-      width: 16px;
-      height: 16px;
+    .bullet.good { color: #d9c37f; }
+    .bullet.bad { color: #d58b82; }
+    .bullet.alert { color: #e0c47a; }
+
+    .alerts-box {
+      margin-top: 1mm;
     }
 
-    ul.clean {
-      margin: 0;
-      padding-left: 18px;
-      font-size: 12px;
-      line-height: 1.66;
-      color: rgba(242,231,210,0.78);
-    }
-
-    .alert-card {
-      margin-top: 12px;
-      padding: 14px 16px;
-    }
-
-    .care-main {
-      padding: 16px;
-    }
-
-    .care-title {
-      font-size: 18px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: #fff1d7;
-      margin-bottom: 8px;
-    }
-
-    .care-copy {
-      font-size: 12px;
-      line-height: 1.68;
-      color: rgba(242,231,210,0.75);
-    }
-
-    .care-grid {
+    .pillars-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 16px;
+      gap: 4mm;
+      margin-top: 4mm;
+      margin-bottom: 4mm;
     }
 
-    .care-item {
-      padding: 14px 12px;
+    .pillar-card {
+      min-height: 36mm;
+      border-radius: 3mm;
+      border: 1px solid rgba(208,171,99,0.20);
+      background: rgba(255,255,255,0.03);
       text-align: center;
-      min-height: 116px;
-    }
-
-    .care-icon {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      margin: 0 auto 10px;
+      padding: 4mm 3mm;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      border: 1px solid rgba(199,165,105,0.38);
-      color: var(--gold-2);
-      background: rgba(255,255,255,0.02);
     }
 
-    .care-item-title {
-      font-size: 12px;
+    .pillar-icon {
+      color: #d0ab63;
+      font-size: 14px;
+      margin-bottom: 2mm;
+    }
+
+    .pillar-title {
+      color: #f5efe1;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #f7ebd3;
-      margin-bottom: 8px;
+      margin-bottom: 1.5mm;
     }
 
-    .care-item-copy {
-      font-size: 11px;
-      line-height: 1.58;
-      color: rgba(242,231,210,0.72);
+    .pillar-subtitle {
+      color: #d4cab7;
+      font-size: 9px;
+      line-height: 1.4;
     }
 
-    .cta {
-      margin-top: 14px;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(199,165,105,0.34);
-      background: rgba(255,255,255,0.03);
-      font-size: 12px;
-      color: rgba(242,231,210,0.82);
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.01);
+    .care-footer {
+      margin-top: 4mm;
+      border: 1px solid rgba(208,171,99,0.20);
+      border-radius: 3mm;
+      padding: 4mm;
+      color: #d6ccbb;
+      font-size: 10px;
+      background: rgba(255,255,255,0.025);
     }
 
-    .cert-wrap {
-      min-height: 264mm;
+    .certificate-page {
+      background: ${pageTexture};
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: stretch;
+    }
+
+    .certificate-shell {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      min-height: calc(297mm - 28mm);
+      border: 1px solid rgba(208,171,99,0.22);
+      padding: 10mm;
+      background:
+        linear-gradient(180deg, rgba(8,8,10,0.72), rgba(8,8,10,0.85)),
+        radial-gradient(circle at top center, rgba(255,255,255,0.04), transparent 34%);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      box-shadow: inset 0 0 80px rgba(0,0,0,0.30);
     }
 
-    .cert-card {
-      position: relative;
-      padding: 16mm 15mm;
-      border: 1px solid rgba(199,165,105,0.32);
-      background:
-        linear-gradient(180deg, rgba(27,27,34,0.88), rgba(15,15,22,0.94));
-      box-shadow: var(--shadow);
-    }
-
-    .cert-corner {
+    .certificate-shell::before,
+    .certificate-shell::after {
+      content: "";
       position: absolute;
-      width: 22px;
-      height: 22px;
-      border-color: rgba(199,165,105,0.54);
-      border-style: solid;
+      width: 18mm;
+      height: 18mm;
+      border-color: rgba(208,171,99,0.42);
+      pointer-events: none;
     }
 
-    .cert-corner.tl { top: 10px; left: 10px; border-width: 2px 0 0 2px; }
-    .cert-corner.tr { top: 10px; right: 10px; border-width: 2px 2px 0 0; }
-    .cert-corner.bl { bottom: 10px; left: 10px; border-width: 0 0 2px 2px; }
-    .cert-corner.br { bottom: 10px; right: 10px; border-width: 0 2px 2px 0; }
-
-    .cert-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 20px;
-      margin-bottom: 22px;
+    .certificate-shell::before {
+      top: 6mm;
+      left: 6mm;
+      border-top: 1px solid rgba(208,171,99,0.42);
+      border-left: 1px solid rgba(208,171,99,0.42);
     }
 
-    .cert-title {
-      font-size: 18px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin: 14px 0 6px;
-      color: #fff2db;
+    .certificate-shell::after {
+      right: 6mm;
+      bottom: 6mm;
+      border-right: 1px solid rgba(208,171,99,0.42);
+      border-bottom: 1px solid rgba(208,171,99,0.42);
     }
 
-    .cert-sub {
-      font-size: 10px;
-      letter-spacing: 1.3px;
-      text-transform: uppercase;
-      color: rgba(242,231,210,0.66);
-    }
-
-    .cert-code {
-      font-size: 28px;
-      color: #fff4de;
-      line-height: 1.2;
-      margin: 20px 0 16px;
-    }
-
-    .cert-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px 18px;
-      margin-bottom: 18px;
-    }
-
-    .cert-label {
-      font-size: 10px;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: var(--gold-2);
-      margin-bottom: 5px;
-    }
-
-    .cert-value {
-      font-size: 14px;
-      color: #f8eedc;
-      word-break: break-word;
-    }
-
-    .cert-copy {
-      font-size: 12px;
-      line-height: 1.75;
-      color: rgba(242,231,210,0.78);
-      margin-bottom: 18px;
-    }
-
-    .serial {
-      font-size: 10px;
-      color: rgba(242,231,210,0.42);
-      word-break: break-all;
-      line-height: 1.55;
-      margin-top: 18px;
-    }
-
-    .cert-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: end;
-      gap: 18px;
-      margin-top: 22px;
-    }
-
-    .footer-brand {
+    .certificate-top {
       display: flex;
       justify-content: center;
-      margin-top: 18px;
+      margin-top: 6mm;
+      margin-bottom: 6mm;
+    }
+
+    .certificate-title {
+      text-align: center;
+      color: #f5efe1;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 17px;
+      margin-bottom: 2.5mm;
+    }
+
+    .certificate-sub {
+      text-align: center;
+      color: #d0ab63;
+      font-size: 10px;
+      letter-spacing: 1.7px;
+      text-transform: uppercase;
+      margin-bottom: 2mm;
+    }
+
+    .certificate-code {
+      text-align: center;
+      color: #f5efe1;
+      font-size: 18px;
+      letter-spacing: 1px;
+      margin: 6mm 0 8mm 0;
+    }
+
+    .certificate-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4mm 8mm;
+      margin: 0 auto;
+      max-width: 128mm;
+      width: 100%;
+    }
+
+    .certificate-field {
+      border-bottom: 1px solid rgba(208,171,99,0.18);
+      padding-bottom: 2mm;
+    }
+
+    .field-label {
+      color: #d0ab63;
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 1mm;
+    }
+
+    .field-value {
+      color: #f2ead8;
+      font-size: 12px;
+    }
+
+    .certificate-qr {
+      display: flex;
+      justify-content: center;
+      margin-top: 8mm;
+      margin-bottom: 6mm;
+    }
+
+    .certificate-bottom-logo {
+      display: flex;
+      justify-content: center;
+      margin-top: auto;
+      padding-top: 8mm;
+    }
+
+    .certificate-bottom-logo .brand-logo {
+      max-width: 82mm;
+      max-height: 22mm;
       opacity: 0.96;
     }
 
-    .page-footer {
-      position: absolute;
-      left: 15mm;
-      right: 15mm;
-      bottom: 9mm;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 10px;
-      letter-spacing: 1px;
+    .footer-note {
+      text-align: center;
+      color: #cfc5b5;
+      font-size: 8.5px;
+      line-height: 1.5;
+      margin-top: 5mm;
+      letter-spacing: 0.4px;
+    }
+
+    .smallcaps {
       text-transform: uppercase;
-      color: rgba(242,231,210,0.55);
-      z-index: 4;
-    }
-
-    .mini-mark {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .mini-gold {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--gold);
-      display: inline-block;
-      box-shadow: 0 0 8px rgba(199,165,105,0.25);
-    }
-
-    .muted { color: var(--muted); }
-    .soft { color: var(--soft); }
-    .text-right { text-align: right; }
-
-    .tag {
-      display: inline-flex;
-      align-items: center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(199,165,105,0.28);
-      font-size: 10px;
       letter-spacing: 1px;
-      text-transform: uppercase;
-      color: rgba(242,231,210,0.82);
-      background: rgba(255,255,255,0.02);
     }
   </style>
 </head>
 <body>
-  <section class="page">
-    <div class="texture"></div>
-    <div class="overlay"></div>
-    <div class="grain"></div>
-    <div class="vein-a"></div>
-    <div class="vein-b"></div>
-    <div class="vein-c"></div>
-    <div class="page-frame"></div>
-
-    <div class="content cover-wrap">
-      <div class="cover-top">
-        ${logoMain}
+  <section class="page cover">
+    <div class="cover-grid">
+      <div class="brand-box">
+        ${logoHtml}
       </div>
 
-      <div class="cover-middle">
-        <div class="line"></div>
-        <div class="cover-title">Camasa<br/>Signature Book</div>
-        <div class="cover-subtitle">Documento de entrega premium</div>
+      <div class="gold-line"></div>
 
-        <div class="hero-project">${projectName}</div>
-        <div class="hero-client">${clientName}</div>
-        <div class="hero-location">${location}</div>
+      <div class="cover-title-wrap">
+        <div class="cover-title">CAMASA <strong>SIGNATURE BOOK</strong></div>
+        <div class="cover-subtitle">${documentType}<br/>Documento de entrega premium</div>
+
+        <div class="cover-project">
+          <div class="cover-project-name">${projectName}</div>
+          <div class="cover-client">${clientName}</div>
+          <div class="cover-location">${location}</div>
+        </div>
 
         <div class="qr-box">
-          ${qrSvg}
+          <div class="qr-shell">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(signatureCode)}" alt="QR Code" style="width:100%;height:100%;object-fit:cover;" />
+          </div>
+        </div>
+
+        <div style="text-align:center;">
           <div class="code-pill">${signatureCode}</div>
-          <div class="issued">Gerado em ${issueDate}</div>
         </div>
       </div>
 
-      <div style="height: 20mm;"></div>
-    </div>
-
-    <div class="page-footer">
-      <div class="mini-mark"><span class="mini-gold"></span> Camasa Mármores & Design</div>
-      <div>${documentType}</div>
+      <div class="cover-footer-date">
+        Gerado em ${issueDate}
+      </div>
     </div>
   </section>
 
   <section class="page">
-    <div class="texture"></div>
-    <div class="overlay"></div>
-    <div class="grain"></div>
-    <div class="page-frame"></div>
+    <div class="section-kicker">Resumo Executivo</div>
+    <div class="section-title">${projectName}</div>
+    <div class="section-subtitle">
+      Documento de garantia, rastreabilidade e orientação de uso do projeto.
+      Esta composição segue o padrão premium do Camasa Process System.
+    </div>
 
-    <div class="content">
-      <div class="page-title">Resumo Executivo</div>
-      <div class="headline-project">${projectName}</div>
-      <div class="headline-copy">
-        Este documento é o prontuário institucional premium conectado ao projeto e aos elementos rastreáveis vinculados ao fluxo Camasa.
-      </div>
-
-      <div class="stats-grid">
-        <div class="card stat-box">
-          <div class="stat-icon">${buildIconSvg("material")}</div>
-          <div class="stat-label">Materiais certificados</div>
-          <div class="stat-value">1</div>
-        </div>
-
-        <div class="card stat-box">
-          <div class="stat-icon">${buildIconSvg("category")}</div>
-          <div class="stat-label">Categorias técnicas</div>
-          <div class="stat-value">1</div>
-        </div>
-
-        <div class="card stat-box">
-          <div class="stat-icon">${buildIconSvg("blocks")}</div>
-          <div class="stat-label">Blocos gerenciados</div>
-          <div class="stat-value">1</div>
-        </div>
-
-        <div class="card progress-card">
-          <div class="section-kicker">Progresso geral</div>
-          <div class="progress-head">
-            <div class="mini-donut"><span>38%</span></div>
-            <div class="meta-list">
-              <div><span class="soft">Etapa em evidência</span><br/>Instalação</div>
-              <div style="margin-top: 8px;"><span class="soft">Entrega de referência</span><br/>09/04/2026</div>
+    <div class="grid-2">
+      <div>
+        <div class="card" style="margin-bottom:5mm;">
+          <div class="metric-grid">
+            <div class="metric-card">
+              <div class="metric-icon">♡</div>
+              <div class="metric-label">Materiais Certificados</div>
+              <div class="metric-value">1</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon">⌂</div>
+              <div class="metric-label">Categorias Técnicas</div>
+              <div class="metric-value">1</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon">▣</div>
+              <div class="metric-label">Blocos de Orientação</div>
+              <div class="metric-value">1</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon">◎</div>
+              <div class="metric-label">Registro Premium</div>
+              <div class="metric-value">1</div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="summary-grid">
-        <div class="card distribution-card">
-          <div class="card-pad">
-            <div class="section-kicker">Distribuição por aplicação</div>
-            <div class="dist-row">
-              <span>${projectName}</span>
-              <span>100%</span>
+          <div class="grid-2" style="grid-template-columns: 1.05fr 0.95fr; gap:4mm;">
+            <div class="card" style="margin:0; min-height:36mm;">
+              <div class="section-kicker" style="margin-bottom:1.4mm;">Distribuição por aplicação</div>
+              <div style="color:#f5efe1; font-size:12px;">${applicationLabel}</div>
+              <div class="distribution-line">
+                <div class="distribution-fill" style="width:${applicationPercent}%"></div>
+              </div>
+              <div style="text-align:right; color:#d6cbba; font-size:10px; margin-top:1.8mm;">${applicationPercent}%</div>
             </div>
-            <div class="bar"></div>
-          </div>
-        </div>
 
-        <div class="card material-card-large">
-          <div class="card-pad">
-            <div class="section-kicker">Materiais utilizados</div>
-            <div class="material-grid">
-              <div class="stone-sample"></div>
-              <div>
-                <div style="font-size: 16px; color: #fff2db;">${material}</div>
-                <div class="muted" style="font-size: 12px; line-height: 1.65; margin-top: 8px;">
-                  Cliente: ${clientName}<br/>
-                  Aplicação: ${projectName}
+            <div class="card" style="margin:0; min-height:36mm;">
+              <div class="section-kicker" style="margin-bottom:1.4mm;">Materiais Utilizados</div>
+              <div class="material-spot">
+                <div class="material-thumb"></div>
+                <div>
+                  <div class="material-title">${material}</div>
+                  <div class="material-small">${materialCategory} • ${materialFinish}</div>
+                  <div class="material-small">${materialUsage}</div>
                 </div>
               </div>
             </div>
@@ -1240,364 +1199,250 @@ function buildHtml(data: RenderPayload): string {
         </div>
       </div>
 
-      <div class="page-footer">
-        <div class="mini-mark"><span class="mini-gold"></span> Camasa Mármores & Design</div>
-        <div>Resumo Executivo</div>
+      <div>
+        <div class="card">
+          <div class="mini-ring-panel">
+            <div class="ring" style="--p:${progressPercent}">
+              <div class="ring-inner">${progressPercent}%</div>
+            </div>
+            <div>
+              <div class="ring-side-title">Progresso Geral</div>
+              <div class="ring-side-line">${progressPercent}% concluído</div>
+              <div class="ring-side-small">Etapa atual: ${currentStage}</div>
+              <div class="ring-side-small">Emissão do documento: ${issueDate}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:5mm;">
+          <div class="section-kicker">Informações centrais</div>
+          <div class="ring-side-small">Cliente: ${clientName}</div>
+          <div class="ring-side-small">Projeto: ${projectName}</div>
+          <div class="ring-side-small">Local: ${location}</div>
+          <div class="ring-side-small">Código: ${signatureCode}</div>
+          <div class="ring-side-small">Material principal: ${material}</div>
+        </div>
       </div>
     </div>
   </section>
 
   <section class="page">
-    <div class="texture"></div>
-    <div class="overlay"></div>
-    <div class="grain"></div>
-    <div class="page-frame"></div>
+    <div class="section-kicker">Etapas da Obra</div>
+    <div class="section-title">Acompanhamento e rastreabilidade</div>
+    <div class="section-subtitle">
+      Visão executiva das etapas principais do projeto, percentual realizado e previsão de entrega.
+    </div>
 
-    <div class="content">
-      <div class="page-title">Etapas da Obra</div>
-      <div class="page-subtitle">Visão geral da execução, leitura do andamento e marcos de entrega do projeto.</div>
-
-      <div class="donut-layout">
-        <div class="card big-ring-card">
-          <div class="big-ring-wrap">
-            <div class="big-ring">
-              <div class="big-ring-center">
-                <div class="big-percent">38%</div>
-                <div class="big-copy">
-                  Concluído<br/>
-                  Referenciado em<br/>
-                  09/04/2026
-                </div>
-              </div>
-            </div>
+    <div class="card">
+      <div class="progress-ring-big-wrap">
+        <div>
+          <div class="status-list">
+            <div class="status-row"><span class="status-icon">✓</span><span>Etapas concluídas <strong style="margin-left:3px;">${completedSteps}</strong></span></div>
+            <div class="status-row"><span class="status-icon">◔</span><span>Etapa em andamento <strong style="margin-left:3px;">${currentStage}</strong></span></div>
+            <div class="status-row"><span class="status-icon"></span><span>Etapas restantes <strong style="margin-left:3px;">${remainingSteps}</strong></span></div>
+            <div class="status-row"><span class="status-icon">⌛</span><span>Previsão de entrega <strong style="margin-left:3px;">${forecastDate}</strong></span></div>
           </div>
         </div>
 
-        <div class="stage-side">
-          <div class="stage-item">
-            <div class="stage-dot">${buildIconSvg("check")}</div>
-            <div>
-              <div class="stage-title">Etapas concluídas</div>
-              <div class="stage-value">6</div>
-            </div>
-          </div>
-
-          <div class="stage-item">
-            <div class="stage-dot">${buildIconSvg("play")}</div>
-            <div>
-              <div class="stage-title">Etapa em andamento</div>
-              <div class="stage-value">Instalação</div>
-            </div>
-          </div>
-
-          <div class="stage-item">
-            <div class="stage-dot">${buildIconSvg("circle")}</div>
-            <div>
-              <div class="stage-title">Etapas restantes</div>
-              <div class="stage-value">8</div>
-            </div>
-          </div>
-
-          <div class="stage-item">
-            <div class="stage-dot">${buildIconSvg("clock")}</div>
-            <div>
-              <div class="stage-title">Previsão de entrega</div>
-              <div class="stage-value">09/04/2026</div>
-            </div>
+        <div class="ring-big" style="--p:${progressPercent}">
+          <div class="ring-big-inner">
+            <div class="ring-big-percent">${progressPercent}%</div>
+            <div class="ring-big-caption">Concluído</div>
           </div>
         </div>
       </div>
 
-      <div class="card timeline-card">
-        <div class="timeline-label">Linhas de frente</div>
-        <div class="timeline">
-          <div class="step done">
-            <div class="step-icon">${buildIconSvg("project")}</div>
-            <div class="step-label">Projeto</div>
-          </div>
-          <div class="step done">
-            <div class="step-icon">${buildIconSvg("measure")}</div>
-            <div class="step-label">Medição</div>
-          </div>
-          <div class="step active">
-            <div class="step-icon">${buildIconSvg("finish")}</div>
-            <div class="step-label">Acabamento</div>
-          </div>
-          <div class="step">
-            <div class="step-icon">${buildIconSvg("install")}</div>
-            <div class="step-label">Instalação</div>
-          </div>
-          <div class="step">
-            <div class="step-icon">${buildIconSvg("final")}</div>
-            <div class="step-label">Finalização</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="page-footer">
-        <div class="mini-mark"><span class="mini-gold"></span> Camasa Mármores & Design</div>
-        <div>Etapas da Obra</div>
+      <div class="timeline">
+        ${buildSteps(progressPercent)}
       </div>
     </div>
   </section>
 
   <section class="page">
-    <div class="texture"></div>
-    <div class="overlay"></div>
-    <div class="grain"></div>
-    <div class="page-frame"></div>
+    <div class="section-kicker">Painel de Materiais</div>
+    <div class="section-title">${material}</div>
+    <div class="section-subtitle">
+      Referência cadastrada, categoria técnica, acabamento e uso principal da peça aplicada no projeto.
+    </div>
 
-    <div class="content">
-      <div class="page-title">Painel de Materiais</div>
-      <div class="page-subtitle">Demonstrativo institucional dos elementos nobres vinculados ao projeto.</div>
-
-      <div class="split-two">
-        <div class="card soft">
-          <div class="card-pad">
-            <div class="section-kicker">Material principal</div>
-            <div class="material-grid">
-              <div class="stone-sample"></div>
-              <div>
-                <div style="font-size: 16px; color: #fff2db;">${material}</div>
-                <div class="muted" style="font-size: 12px; line-height: 1.68; margin-top: 8px;">
-                  Aplicação: ${projectName}<br/>
-                  Local: ${location}
-                </div>
-                <div style="margin-top: 12px;">
-                  <span class="tag">Material certificado</span>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div class="material-panel-grid">
+      <div class="card">
+        <div class="material-sheet"></div>
+        <div class="badge-row">
+          <span class="badge">${materialCategory}</span>
+          <span class="badge">${materialFinish}</span>
+          <span class="badge">${materialUsage}</span>
         </div>
-
-        <div class="card soft">
-          <div class="card-pad">
-            <div class="section-kicker">Materiais certificados</div>
-            <div class="photo-sample"></div>
-            <div class="muted" style="font-size: 12px; line-height: 1.7; margin-top: 12px;">
-              Apresentação visual do material em contexto aplicado, reforçando estética, ambiente e resultado final do projeto.
-            </div>
-          </div>
-        </div>
+        <div class="material-title">${material}</div>
+        <div class="material-small">Aplicação: ${projectName}</div>
+        <div class="material-small">Local: ${location}</div>
+        <div class="material-small">Classificação: material certificado</div>
       </div>
 
-      <div class="page-footer">
-        <div class="mini-mark"><span class="mini-gold"></span> Camasa Mármores & Design</div>
-        <div>Painel de Materiais</div>
+      <div class="card">
+        <div class="photo-panel"></div>
+        <div class="panel-caption">
+          Referencial visual do ambiente, registro premium do projeto e associação direta com a peça especificada.
+        </div>
+        <div class="panel-caption">
+          Uso previsto: ${materialCare}
+        </div>
       </div>
     </div>
   </section>
 
   <section class="page">
-    <div class="texture"></div>
-    <div class="overlay"></div>
-    <div class="grain"></div>
-    <div class="page-frame"></div>
+    <div class="section-kicker">Manual de Uso e Conservação</div>
+    <div class="section-title">Cuidados essenciais</div>
+    <div class="section-subtitle">
+      Orientações práticas para preservar a estética, integridade e desempenho da superfície ao longo do tempo.
+    </div>
 
-    <div class="content">
-      <div class="page-title">Manual de Uso e Conservação</div>
-      <div class="page-subtitle">Orientações essenciais para preservar beleza, acabamento e longevidade.</div>
-
-      <div class="split-two">
-        <div class="card bullet-card ok">
-          <div class="bullet-title"><span class="bullet-mark">${buildIconSvg("check")}</span> O que fazer</div>
-          <ul class="clean">
-            <li>Limpar com pano macio levemente umedecido.</li>
-            <li>Utilizar detergente neutro em pequena quantidade.</li>
-            <li>Remover resíduos líquidos rapidamente.</li>
-            <li>Usar apoio para objetos quentes e utensílios pesados.</li>
-            <li>Manter rotina preventiva de inspeção visual.</li>
-          </ul>
-        </div>
-
-        <div class="card bullet-card no">
-          <div class="bullet-title"><span class="bullet-mark">${buildIconSvg("warning")}</span> O que evitar</div>
-          <ul class="clean">
-            <li>Produtos ácidos, abrasivos ou clorados.</li>
-            <li>Impactos concentrados em quinas e bordas.</li>
-            <li>Arraste de peças metálicas sem proteção.</li>
-            <li>Contato prolongado com agentes pigmentantes.</li>
-            <li>Limpeza agressiva com discos ou esponjas duras.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="card alert-card">
-        <div class="section-kicker">Alertas importantes</div>
-        <ul class="clean">
-          <li>Pedras naturais podem apresentar variações próprias de sua formação.</li>
-          <li>O uso incorreto de químicos pode comprometer acabamento, proteção e brilho.</li>
-          <li>Qualquer intervenção corretiva deve respeitar orientação técnica especializada.</li>
+    <div class="list-grid">
+      <div class="card list-card">
+        <div class="list-card-title">O que fazer</div>
+        <ul>
+          ${buildList(doList, "good")}
         </ul>
       </div>
 
-      <div class="page-footer">
-        <div class="mini-mark"><span class="mini-gold"></span> Camasa Mármores & Design</div>
-        <div>Manual de Uso e Conservação</div>
+      <div class="card list-card">
+        <div class="list-card-title">O que evitar</div>
+        <ul>
+          ${buildList(dontList, "bad")}
+        </ul>
       </div>
+    </div>
+
+    <div class="card alerts-box list-card">
+      <div class="list-card-title">Alertas importantes</div>
+      <ul>
+        ${buildList(alerts, "alert")}
+      </ul>
     </div>
   </section>
 
   <section class="page">
-    <div class="texture"></div>
-    <div class="overlay"></div>
-    <div class="grain"></div>
-    <div class="page-frame"></div>
+    <div class="section-kicker">Camasa Care</div>
+    <div class="section-title">Preserve a beleza</div>
+    <div class="section-subtitle">
+      Projeto de conservação contínua, orientação preventiva e manutenção visual coerente com materiais nobres.
+    </div>
 
-    <div class="content">
-      <div class="page-title">Camasa Care</div>
-      <div class="page-subtitle">Programa de acompanhamento, preservação estética e atenção contínua.</div>
-
-      <div class="card care-main">
-        <div class="care-title">Preserve a beleza</div>
-        <div class="care-copy">
-          Serviço pensado para manter valor estético, segurança de uso e consistência visual das superfícies nobres entregues pela Camasa.
-        </div>
-
-        <div class="care-grid">
-          <div class="card care-item">
-            <div class="care-icon">${buildIconSvg("preserve")}</div>
-            <div class="care-item-title">Preservar</div>
-            <div class="care-item-copy">Rotina de avaliação preventiva e leitura visual da superfície.</div>
-          </div>
-
-          <div class="card care-item">
-            <div class="care-icon">${buildIconSvg("protect")}</div>
-            <div class="care-item-title">Proteger</div>
-            <div class="care-item-copy">Sugestões de cuidado para manter acabamento, toque e presença.</div>
-          </div>
-
-          <div class="card care-item">
-            <div class="care-icon">${buildIconSvg("revisit")}</div>
-            <div class="care-item-title">Revisitar</div>
-            <div class="care-item-copy">Acompanhamento técnico periódico conforme necessidade do projeto.</div>
-          </div>
-        </div>
-
-        <div class="cta">
-          Atendimento Camasa Care disponível para projetos com demanda de acompanhamento contínuo e preservação estética.
-        </div>
+    <div class="card">
+      <div class="pillars-grid">
+        ${buildCarePillars(carePillars)}
       </div>
 
-      <div class="page-footer">
-        <div class="mini-mark"><span class="mini-gold"></span> Camasa Mármores & Design</div>
-        <div>Camasa Care</div>
+      <div class="care-footer">
+        A manutenção Camasa Care foi pensada para prolongar a estética da obra,
+        reduzir desgaste prematuro e manter coerência entre uso, cuidado e apresentação.
       </div>
     </div>
   </section>
 
-  <section class="page">
-    <div class="texture"></div>
-    <div class="overlay"></div>
-    <div class="grain"></div>
-    <div class="page-frame"></div>
-
-    <div class="content cert-wrap">
-      <div class="cert-card">
-        <div class="cert-corner tl"></div>
-        <div class="cert-corner tr"></div>
-        <div class="cert-corner bl"></div>
-        <div class="cert-corner br"></div>
-
-        <div class="cert-header">
-          <div>
-            ${logoSmall}
-            <div class="cert-title">Certificado de Autenticidade</div>
-            <div class="cert-sub">Camasa Process System • Registro institucional</div>
-          </div>
-
-          <div>${qrSvg}</div>
+  <section class="page certificate-page">
+    <div class="certificate-shell">
+      <div>
+        <div class="certificate-top">
+          ${logoHtml}
         </div>
 
-        <div class="cert-code">${signatureCode}</div>
+        <div class="gold-line" style="margin-top:0; margin-bottom:7mm;"></div>
 
-        <div class="cert-grid">
-          <div>
-            <div class="cert-label">Projeto</div>
-            <div class="cert-value">${projectName}</div>
+        <div class="certificate-title">Certificado de Autenticidade</div>
+        <div class="certificate-sub">${material}</div>
+        <div class="certificate-sub">Projeto rastreado pelo Camasa Process System</div>
+
+        <div class="certificate-code">${signatureCode}</div>
+
+        <div class="certificate-grid">
+          <div class="certificate-field">
+            <div class="field-label">Projeto</div>
+            <div class="field-value">${projectName}</div>
           </div>
-          <div>
-            <div class="cert-label">Cliente</div>
-            <div class="cert-value">${clientName}</div>
+          <div class="certificate-field">
+            <div class="field-label">Cliente</div>
+            <div class="field-value">${clientName}</div>
           </div>
-          <div>
-            <div class="cert-label">Local</div>
-            <div class="cert-value">${location}</div>
+          <div class="certificate-field">
+            <div class="field-label">Família</div>
+            <div class="field-value">${certificateFamily}</div>
           </div>
-          <div>
-            <div class="cert-label">Material</div>
-            <div class="cert-value">${material}</div>
+          <div class="certificate-field">
+            <div class="field-label">Origem</div>
+            <div class="field-value">${certificateOrigin}</div>
           </div>
-          <div>
-            <div class="cert-label">Project ID</div>
-            <div class="cert-value">${projectId}</div>
+          <div class="certificate-field">
+            <div class="field-label">Lote / Batch</div>
+            <div class="field-value">${certificateBatch}</div>
           </div>
-          <div>
-            <div class="cert-label">Data de emissão</div>
-            <div class="cert-value">${issueDate}</div>
+          <div class="certificate-field">
+            <div class="field-label">Emissão</div>
+            <div class="field-value">${issueDate}</div>
           </div>
         </div>
 
-        <div class="cert-copy">
-          Este documento certifica a vinculação institucional deste projeto ao fluxo premium do Camasa Process System, com identificação, rastreabilidade documental e referência visual compatível com o padrão de entrega Camasa.
+        <div class="certificate-qr">
+          <div class="qr-shell" style="width:28mm;height:28mm;">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(signatureCode)}" alt="QR Code" style="width:100%;height:100%;object-fit:cover;" />
+          </div>
         </div>
 
-        <div class="serial">
-          8bca99f8d25e1a34f9d80d3e2${projectId.replace(/[^a-zA-Z0-9]/g, "")}cpssignaturebook${signatureCode.replace(/[^a-zA-Z0-9]/g, "")}
-        </div>
-
-        <div class="cert-bottom">
-          <div>
-            <div class="cert-label">Sistema</div>
-            <div class="cert-value">CPS — Camasa Process System</div>
-          </div>
-
-          <div class="text-right">
-            <div class="cert-label">Validação</div>
-            <div class="cert-value">Documento premium institucional</div>
-          </div>
+        <div class="footer-note">
+          Este documento integra a rastreabilidade visual, técnica e institucional do projeto,
+          vinculando material, aplicação, cuidado e identidade documental em padrão premium.
         </div>
       </div>
 
-      <div class="footer-brand">
-        ${logoSmall}
-      </div>
-
-      <div class="page-footer">
-        <div class="mini-mark"><span class="mini-gold"></span> Camasa Mármores & Design</div>
-        <div>Certificado</div>
+      <div class="certificate-bottom-logo">
+        ${logoHtml}
       </div>
     </div>
   </section>
 </body>
-</html>`;
+</html>
+  `;
 }
 
-async function generatePdfBuffer(data: RenderPayload): Promise<Buffer> {
+function parseBody(rawBody: string): RenderPayload {
+  if (!rawBody || !rawBody.trim()) return {};
+  try {
+    return JSON.parse(rawBody) as RenderPayload;
+  } catch {
+    return {};
+  }
+}
+
+async function generatePdfBuffer(payload: RenderPayload): Promise<Buffer> {
   const browser = await chromium.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
   try {
     const page = await browser.newPage({
-      viewport: { width: 1400, height: 1980 },
-      deviceScaleFactor: 1.5
+      viewport: { width: 1600, height: 2200 },
+      deviceScaleFactor: 1.5,
     });
 
-    const html = buildHtml(data);
-    await page.setContent(html, { waitUntil: "networkidle" });
+    const html = buildHtml(payload);
+
+    await page.setContent(html, {
+      waitUntil: "networkidle",
+      timeout: 120000,
+    });
 
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
       margin: {
-        top: "0mm",
-        right: "0mm",
-        bottom: "0mm",
-        left: "0mm"
-      }
+        top: "0",
+        right: "0",
+        bottom: "0",
+        left: "0",
+      },
+      preferCSSPageSize: true,
     });
 
     return Buffer.from(pdf);
@@ -1606,130 +1451,101 @@ async function generatePdfBuffer(data: RenderPayload): Promise<Buffer> {
   }
 }
 
-function parseBody(body: string): RenderPayload {
-  if (!body) return {};
-  try {
-    return JSON.parse(body);
-  } catch {
-    return {};
-  }
-}
-
 const server = http.createServer(async (req, res) => {
   try {
-    const url = new URL(req.url || "/", `http://localhost:${port}`);
+    const method = req.method || "GET";
+    const url = req.url || "/";
 
-    if (req.method === "GET" && url.pathname === "/health") {
-      res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-      res.end(JSON.stringify({ ok: true, service: "camasa-signature-renderer" }));
+    if (method === "GET" && url === "/health") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true }));
       return;
     }
 
-    if (req.method === "GET" && url.pathname === "/render-test") {
+    if (method === "GET" && url === "/render-test") {
       const pdf = await generatePdfBuffer({
-        projectId: "600059b1-85f8-4ca1-81dc-ed5339a8a812",
         signatureCode: "CSB-20260331-2344-XBGE",
         documentType: "Camasa Signature Book",
         clientName: "Ana",
         projectName: "Bancada em L",
         material: "Granito Verde Ubatuba",
         location: "São Paulo, SP",
-        issueDate: "31/03/2026"
+        issueDate: "2026-03-31",
+        progressPercent: 38,
+        completedSteps: 6,
+        currentStage: "Instalação",
+        remainingSteps: 8,
+        forecastDate: "2026-04-09",
+        applicationLabel: "Bancada em L",
+        applicationPercent: 100,
+        materialCategory: "Granito",
+        materialFinish: "Polido",
+        materialUsage: "Bancada em L",
+        certificateFamily: "Granito",
+        certificateOrigin: "Brasil",
+        certificateBatch: "AM",
       });
 
       res.writeHead(200, {
         "Content-Type": "application/pdf",
         "Content-Disposition": 'inline; filename="camasa-signature-book-test.pdf"',
-        "Cache-Control": "no-store"
+        "Access-Control-Allow-Origin": "*",
       });
       res.end(pdf);
       return;
     }
 
-    if (req.method === "POST" && url.pathname === "/render") {
-      let body = "";
+    if (method === "POST" && url === "/render") {
+      const chunks: Buffer[] = [];
 
-      req.on("data", (chunk) => {
-        body += chunk.toString();
-      });
-
+      req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
       req.on("end", async () => {
         try {
-          const payload = parseBody(body);
+          const rawBody = Buffer.concat(chunks).toString("utf-8");
+          const payload = parseBody(rawBody);
           const pdf = await generatePdfBuffer(payload);
 
           res.writeHead(200, {
             "Content-Type": "application/pdf",
-            "Content-Disposition": 'inline; filename="camasa-signature-book.pdf"',
-            "Cache-Control": "no-store"
+            "Content-Disposition": `inline; filename="${payload.projectId || "signature-book"}.pdf"`,
+            "Access-Control-Allow-Origin": "*",
           });
           res.end(pdf);
         } catch (error) {
-          const message =
-            error instanceof Error ? error.message : "Erro interno do servidor.";
-
-          res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
-          res.end(JSON.stringify({ error: message }));
+          res.writeHead(500, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          });
+          res.end(
+            JSON.stringify({
+              error: "Erro ao gerar PDF.",
+              details: error instanceof Error ? error.message : String(error),
+            }),
+          );
         }
       });
-
       return;
     }
 
-    const previewHtml = `
-      <html>
-        <body style="font-family:Arial;padding:20px;background:#111;color:#eee">
-          <h2>Teste Camasa Renderer</h2>
-          <button onclick="testar()">Gerar PDF</button>
-          <pre id="out"></pre>
-          <script>
-            async function testar() {
-              const out = document.getElementById('out');
-              out.textContent = 'Gerando PDF...';
-              try {
-                const response = await fetch('/render', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    projectId: '600059b1-85f8-4ca1-81dc-ed5339a8a812',
-                    signatureCode: 'CSB-20260331-2344-XBGE',
-                    documentType: 'Camasa Signature Book',
-                    clientName: 'Ana',
-                    projectName: 'Bancada em L',
-                    material: 'Granito Verde Ubatuba',
-                    location: 'São Paulo, SP',
-                    issueDate: '31/03/2026'
-                  })
-                });
-
-                if (!response.ok) {
-                  throw new Error(await response.text());
-                }
-
-                const blob = await response.blob();
-                const url = URL.createObjectURL(blob);
-                window.open(url, '_blank');
-                out.textContent = 'PDF gerado com sucesso.';
-              } catch (err) {
-                out.textContent = 'ERRO: ' + (err && err.message ? err.message : String(err));
-              }
-            }
-          </script>
-        </body>
-      </html>
-    `;
-
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    res.end(previewHtml);
+    res.writeHead(404, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    });
+    res.end(JSON.stringify({ error: "Rota não encontrada." }));
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Erro interno do servidor.";
-
-    res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" });
-    res.end(JSON.stringify({ error: message }));
+    res.writeHead(500, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    });
+    res.end(
+      JSON.stringify({
+        error: "Erro interno no renderer.",
+        details: error instanceof Error ? error.message : String(error),
+      }),
+    );
   }
 });
 
 server.listen(port, "0.0.0.0", () => {
-  console.log("Camasa renderer running on port " + port);
+  console.log(\`Camasa Signature Renderer running on port \${port}\`);
 });
