@@ -1,15 +1,15 @@
 import http from "http";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
+
 import { chromium } from "playwright-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
 
 chromium.use(StealthPlugin());
 
 const port = Number(process.env.PORT || 8080);
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = process.cwd();
+
 
 type RenderPayload = {
   projectId?: string;
