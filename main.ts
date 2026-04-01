@@ -28,7 +28,7 @@ type RenderPayload = {
   materialCategory?: string;
   materialFinish?: string;
   materialUsage?: string;
-  materialCare?: string[];
+  materialCareText?: string;
   doList?: string[];
   dontList?: string[];
   alerts?: string[];
@@ -117,8 +117,11 @@ function buildSteps(percent: number): string {
     "Instalação",
     "Finalização",
   ];
+
   const activeIndex =
-    percent >= 100 ? steps.length - 1 : Math.max(0, Math.min(4, Math.floor(percent / 20)));
+    percent >= 100
+      ? steps.length - 1
+      : Math.max(0, Math.min(steps.length - 1, Math.floor(percent / 20)));
 
   return steps
     .map((label, index) => {
@@ -168,85 +171,63 @@ function buildHtml(data: RenderPayload): string {
     assetDataUri("assets/logotipo-camasa-process-system.jpeg") ||
     assetDataUri("assets/logotipo-camasa-process-system.png");
 
-  const referenceAsset =
-    assetDataUri("assets/camasa-signature-book-completo.jpg") ||
-    assetDataUri("assets/camasa-signature-book-completo.jpeg") ||
-    assetDataUri("assets/camasa-signature-book-completo.png");
-
   const signatureCode = escapeHtml(data.signatureCode || "CSB-20260331-2344-XBGE");
-  const documentType = escapeHtml(data.documentType || "CAMASA SIGNATURE BOOK");
+  const documentType = escapeHtml(data.documentType || "Camasa Signature Book");
   const clientName = escapeHtml(data.clientName || "Ana");
   const projectName = escapeHtml(data.projectName || "Bancada em L");
   const material = escapeHtml(data.material || "Granito Verde Ubatuba");
   const location = escapeHtml(data.location || "São Paulo, SP");
-  const issueDate = formatDatePtBr(data.issueDate);
-  const forecastDate = formatDatePtBr(data.forecastDate || data.issueDate);
+  const issueDate = formatDatePtBr(data.issueDate || "2026-03-31");
+  const forecastDate = formatDatePtBr(data.forecastDate || "2026-04-09");
   const progressPercent = Math.max(0, Math.min(100, Number(data.progressPercent ?? 38)));
   const completedSteps = Math.max(0, Number(data.completedSteps ?? 6));
   const remainingSteps = Math.max(0, Number(data.remainingSteps ?? 8));
   const currentStage = escapeHtml(data.currentStage || "Instalação");
-  const applicationLabel = escapeHtml(data.applicationLabel || projectName);
-  const applicationPercent = Math.max(0, Math.min(100, Number(data.applicationPercent ?? 100)));
+  const applicationLabel = escapeHtml(data.applicationLabel || "Bancada em L");
+  const applicationPercent = Math.max(
+    0,
+    Math.min(100, Number(data.applicationPercent ?? 100)),
+  );
   const materialCategory = escapeHtml(data.materialCategory || "Granito");
   const materialFinish = escapeHtml(data.materialFinish || "Polido");
-  const materialUsage = escapeHtml(data.materialUsage || projectName);
-  const materialCare = escapeHtml(data.materialUsage || "Uso interno e vedado");
-  const certificateFamily = escapeHtml(data.certificateFamily || materialCategory);
+  const materialUsage = escapeHtml(data.materialUsage || "Bancada em L");
+  const materialCareText = escapeHtml(
+    data.materialCareText || "Uso interno • vedado • limpeza controlada",
+  );
+  const certificateFamily = escapeHtml(data.certificateFamily || "Granito");
   const certificateOrigin = escapeHtml(data.certificateOrigin || "Brasil");
   const certificateBatch = escapeHtml(data.certificateBatch || "AM");
 
   const doList = normalizeArray(data.doList, [
-    "Limpar com pano macio e detergente neutro.",
-    "Secar após limpeza e contato com líquidos.",
-    "Usar apoios adequados para objetos quentes.",
-    "Manter rotina de cuidado e inspeção visual.",
+    "Limpar com pano macio, água e detergente neutro.",
+    "Secar a superfície após a limpeza ou contato com líquidos.",
+    "Usar apoio para panelas, objetos quentes e peças metálicas.",
+    "Manter rotina de inspeção visual em quinas e áreas de uso intenso.",
   ]);
 
   const dontList = normalizeArray(data.dontList, [
-    "Não usar ácido, cloro ou produtos abrasivos.",
-    "Não apoiar panelas ou peças superaquecidas diretamente.",
-    "Não deixar líquidos pigmentados por longos períodos.",
-    "Não usar lâmina, palha de aço ou solvente forte.",
+    "Não usar ácido, cloro, saponáceo ou produto abrasivo.",
+    "Não apoiar panelas superaquecidas diretamente sobre a peça.",
+    "Não deixar vinho, café, óleo ou pigmentos por tempo prolongado.",
+    "Não usar lâmina, palha de aço ou solvente agressivo.",
   ]);
 
   const alerts = normalizeArray(data.alerts, [
-    "Heróis da limpeza agressiva causam dano silencioso.",
-    "Óleo, vinho e café devem ser removidos rapidamente.",
-    "Choques mecânicos em quinas exigem atenção permanente.",
+    "Choques mecânicos em bordas e quinas podem causar danos localizados.",
+    "Produtos agressivos degradam brilho, vedação e leitura estética da peça.",
+    "Substâncias pigmentadas devem ser removidas com rapidez.",
   ]);
 
   const carePillars = normalizePillars(data.carePillars);
-
-  const coverBackground = referenceAsset
-    ? `
-      linear-gradient(180deg, rgba(8,8,10,0.72), rgba(10,10,12,0.88)),
-      radial-gradient(circle at top center, rgba(255,255,255,0.06), transparent 36%),
-      url("${referenceAsset}")
-    `
-    : `
-      linear-gradient(180deg, rgba(8,8,10,0.86), rgba(10,10,12,0.96)),
-      radial-gradient(circle at top center, rgba(255,255,255,0.06), transparent 36%)
-    `;
-
-  const pageTexture = referenceAsset
-    ? `
-      linear-gradient(180deg, rgba(8,8,10,0.84), rgba(12,12,14,0.92)),
-      radial-gradient(circle at top center, rgba(255,255,255,0.04), transparent 30%),
-      url("${referenceAsset}")
-    `
-    : `
-      linear-gradient(180deg, rgba(8,8,10,0.94), rgba(12,12,14,0.98)),
-      radial-gradient(circle at top center, rgba(255,255,255,0.04), transparent 30%)
-    `;
 
   const logoHtml = logoAsset
     ? `<img class="brand-logo" src="${logoAsset}" alt="CPS Camasa Process System" />`
     : `
       <div class="brand-fallback">
-        <div class="brand-fallback-top">CPS</div>
+        <div class="brand-fallback-cps">CPS</div>
         <div class="brand-fallback-right">
-          <div>CAMASA</div>
-          <div class="small">Process System</div>
+          <div class="brand-fallback-camasa">CAMASA</div>
+          <div class="brand-fallback-sub">Process System</div>
         </div>
       </div>
     `;
@@ -258,34 +239,38 @@ function buildHtml(data: RenderPayload): string {
   <meta charset="UTF-8" />
   <title>Camasa Signature Book</title>
   <style>
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      background: #0a0a0c;
-      color: #f1e5c8;
-      font-family: "Helvetica Neue", Arial, sans-serif;
+    * {
+      box-sizing: border-box;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
 
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #070707;
+      color: #f4ead7;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+    }
+
     body {
       background:
-        radial-gradient(circle at top, rgba(255,255,255,0.03), transparent 22%),
-        linear-gradient(180deg, #070708 0%, #111114 100%);
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 24%),
+        linear-gradient(180deg, #060606 0%, #111111 100%);
     }
 
     .page {
       width: 210mm;
       min-height: 297mm;
-      padding: 14mm;
       margin: 0 auto;
       position: relative;
-      page-break-after: always;
       overflow: hidden;
-      background: ${pageTexture};
-      background-size: cover;
-      background-position: center;
+      page-break-after: always;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.035), transparent 22%),
+        radial-gradient(circle at 20% 18%, rgba(208,171,99,0.06), transparent 16%),
+        radial-gradient(circle at 80% 12%, rgba(208,171,99,0.05), transparent 14%),
+        linear-gradient(180deg, #0a0a0b 0%, #111113 100%);
     }
 
     .page:last-child {
@@ -295,136 +280,198 @@ function buildHtml(data: RenderPayload): string {
     .page::before {
       content: "";
       position: absolute;
-      inset: 8mm;
-      border: 1px solid rgba(202, 170, 103, 0.20);
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.015), transparent 16%, transparent 84%, rgba(255,255,255,0.012)),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255,255,255,0.006) 0px,
+          rgba(255,255,255,0.006) 1px,
+          transparent 1px,
+          transparent 90px
+        ),
+        repeating-linear-gradient(
+          0deg,
+          rgba(255,255,255,0.004) 0px,
+          rgba(255,255,255,0.004) 1px,
+          transparent 1px,
+          transparent 80px
+        );
+      opacity: 0.38;
       pointer-events: none;
     }
 
     .page::after {
       content: "";
       position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.02), transparent 18%, transparent 82%, rgba(255,255,255,0.018)),
-        radial-gradient(circle at top center, rgba(255,255,255,0.04), transparent 40%);
+      inset: 8mm;
+      border: 1px solid rgba(208,171,99,0.14);
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,0.015),
+        inset 0 0 60px rgba(0,0,0,0.20);
       pointer-events: none;
     }
 
-    .cover {
-      background: ${coverBackground};
-      background-size: cover;
-      background-position: center;
-      display: flex;
-      align-items: stretch;
-    }
-
-    .cover-grid {
+    .page-inner {
       position: relative;
       z-index: 2;
-      display: grid;
-      grid-template-columns: 1fr;
-      width: 100%;
-      min-height: calc(297mm - 28mm);
-      border: 1px solid rgba(203, 171, 106, 0.18);
-      background: linear-gradient(180deg, rgba(8,8,10,0.34), rgba(8,8,10,0.54));
-      box-shadow: inset 0 0 80px rgba(0,0,0,0.35);
-      padding: 18mm 16mm 14mm 16mm;
+      padding: 14mm;
+      min-height: 297mm;
     }
 
-    .gold-line {
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, rgba(0,0,0,0), #d0ab63, rgba(0,0,0,0));
-      opacity: 0.95;
-      margin: 9mm 0 7mm 0;
-    }
-
-    .brand-box {
+    .cover .page-inner {
+      padding: 15mm 14mm 13mm 14mm;
       display: flex;
-      justify-content: flex-start;
+      flex-direction: column;
+      min-height: 297mm;
+      justify-content: space-between;
+    }
+
+    .cover {
+      background:
+        radial-gradient(circle at 50% 14%, rgba(255,255,255,0.05), transparent 18%),
+        linear-gradient(180deg, #090909 0%, #101011 100%);
+    }
+
+    .cover-main {
+      border: 1px solid rgba(208,171,99,0.18);
+      min-height: 258mm;
+      position: relative;
+      padding: 14mm 12mm 10mm 12mm;
+      box-shadow:
+        inset 0 0 80px rgba(0,0,0,0.28),
+        0 20px 50px rgba(0,0,0,0.20);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.018), transparent 22%, transparent 78%, rgba(255,255,255,0.01)),
+        radial-gradient(circle at 50% 6%, rgba(255,255,255,0.035), transparent 22%),
+        linear-gradient(180deg, rgba(18,18,19,0.82), rgba(10,10,11,0.88));
+    }
+
+    .cover-main::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, transparent 0%, transparent 84%, rgba(208,171,99,0.10) 100%),
+        linear-gradient(315deg, transparent 0%, transparent 84%, rgba(208,171,99,0.08) 100%);
+      pointer-events: none;
+    }
+
+    .cover-main::after {
+      content: "";
+      position: absolute;
+      left: 9mm;
+      top: 9mm;
+      right: 9mm;
+      bottom: 9mm;
+      border: 1px solid rgba(208,171,99,0.10);
+      pointer-events: none;
+    }
+
+    .brand-row {
+      display: flex;
       align-items: center;
-      min-height: 38mm;
-      margin-bottom: 10mm;
+      justify-content: flex-start;
+      min-height: 36mm;
+      margin-bottom: 5mm;
     }
 
     .brand-logo {
-      max-width: 132mm;
-      max-height: 34mm;
+      max-width: 126mm;
+      max-height: 32mm;
       object-fit: contain;
-      filter: drop-shadow(0 8px 18px rgba(0,0,0,0.35));
+      filter:
+        drop-shadow(0 8px 20px rgba(0,0,0,0.45))
+        drop-shadow(0 2px 2px rgba(255,255,255,0.05));
     }
 
     .brand-fallback {
       display: flex;
       align-items: center;
-      gap: 10px;
-      color: #f2efe9;
+      gap: 8px;
+      color: #f7f1e5;
     }
 
-    .brand-fallback-top {
+    .brand-fallback-cps {
       font-size: 30px;
       font-weight: 800;
-      letter-spacing: 1px;
       color: #d0ab63;
+      letter-spacing: 1px;
     }
 
-    .brand-fallback-right {
-      font-size: 18px;
+    .brand-fallback-camasa {
+      font-size: 19px;
       font-weight: 700;
-      line-height: 1.05;
+      letter-spacing: 1px;
     }
 
-    .brand-fallback-right .small {
-      font-size: 13px;
-      font-weight: 400;
-      color: #d8d0c2;
+    .brand-fallback-sub {
+      font-size: 12px;
+      color: #d9cfbd;
+      margin-top: 1px;
     }
 
-    .cover-title-wrap {
+    .gold-divider {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, rgba(0,0,0,0), #d0ab63 16%, #f0d292 50%, #d0ab63 84%, rgba(0,0,0,0));
+      box-shadow: 0 0 20px rgba(208,171,99,0.12);
+      margin: 4mm 0 10mm 0;
+    }
+
+    .cover-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       text-align: center;
-      margin-top: 10mm;
+      margin-top: 4mm;
+      flex: 1;
+      justify-content: center;
+    }
+
+    .cover-kicker {
+      color: #d4b16b;
+      font-size: 10px;
+      letter-spacing: 2.8px;
+      text-transform: uppercase;
+      margin-bottom: 5mm;
     }
 
     .cover-title {
-      font-size: 17px;
+      color: #f8f2e6;
+      font-size: 21px;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: #f5efe1;
-      margin-bottom: 3mm;
+      line-height: 1.3;
+      margin-bottom: 2mm;
     }
 
     .cover-title strong {
       display: block;
-      font-size: 23px;
-      letter-spacing: 2.2px;
+      font-size: 31px;
+      letter-spacing: 2.4px;
       margin-top: 2mm;
+      font-weight: 500;
     }
 
     .cover-subtitle {
-      text-align: center;
-      color: #d8cfbf;
-      font-size: 11px;
-      letter-spacing: 1.6px;
+      color: #d8cdb8;
+      font-size: 10px;
+      letter-spacing: 1.8px;
       text-transform: uppercase;
-      margin-bottom: 13mm;
-    }
-
-    .cover-project {
-      text-align: center;
-      margin-top: 2mm;
+      margin-bottom: 12mm;
     }
 
     .cover-project-name {
-      font-size: 20px;
-      color: #f6f0e3;
+      color: #f7f0e2;
+      font-size: 21px;
       margin-bottom: 3mm;
     }
 
-    .cover-client,
-    .cover-location {
-      color: #d8cfbf;
+    .cover-meta {
+      color: #d6cbb8;
       font-size: 13px;
-      margin-bottom: 2mm;
+      margin-bottom: 1.5mm;
     }
 
     .qr-box {
@@ -435,97 +482,87 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .qr-shell {
-      width: 34mm;
-      height: 34mm;
-      background: rgba(255,255,255,0.95);
-      border: 1px solid rgba(208,171,99,0.55);
-      border-radius: 5mm;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.28);
+      width: 33mm;
+      height: 33mm;
+      border-radius: 4.5mm;
+      background: #fff;
+      padding: 2.4mm;
+      border: 1px solid rgba(208,171,99,0.50);
+      box-shadow:
+        0 16px 34px rgba(0,0,0,0.30),
+        inset 0 0 0 1px rgba(255,255,255,0.10);
     }
 
     .code-pill {
-      margin: 0 auto;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4mm 8mm;
-      border: 1px solid rgba(208,171,99,0.45);
-      border-radius: 3mm;
-      font-size: 13px;
+      display: inline-block;
+      border: 1px solid rgba(208,171,99,0.34);
+      border-radius: 3.2mm;
+      padding: 3.4mm 8mm;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      color: #ecd59f;
       letter-spacing: 1px;
-      color: #ead5a5;
-      background: rgba(0,0,0,0.24);
-      box-shadow: inset 0 0 12px rgba(255,255,255,0.03);
+      font-size: 12px;
+      box-shadow: inset 0 0 14px rgba(255,255,255,0.02);
     }
 
-    .cover-footer-date {
+    .cover-footer {
       text-align: center;
-      margin-top: auto;
-      font-size: 10px;
-      color: #d4cabb;
-      letter-spacing: 1.8px;
+      color: #d4c9b5;
+      font-size: 9px;
+      letter-spacing: 2px;
       text-transform: uppercase;
+      margin-top: 10mm;
     }
 
     .section-kicker {
       color: #d0ab63;
+      font-size: 10px;
       letter-spacing: 2px;
       text-transform: uppercase;
-      font-size: 10px;
       margin-bottom: 2mm;
     }
 
     .section-title {
-      color: #f5efe1;
+      color: #f8f2e6;
       font-size: 18px;
-      letter-spacing: 1.2px;
+      letter-spacing: 1.6px;
       text-transform: uppercase;
-      margin-bottom: 3mm;
+      margin-bottom: 2.4mm;
     }
 
     .section-subtitle {
-      color: #d5cbba;
+      color: #d4cab8;
       font-size: 11px;
-      line-height: 1.6;
+      line-height: 1.65;
+      max-width: 126mm;
       margin-bottom: 6mm;
-      max-width: 120mm;
     }
 
     .grid-2 {
       display: grid;
-      grid-template-columns: 1.15fr 0.85fr;
-      gap: 6mm;
-      position: relative;
-      z-index: 2;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1.12fr 0.88fr;
       gap: 5mm;
     }
 
     .card {
-      background: linear-gradient(180deg, rgba(25,25,28,0.76), rgba(14,14,16,0.86));
-      border: 1px solid rgba(208,171,99,0.20);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.025), transparent 20%),
+        linear-gradient(180deg, rgba(22,22,24,0.78), rgba(11,11,12,0.90));
+      border: 1px solid rgba(208,171,99,0.18);
       border-radius: 4mm;
       padding: 5mm;
       box-shadow:
-        inset 0 0 26px rgba(255,255,255,0.02),
-        0 16px 32px rgba(0,0,0,0.22);
+        inset 0 0 30px rgba(255,255,255,0.015),
+        0 18px 34px rgba(0,0,0,0.18);
       position: relative;
       overflow: hidden;
     }
 
-    .card::before {
+    .card::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.018), transparent 26%);
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent 24%);
       pointer-events: none;
     }
 
@@ -533,193 +570,202 @@ function buildHtml(data: RenderPayload): string {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 4mm;
-      margin-bottom: 5mm;
+      margin-bottom: 4mm;
     }
 
     .metric-card {
-      min-height: 33mm;
+      min-height: 30mm;
+      padding: 3mm 2.5mm;
+      text-align: center;
+      border-radius: 3.2mm;
+      border: 1px solid rgba(208,171,99,0.16);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008)),
+        rgba(8,8,9,0.26);
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
-      text-align: center;
-      background: rgba(10,10,12,0.34);
-      border: 1px solid rgba(208,171,99,0.18);
-      border-radius: 3.5mm;
-      padding: 3mm;
+      justify-content: center;
     }
 
     .metric-icon {
       color: #d0ab63;
-      font-size: 13px;
+      font-size: 12px;
       margin-bottom: 2mm;
     }
 
     .metric-label {
-      color: #d3c8b8;
+      color: #d7ccba;
       font-size: 8px;
       line-height: 1.35;
-      letter-spacing: 1px;
+      min-height: 8mm;
       text-transform: uppercase;
-      min-height: 10mm;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      letter-spacing: 1px;
     }
 
     .metric-value {
-      color: #f5efe1;
+      color: #f8f2e6;
       font-size: 18px;
-      margin-top: 1mm;
+      margin-top: 1.5mm;
     }
 
-    .mini-ring-panel {
+    .mini-two {
+      display: grid;
+      grid-template-columns: 1.02fr 0.98fr;
+      gap: 4mm;
+    }
+
+    .distribution-line {
+      width: 100%;
+      height: 3mm;
+      background: rgba(255,255,255,0.07);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 2mm;
+    }
+
+    .distribution-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #b38d49 0%, #e6c983 45%, #d0ab63 100%);
+      box-shadow: 0 0 20px rgba(208,171,99,0.14);
+    }
+
+    .material-spot {
+      display: grid;
+      grid-template-columns: 33mm 1fr;
+      gap: 4mm;
+      align-items: stretch;
+    }
+
+    .material-thumb {
+      min-height: 31mm;
+      border-radius: 3mm;
+      border: 1px solid rgba(208,171,99,0.16);
+      background:
+        radial-gradient(circle at 28% 24%, rgba(255,255,255,0.14), transparent 11%),
+        radial-gradient(circle at 62% 34%, rgba(255,255,255,0.10), transparent 9%),
+        linear-gradient(145deg, #0f1112 0%, #2d3238 14%, #131517 29%, #515860 45%, #1a1d20 61%, #111214 76%, #454b53 90%, #16191b 100%);
+      box-shadow: inset 0 0 24px rgba(255,255,255,0.02);
+    }
+
+    .material-title {
+      color: #f8f2e6;
+      font-size: 13px;
+      margin-bottom: 1.2mm;
+    }
+
+    .material-small {
+      color: #d0c6b5;
+      font-size: 10px;
+      line-height: 1.45;
+      margin-bottom: 1mm;
+    }
+
+    .ring-wrap {
       display: grid;
       grid-template-columns: 33mm 1fr;
       gap: 4mm;
       align-items: center;
-      min-height: 44mm;
     }
 
     .ring {
-      --p: 38;
       width: 30mm;
       height: 30mm;
       border-radius: 50%;
       background:
-        radial-gradient(circle at center, #0d0d11 49%, transparent 50%),
+        radial-gradient(circle at center, #0d0d10 50%, transparent 51%),
         conic-gradient(#d0ab63 calc(var(--p) * 1%), rgba(255,255,255,0.08) 0);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 22px rgba(0,0,0,0.35), inset 0 0 12px rgba(255,255,255,0.04);
       margin: 0 auto;
+      box-shadow:
+        0 12px 26px rgba(0,0,0,0.28),
+        inset 0 0 12px rgba(255,255,255,0.03);
     }
 
     .ring-inner {
       width: 18mm;
       height: 18mm;
       border-radius: 50%;
-      background: radial-gradient(circle at center, rgba(255,255,255,0.03), rgba(0,0,0,0.42));
+      background: linear-gradient(180deg, rgba(18,18,19,0.98), rgba(8,8,9,0.96));
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #f4ead6;
-      font-size: 15px;
+      color: #f7eedb;
+      font-size: 14px;
       font-weight: 600;
     }
 
     .ring-side-title {
       color: #d0ab63;
       font-size: 8px;
-      text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 1.4mm;
-    }
-
-    .ring-side-line {
-      color: #f4ead6;
-      font-size: 13px;
-      margin-bottom: 1.2mm;
-    }
-
-    .ring-side-small {
-      color: #cfc5b5;
-      font-size: 10px;
-      line-height: 1.45;
-    }
-
-    .distribution-line {
-      margin-top: 2.5mm;
-      width: 100%;
-      height: 2.8mm;
-      background: rgba(255,255,255,0.08);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .distribution-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #d0ab63, #f2d38f);
-      border-radius: 999px;
-    }
-
-    .material-spot {
-      display: grid;
-      grid-template-columns: 34mm 1fr;
-      gap: 4mm;
-      align-items: stretch;
-    }
-
-    .material-thumb {
-      border-radius: 3mm;
-      min-height: 30mm;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.42)),
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,0.10), transparent 18%),
-        linear-gradient(135deg, #303338 0%, #1b1e22 26%, #495057 48%, #16191d 72%, #2e3338 100%);
-      border: 1px solid rgba(208,171,99,0.18);
-      box-shadow: inset 0 0 24px rgba(255,255,255,0.03);
-    }
-
-    .material-title {
-      color: #f4ead6;
-      font-size: 13px;
+      text-transform: uppercase;
       margin-bottom: 1.5mm;
     }
 
-    .material-small {
-      color: #cdc2b3;
-      font-size: 10px;
-      line-height: 1.45;
+    .ring-side-line {
+      color: #f5eddf;
+      font-size: 12px;
+      margin-bottom: 1.5mm;
     }
 
-    .progress-ring-big-wrap {
+    .ring-side-small {
+      color: #d0c6b5;
+      font-size: 10px;
+      line-height: 1.5;
+      margin-bottom: 1mm;
+    }
+
+    .big-ring-area {
       display: grid;
-      grid-template-columns: 1fr 48mm;
+      grid-template-columns: 1fr 50mm;
       gap: 5mm;
       align-items: start;
     }
 
     .ring-big {
-      --p: 38;
-      width: 47mm;
-      height: 47mm;
+      width: 48mm;
+      height: 48mm;
       border-radius: 50%;
       background:
-        radial-gradient(circle at center, #0d0d11 43%, transparent 44%),
-        conic-gradient(#d0ab63 calc(var(--p) * 1%), rgba(255,255,255,0.08) 0);
+        radial-gradient(circle at center, #0d0d10 44%, transparent 45%),
+        conic-gradient(#d0ab63 calc(var(--p) * 1%), rgba(255,255,255,0.09) 0);
       display: flex;
       align-items: center;
       justify-content: center;
       margin-left: auto;
-      box-shadow: 0 10px 28px rgba(0,0,0,0.28), inset 0 0 14px rgba(255,255,255,0.04);
+      box-shadow:
+        0 16px 34px rgba(0,0,0,0.32),
+        inset 0 0 14px rgba(255,255,255,0.03);
     }
 
     .ring-big-inner {
       width: 24mm;
       height: 24mm;
       border-radius: 50%;
-      background: linear-gradient(180deg, rgba(18,18,20,0.96), rgba(10,10,12,0.94));
+      background: linear-gradient(180deg, rgba(18,18,19,0.98), rgba(8,8,9,0.98));
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: #f4ead6;
+      color: #f7eedb;
       text-align: center;
-      line-height: 1.05;
     }
 
     .ring-big-percent {
       font-size: 17px;
       font-weight: 700;
+      line-height: 1;
     }
 
     .ring-big-caption {
       font-size: 7px;
-      color: #d2c8b7;
+      color: #d8cebc;
       text-transform: uppercase;
       letter-spacing: 1px;
+      margin-top: 1mm;
     }
 
     .status-list {
@@ -740,7 +786,7 @@ function buildHtml(data: RenderPayload): string {
       width: 6mm;
       height: 6mm;
       border-radius: 50%;
-      border: 1px solid rgba(208,171,99,0.45);
+      border: 1px solid rgba(208,171,99,0.44);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -755,7 +801,6 @@ function buildHtml(data: RenderPayload): string {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 2mm;
-      align-items: start;
     }
 
     .timeline-step {
@@ -770,7 +815,7 @@ function buildHtml(data: RenderPayload): string {
       left: calc(50% + 4mm);
       width: calc(100% - 8mm);
       height: 1px;
-      background: rgba(208,171,99,0.35);
+      background: rgba(208,171,99,0.32);
     }
 
     .timeline-dot {
@@ -778,7 +823,7 @@ function buildHtml(data: RenderPayload): string {
       height: 7mm;
       margin: 0 auto 2mm auto;
       border-radius: 50%;
-      border: 1px solid rgba(208,171,99,0.45);
+      border: 1px solid rgba(208,171,99,0.44);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -791,66 +836,81 @@ function buildHtml(data: RenderPayload): string {
 
     .timeline-step.done .timeline-dot,
     .timeline-step.current .timeline-dot {
-      background: radial-gradient(circle at center, rgba(208,171,99,0.28), rgba(0,0,0,0.35));
-      box-shadow: 0 0 12px rgba(208,171,99,0.18);
+      background: radial-gradient(circle at center, rgba(208,171,99,0.25), rgba(0,0,0,0.36));
+      box-shadow: 0 0 14px rgba(208,171,99,0.15);
     }
 
     .timeline-label {
-      color: #d3c8b8;
+      color: #d4cab8;
       font-size: 9px;
       line-height: 1.35;
     }
 
     .material-panel-grid {
       display: grid;
-      grid-template-columns: 0.95fr 1.05fr;
+      grid-template-columns: 0.94fr 1.06fr;
       gap: 5mm;
     }
 
     .material-sheet {
       min-height: 64mm;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.14)),
-        radial-gradient(circle at 18% 24%, rgba(255,255,255,0.11), transparent 10%),
-        radial-gradient(circle at 60% 30%, rgba(255,255,255,0.08), transparent 9%),
-        linear-gradient(145deg, #1b1e20 0%, #3b4046 18%, #17191c 32%, #5f666d 44%, #202428 56%, #111315 73%, #434850 86%, #16191c 100%);
-      border: 1px solid rgba(208,171,99,0.22);
       border-radius: 3mm;
-      box-shadow: inset 0 0 28px rgba(255,255,255,0.02);
+      border: 1px solid rgba(208,171,99,0.18);
+      background:
+        radial-gradient(circle at 22% 20%, rgba(255,255,255,0.12), transparent 10%),
+        radial-gradient(circle at 60% 26%, rgba(255,255,255,0.08), transparent 8%),
+        linear-gradient(145deg, #111315 0%, #2e343a 14%, #15171a 30%, #59616a 46%, #202428 63%, #111214 80%, #484f58 92%, #181b1d 100%);
+      box-shadow: inset 0 0 26px rgba(255,255,255,0.02);
       margin-bottom: 4mm;
     }
 
     .badge-row {
       display: flex;
-      gap: 2mm;
       flex-wrap: wrap;
-      margin-top: 3mm;
+      gap: 2mm;
       margin-bottom: 3mm;
     }
 
     .badge {
-      border: 1px solid rgba(208,171,99,0.28);
+      border: 1px solid rgba(208,171,99,0.25);
       border-radius: 999px;
-      padding: 1.5mm 3mm;
+      padding: 1.3mm 3mm;
       font-size: 9px;
-      color: #e8dcc3;
-      background: rgba(255,255,255,0.03);
+      color: #e9dcc2;
+      background: rgba(255,255,255,0.025);
     }
 
     .photo-panel {
       min-height: 65mm;
       border-radius: 3mm;
-      border: 1px solid rgba(208,171,99,0.22);
+      border: 1px solid rgba(208,171,99,0.18);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.08)),
-        url("${referenceAsset || ""}");
-      background-size: cover;
-      background-position: center;
-      box-shadow: inset 0 0 34px rgba(0,0,0,0.25);
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05), transparent 18%),
+        linear-gradient(160deg, #131313 0%, #1e1e20 18%, #0d0d0e 40%, #252527 64%, #0b0b0c 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .photo-panel::before {
+      content: "";
+      position: absolute;
+      inset: 10%;
+      border: 1px solid rgba(208,171,99,0.12);
+      transform: rotate(-6deg);
+    }
+
+    .photo-panel::after {
+      content: "CAMASA";
+      position: absolute;
+      right: 8mm;
+      bottom: 7mm;
+      color: rgba(208,171,99,0.20);
+      font-size: 18px;
+      letter-spacing: 3px;
     }
 
     .panel-caption {
-      color: #d4cab7;
+      color: #d3c8b6;
       font-size: 10px;
       line-height: 1.55;
       margin-top: 3mm;
@@ -864,7 +924,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .list-card-title {
-      color: #f4ead6;
+      color: #f6efdf;
       font-size: 13px;
       margin-bottom: 3mm;
       text-transform: uppercase;
@@ -882,9 +942,9 @@ function buildHtml(data: RenderPayload): string {
 
     .list-card li {
       display: flex;
-      gap: 2.5mm;
+      gap: 2.4mm;
       align-items: flex-start;
-      color: #d6ccbb;
+      color: #d4c9b8;
       font-size: 10px;
       line-height: 1.45;
     }
@@ -894,21 +954,17 @@ function buildHtml(data: RenderPayload): string {
       width: 5mm;
       height: 5mm;
       border-radius: 50%;
-      border: 1px solid rgba(208,171,99,0.32);
+      border: 1px solid rgba(208,171,99,0.30);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 8px;
-      margin-top: 0.4mm;
+      margin-top: 0.35mm;
     }
 
-    .bullet.good { color: #d9c37f; }
-    .bullet.bad { color: #d58b82; }
-    .bullet.alert { color: #e0c47a; }
-
-    .alerts-box {
-      margin-top: 1mm;
-    }
+    .bullet.good { color: #dcc67c; }
+    .bullet.bad { color: #d98e85; }
+    .bullet.alert { color: #e1c57a; }
 
     .pillars-grid {
       display: grid;
@@ -921,8 +977,10 @@ function buildHtml(data: RenderPayload): string {
     .pillar-card {
       min-height: 36mm;
       border-radius: 3mm;
-      border: 1px solid rgba(208,171,99,0.20);
-      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(208,171,99,0.18);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
+        rgba(10,10,10,0.18);
       text-align: center;
       padding: 4mm 3mm;
       display: flex;
@@ -938,7 +996,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .pillar-title {
-      color: #f5efe1;
+      color: #f8f1e3;
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -946,43 +1004,42 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .pillar-subtitle {
-      color: #d4cab7;
+      color: #d3c9b7;
       font-size: 9px;
       line-height: 1.4;
     }
 
     .care-footer {
       margin-top: 4mm;
-      border: 1px solid rgba(208,171,99,0.20);
+      border: 1px solid rgba(208,171,99,0.18);
       border-radius: 3mm;
       padding: 4mm;
       color: #d6ccbb;
       font-size: 10px;
-      background: rgba(255,255,255,0.025);
+      background: rgba(255,255,255,0.02);
+      line-height: 1.6;
     }
 
-    .certificate-page {
-      background: ${pageTexture};
-      background-size: cover;
-      background-position: center;
-      display: flex;
-      align-items: stretch;
+    .certificate {
+      background:
+        radial-gradient(circle at 50% 8%, rgba(255,255,255,0.05), transparent 20%),
+        linear-gradient(180deg, #090909 0%, #111113 100%);
     }
 
     .certificate-shell {
       position: relative;
-      z-index: 2;
-      width: 100%;
-      min-height: calc(297mm - 28mm);
-      border: 1px solid rgba(208,171,99,0.22);
+      min-height: 258mm;
+      border: 1px solid rgba(208,171,99,0.20);
       padding: 10mm;
       background:
-        linear-gradient(180deg, rgba(8,8,10,0.72), rgba(8,8,10,0.85)),
-        radial-gradient(circle at top center, rgba(255,255,255,0.04), transparent 34%);
+        linear-gradient(180deg, rgba(255,255,255,0.018), transparent 18%),
+        linear-gradient(180deg, rgba(17,17,18,0.82), rgba(8,8,9,0.90));
+      box-shadow:
+        inset 0 0 80px rgba(0,0,0,0.30),
+        0 20px 44px rgba(0,0,0,0.18);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: inset 0 0 80px rgba(0,0,0,0.30);
     }
 
     .certificate-shell::before,
@@ -991,22 +1048,21 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       width: 18mm;
       height: 18mm;
-      border-color: rgba(208,171,99,0.42);
       pointer-events: none;
     }
 
     .certificate-shell::before {
       top: 6mm;
       left: 6mm;
-      border-top: 1px solid rgba(208,171,99,0.42);
-      border-left: 1px solid rgba(208,171,99,0.42);
+      border-top: 1px solid rgba(208,171,99,0.40);
+      border-left: 1px solid rgba(208,171,99,0.40);
     }
 
     .certificate-shell::after {
       right: 6mm;
       bottom: 6mm;
-      border-right: 1px solid rgba(208,171,99,0.42);
-      border-bottom: 1px solid rgba(208,171,99,0.42);
+      border-right: 1px solid rgba(208,171,99,0.40);
+      border-bottom: 1px solid rgba(208,171,99,0.40);
     }
 
     .certificate-top {
@@ -1016,39 +1072,44 @@ function buildHtml(data: RenderPayload): string {
       margin-bottom: 6mm;
     }
 
+    .certificate-top .brand-logo {
+      max-width: 108mm;
+      max-height: 28mm;
+    }
+
     .certificate-title {
       text-align: center;
-      color: #f5efe1;
+      color: #f7f0e3;
+      font-size: 18px;
       text-transform: uppercase;
       letter-spacing: 2px;
-      font-size: 17px;
-      margin-bottom: 2.5mm;
+      margin-bottom: 2mm;
     }
 
     .certificate-sub {
       text-align: center;
       color: #d0ab63;
       font-size: 10px;
-      letter-spacing: 1.7px;
+      letter-spacing: 1.6px;
       text-transform: uppercase;
-      margin-bottom: 2mm;
+      margin-bottom: 1.5mm;
     }
 
     .certificate-code {
       text-align: center;
-      color: #f5efe1;
-      font-size: 18px;
+      color: #f7efdd;
+      font-size: 19px;
       letter-spacing: 1px;
-      margin: 6mm 0 8mm 0;
+      margin: 7mm 0 8mm 0;
     }
 
     .certificate-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 4mm 8mm;
-      margin: 0 auto;
-      max-width: 128mm;
       width: 100%;
+      max-width: 128mm;
+      margin: 0 auto;
     }
 
     .certificate-field {
@@ -1059,13 +1120,13 @@ function buildHtml(data: RenderPayload): string {
     .field-label {
       color: #d0ab63;
       font-size: 8px;
-      text-transform: uppercase;
       letter-spacing: 1px;
+      text-transform: uppercase;
       margin-bottom: 1mm;
     }
 
     .field-value {
-      color: #f2ead8;
+      color: #f5ecdd;
       font-size: 12px;
     }
 
@@ -1076,10 +1137,20 @@ function buildHtml(data: RenderPayload): string {
       margin-bottom: 6mm;
     }
 
+    .footer-note {
+      text-align: center;
+      color: #cfc5b4;
+      font-size: 8.5px;
+      line-height: 1.55;
+      margin-top: 5mm;
+      max-width: 130mm;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     .certificate-bottom-logo {
       display: flex;
       justify-content: center;
-      margin-top: auto;
       padding-top: 8mm;
     }
 
@@ -1088,315 +1159,331 @@ function buildHtml(data: RenderPayload): string {
       max-height: 22mm;
       opacity: 0.96;
     }
-
-    .footer-note {
-      text-align: center;
-      color: #cfc5b5;
-      font-size: 8.5px;
-      line-height: 1.5;
-      margin-top: 5mm;
-      letter-spacing: 0.4px;
-    }
-
-    .smallcaps {
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
   </style>
 </head>
 <body>
   <section class="page cover">
-    <div class="cover-grid">
-      <div class="brand-box">
-        ${logoHtml}
-      </div>
-
-      <div class="gold-line"></div>
-
-      <div class="cover-title-wrap">
-        <div class="cover-title">CAMASA <strong>SIGNATURE BOOK</strong></div>
-        <div class="cover-subtitle">${documentType}<br/>Documento de entrega premium</div>
-
-        <div class="cover-project">
-          <div class="cover-project-name">${projectName}</div>
-          <div class="cover-client">${clientName}</div>
-          <div class="cover-location">${location}</div>
+    <div class="page-inner">
+      <div class="cover-main">
+        <div class="brand-row">
+          ${logoHtml}
         </div>
 
-        <div class="qr-box">
-          <div class="qr-shell">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(signatureCode)}" alt="QR Code" style="width:100%;height:100%;object-fit:cover;" />
+        <div class="gold-divider"></div>
+
+        <div class="cover-content">
+          <div class="cover-kicker">Camasa Process System</div>
+          <div class="cover-title">
+            Camasa
+            <strong>Signature Book</strong>
           </div>
-        </div>
+          <div class="cover-subtitle">
+            ${documentType}<br />
+            Documento de entrega premium
+          </div>
 
-        <div style="text-align:center;">
+          <div class="cover-project-name">${projectName}</div>
+          <div class="cover-meta">${clientName}</div>
+          <div class="cover-meta">${location}</div>
+
+          <div class="qr-box">
+            <div class="qr-shell">
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(signatureCode)}"
+                alt="QR Code"
+                style="width:100%;height:100%;object-fit:cover;"
+              />
+            </div>
+          </div>
+
           <div class="code-pill">${signatureCode}</div>
         </div>
-      </div>
 
-      <div class="cover-footer-date">
-        Gerado em ${issueDate}
+        <div class="cover-footer">
+          Gerado em ${issueDate}
+        </div>
       </div>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-kicker">Resumo Executivo</div>
-    <div class="section-title">${projectName}</div>
-    <div class="section-subtitle">
-      Documento de garantia, rastreabilidade e orientação de uso do projeto.
-      Esta composição segue o padrão premium do Camasa Process System.
-    </div>
+    <div class="page-inner">
+      <div class="section-kicker">Resumo Executivo</div>
+      <div class="section-title">${projectName}</div>
+      <div class="section-subtitle">
+        Documento de garantia, rastreabilidade e orientação de uso do projeto.
+        Composição premium para leitura institucional, técnica e visual.
+      </div>
 
-    <div class="grid-2">
-      <div>
-        <div class="card" style="margin-bottom:5mm;">
-          <div class="metric-grid">
-            <div class="metric-card">
-              <div class="metric-icon">♡</div>
-              <div class="metric-label">Materiais Certificados</div>
-              <div class="metric-value">1</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-icon">⌂</div>
-              <div class="metric-label">Categorias Técnicas</div>
-              <div class="metric-value">1</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-icon">▣</div>
-              <div class="metric-label">Blocos de Orientação</div>
-              <div class="metric-value">1</div>
-            </div>
-            <div class="metric-card">
-              <div class="metric-icon">◎</div>
-              <div class="metric-label">Registro Premium</div>
-              <div class="metric-value">1</div>
-            </div>
-          </div>
-
-          <div class="grid-2" style="grid-template-columns: 1.05fr 0.95fr; gap:4mm;">
-            <div class="card" style="margin:0; min-height:36mm;">
-              <div class="section-kicker" style="margin-bottom:1.4mm;">Distribuição por aplicação</div>
-              <div style="color:#f5efe1; font-size:12px;">${applicationLabel}</div>
-              <div class="distribution-line">
-                <div class="distribution-fill" style="width:${applicationPercent}%"></div>
+      <div class="grid-2">
+        <div>
+          <div class="card" style="margin-bottom:5mm;">
+            <div class="metric-grid">
+              <div class="metric-card">
+                <div class="metric-icon">♡</div>
+                <div class="metric-label">Materiais Certificados</div>
+                <div class="metric-value">1</div>
               </div>
-              <div style="text-align:right; color:#d6cbba; font-size:10px; margin-top:1.8mm;">${applicationPercent}%</div>
+              <div class="metric-card">
+                <div class="metric-icon">⌂</div>
+                <div class="metric-label">Categorias Técnicas</div>
+                <div class="metric-value">1</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-icon">▣</div>
+                <div class="metric-label">Blocos de Orientação</div>
+                <div class="metric-value">1</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-icon">◎</div>
+                <div class="metric-label">Registro Premium</div>
+                <div class="metric-value">1</div>
+              </div>
             </div>
 
-            <div class="card" style="margin:0; min-height:36mm;">
-              <div class="section-kicker" style="margin-bottom:1.4mm;">Materiais Utilizados</div>
-              <div class="material-spot">
-                <div class="material-thumb"></div>
-                <div>
-                  <div class="material-title">${material}</div>
-                  <div class="material-small">${materialCategory} • ${materialFinish}</div>
-                  <div class="material-small">${materialUsage}</div>
+            <div class="mini-two">
+              <div class="card" style="margin:0; min-height:36mm;">
+                <div class="section-kicker" style="margin-bottom:1.5mm;">Distribuição por aplicação</div>
+                <div style="color:#f7efdf; font-size:12px;">${applicationLabel}</div>
+                <div class="distribution-line">
+                  <div class="distribution-fill" style="width:${applicationPercent}%"></div>
+                </div>
+                <div style="text-align:right; color:#d4c8b6; font-size:10px; margin-top:1.8mm;">${applicationPercent}%</div>
+              </div>
+
+              <div class="card" style="margin:0; min-height:36mm;">
+                <div class="section-kicker" style="margin-bottom:1.5mm;">Material Utilizado</div>
+                <div class="material-spot">
+                  <div class="material-thumb"></div>
+                  <div>
+                    <div class="material-title">${material}</div>
+                    <div class="material-small">${materialCategory} • ${materialFinish}</div>
+                    <div class="material-small">${materialUsage}</div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div>
-        <div class="card">
-          <div class="mini-ring-panel">
-            <div class="ring" style="--p:${progressPercent}">
-              <div class="ring-inner">${progressPercent}%</div>
-            </div>
-            <div>
-              <div class="ring-side-title">Progresso Geral</div>
-              <div class="ring-side-line">${progressPercent}% concluído</div>
-              <div class="ring-side-small">Etapa atual: ${currentStage}</div>
-              <div class="ring-side-small">Emissão do documento: ${issueDate}</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:5mm;">
-          <div class="section-kicker">Informações centrais</div>
-          <div class="ring-side-small">Cliente: ${clientName}</div>
-          <div class="ring-side-small">Projeto: ${projectName}</div>
-          <div class="ring-side-small">Local: ${location}</div>
-          <div class="ring-side-small">Código: ${signatureCode}</div>
-          <div class="ring-side-small">Material principal: ${material}</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="page">
-    <div class="section-kicker">Etapas da Obra</div>
-    <div class="section-title">Acompanhamento e rastreabilidade</div>
-    <div class="section-subtitle">
-      Visão executiva das etapas principais do projeto, percentual realizado e previsão de entrega.
-    </div>
-
-    <div class="card">
-      <div class="progress-ring-big-wrap">
         <div>
-          <div class="status-list">
-            <div class="status-row"><span class="status-icon">✓</span><span>Etapas concluídas <strong style="margin-left:3px;">${completedSteps}</strong></span></div>
-            <div class="status-row"><span class="status-icon">◔</span><span>Etapa em andamento <strong style="margin-left:3px;">${currentStage}</strong></span></div>
-            <div class="status-row"><span class="status-icon"></span><span>Etapas restantes <strong style="margin-left:3px;">${remainingSteps}</strong></span></div>
-            <div class="status-row"><span class="status-icon">⌛</span><span>Previsão de entrega <strong style="margin-left:3px;">${forecastDate}</strong></span></div>
+          <div class="card">
+            <div class="ring-wrap">
+              <div class="ring" style="--p:${progressPercent}">
+                <div class="ring-inner">${progressPercent}%</div>
+              </div>
+              <div>
+                <div class="ring-side-title">Progresso Geral</div>
+                <div class="ring-side-line">${progressPercent}% concluído</div>
+                <div class="ring-side-small">Etapa atual: ${currentStage}</div>
+                <div class="ring-side-small">Documento emitido em ${issueDate}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top:5mm;">
+            <div class="section-kicker">Informações centrais</div>
+            <div class="ring-side-small">Cliente: ${clientName}</div>
+            <div class="ring-side-small">Projeto: ${projectName}</div>
+            <div class="ring-side-small">Local: ${location}</div>
+            <div class="ring-side-small">Código: ${signatureCode}</div>
+            <div class="ring-side-small">Material principal: ${material}</div>
           </div>
         </div>
-
-        <div class="ring-big" style="--p:${progressPercent}">
-          <div class="ring-big-inner">
-            <div class="ring-big-percent">${progressPercent}%</div>
-            <div class="ring-big-caption">Concluído</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="timeline">
-        ${buildSteps(progressPercent)}
       </div>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-kicker">Painel de Materiais</div>
-    <div class="section-title">${material}</div>
-    <div class="section-subtitle">
-      Referência cadastrada, categoria técnica, acabamento e uso principal da peça aplicada no projeto.
-    </div>
-
-    <div class="material-panel-grid">
-      <div class="card">
-        <div class="material-sheet"></div>
-        <div class="badge-row">
-          <span class="badge">${materialCategory}</span>
-          <span class="badge">${materialFinish}</span>
-          <span class="badge">${materialUsage}</span>
-        </div>
-        <div class="material-title">${material}</div>
-        <div class="material-small">Aplicação: ${projectName}</div>
-        <div class="material-small">Local: ${location}</div>
-        <div class="material-small">Classificação: material certificado</div>
+    <div class="page-inner">
+      <div class="section-kicker">Etapas da Obra</div>
+      <div class="section-title">Acompanhamento e rastreabilidade</div>
+      <div class="section-subtitle">
+        Visão executiva das etapas principais do projeto, progresso realizado
+        e previsão de entrega.
       </div>
 
       <div class="card">
-        <div class="photo-panel"></div>
-        <div class="panel-caption">
-          Referencial visual do ambiente, registro premium do projeto e associação direta com a peça especificada.
+        <div class="big-ring-area">
+          <div>
+            <div class="status-list">
+              <div class="status-row"><span class="status-icon">✓</span><span>Etapas concluídas <strong style="margin-left:3px;">${completedSteps}</strong></span></div>
+              <div class="status-row"><span class="status-icon">◔</span><span>Etapa em andamento <strong style="margin-left:3px;">${currentStage}</strong></span></div>
+              <div class="status-row"><span class="status-icon"></span><span>Etapas restantes <strong style="margin-left:3px;">${remainingSteps}</strong></span></div>
+              <div class="status-row"><span class="status-icon">⌛</span><span>Previsão de entrega <strong style="margin-left:3px;">${forecastDate}</strong></span></div>
+            </div>
+          </div>
+
+          <div class="ring-big" style="--p:${progressPercent}">
+            <div class="ring-big-inner">
+              <div class="ring-big-percent">${progressPercent}%</div>
+              <div class="ring-big-caption">Concluído</div>
+            </div>
+          </div>
         </div>
-        <div class="panel-caption">
-          Uso previsto: ${materialCare}
+
+        <div class="timeline">
+          ${buildSteps(progressPercent)}
         </div>
       </div>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-kicker">Manual de Uso e Conservação</div>
-    <div class="section-title">Cuidados essenciais</div>
-    <div class="section-subtitle">
-      Orientações práticas para preservar a estética, integridade e desempenho da superfície ao longo do tempo.
-    </div>
-
-    <div class="list-grid">
-      <div class="card list-card">
-        <div class="list-card-title">O que fazer</div>
-        <ul>
-          ${buildList(doList, "good")}
-        </ul>
+    <div class="page-inner">
+      <div class="section-kicker">Painel de Materiais</div>
+      <div class="section-title">${material}</div>
+      <div class="section-subtitle">
+        Referência cadastrada, categoria técnica, acabamento e aplicação principal
+        da peça especificada no projeto.
       </div>
 
-      <div class="card list-card">
-        <div class="list-card-title">O que evitar</div>
-        <ul>
-          ${buildList(dontList, "bad")}
-        </ul>
-      </div>
-    </div>
+      <div class="material-panel-grid">
+        <div class="card">
+          <div class="material-sheet"></div>
+          <div class="badge-row">
+            <span class="badge">${materialCategory}</span>
+            <span class="badge">${materialFinish}</span>
+            <span class="badge">${materialUsage}</span>
+          </div>
+          <div class="material-title">${material}</div>
+          <div class="material-small">Aplicação: ${projectName}</div>
+          <div class="material-small">Local: ${location}</div>
+          <div class="material-small">Classificação: material certificado</div>
+        </div>
 
-    <div class="card alerts-box list-card">
-      <div class="list-card-title">Alertas importantes</div>
-      <ul>
-        ${buildList(alerts, "alert")}
-      </ul>
+        <div class="card">
+          <div class="photo-panel"></div>
+          <div class="panel-caption">
+            Registro visual institucional do projeto e associação do material
+            com a linguagem premium do documento.
+          </div>
+          <div class="panel-caption">
+            Uso previsto: ${materialCareText}
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
   <section class="page">
-    <div class="section-kicker">Camasa Care</div>
-    <div class="section-title">Preserve a beleza</div>
-    <div class="section-subtitle">
-      Projeto de conservação contínua, orientação preventiva e manutenção visual coerente com materiais nobres.
-    </div>
-
-    <div class="card">
-      <div class="pillars-grid">
-        ${buildCarePillars(carePillars)}
+    <div class="page-inner">
+      <div class="section-kicker">Manual de Uso e Conservação</div>
+      <div class="section-title">Cuidados essenciais</div>
+      <div class="section-subtitle">
+        Orientações práticas para preservar estética, integridade e desempenho
+        da superfície ao longo do tempo.
       </div>
 
-      <div class="care-footer">
-        A manutenção Camasa Care foi pensada para prolongar a estética da obra,
-        reduzir desgaste prematuro e manter coerência entre uso, cuidado e apresentação.
+      <div class="list-grid">
+        <div class="card list-card">
+          <div class="list-card-title">O que fazer</div>
+          <ul>
+            ${buildList(doList, "good")}
+          </ul>
+        </div>
+
+        <div class="card list-card">
+          <div class="list-card-title">O que evitar</div>
+          <ul>
+            ${buildList(dontList, "bad")}
+          </ul>
+        </div>
+      </div>
+
+      <div class="card list-card">
+        <div class="list-card-title">Alertas importantes</div>
+        <ul>
+          ${buildList(alerts, "alert")}
+        </ul>
       </div>
     </div>
   </section>
 
-  <section class="page certificate-page">
-    <div class="certificate-shell">
-      <div>
-        <div class="certificate-top">
+  <section class="page">
+    <div class="page-inner">
+      <div class="section-kicker">Camasa Care</div>
+      <div class="section-title">Preserve a beleza</div>
+      <div class="section-subtitle">
+        Conservação contínua, orientação preventiva e manutenção coerente com
+        materiais nobres e projetos de alto padrão.
+      </div>
+
+      <div class="card">
+        <div class="pillars-grid">
+          ${buildCarePillars(carePillars)}
+        </div>
+
+        <div class="care-footer">
+          A manutenção Camasa Care foi pensada para prolongar a estética da obra,
+          reduzir desgaste prematuro e manter coerência entre uso, cuidado e apresentação.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page certificate">
+    <div class="page-inner">
+      <div class="certificate-shell">
+        <div>
+          <div class="certificate-top">
+            ${logoHtml}
+          </div>
+
+          <div class="gold-divider" style="margin-top:0; margin-bottom:7mm;"></div>
+
+          <div class="certificate-title">Certificado de Autenticidade</div>
+          <div class="certificate-sub">${material}</div>
+          <div class="certificate-sub">Projeto rastreado pelo Camasa Process System</div>
+
+          <div class="certificate-code">${signatureCode}</div>
+
+          <div class="certificate-grid">
+            <div class="certificate-field">
+              <div class="field-label">Projeto</div>
+              <div class="field-value">${projectName}</div>
+            </div>
+            <div class="certificate-field">
+              <div class="field-label">Cliente</div>
+              <div class="field-value">${clientName}</div>
+            </div>
+            <div class="certificate-field">
+              <div class="field-label">Família</div>
+              <div class="field-value">${certificateFamily}</div>
+            </div>
+            <div class="certificate-field">
+              <div class="field-label">Origem</div>
+              <div class="field-value">${certificateOrigin}</div>
+            </div>
+            <div class="certificate-field">
+              <div class="field-label">Lote / Batch</div>
+              <div class="field-value">${certificateBatch}</div>
+            </div>
+            <div class="certificate-field">
+              <div class="field-label">Emissão</div>
+              <div class="field-value">${issueDate}</div>
+            </div>
+          </div>
+
+          <div class="certificate-qr">
+            <div class="qr-shell" style="width:28mm;height:28mm;">
+              <img
+                src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(signatureCode)}"
+                alt="QR Code"
+                style="width:100%;height:100%;object-fit:cover;"
+              />
+            </div>
+          </div>
+
+          <div class="footer-note">
+            Este documento integra rastreabilidade visual, técnica e institucional,
+            vinculando material, aplicação, cuidado e identidade documental em padrão premium.
+          </div>
+        </div>
+
+        <div class="certificate-bottom-logo">
           ${logoHtml}
         </div>
-
-        <div class="gold-line" style="margin-top:0; margin-bottom:7mm;"></div>
-
-        <div class="certificate-title">Certificado de Autenticidade</div>
-        <div class="certificate-sub">${material}</div>
-        <div class="certificate-sub">Projeto rastreado pelo Camasa Process System</div>
-
-        <div class="certificate-code">${signatureCode}</div>
-
-        <div class="certificate-grid">
-          <div class="certificate-field">
-            <div class="field-label">Projeto</div>
-            <div class="field-value">${projectName}</div>
-          </div>
-          <div class="certificate-field">
-            <div class="field-label">Cliente</div>
-            <div class="field-value">${clientName}</div>
-          </div>
-          <div class="certificate-field">
-            <div class="field-label">Família</div>
-            <div class="field-value">${certificateFamily}</div>
-          </div>
-          <div class="certificate-field">
-            <div class="field-label">Origem</div>
-            <div class="field-value">${certificateOrigin}</div>
-          </div>
-          <div class="certificate-field">
-            <div class="field-label">Lote / Batch</div>
-            <div class="field-value">${certificateBatch}</div>
-          </div>
-          <div class="certificate-field">
-            <div class="field-label">Emissão</div>
-            <div class="field-value">${issueDate}</div>
-          </div>
-        </div>
-
-        <div class="certificate-qr">
-          <div class="qr-shell" style="width:28mm;height:28mm;">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(signatureCode)}" alt="QR Code" style="width:100%;height:100%;object-fit:cover;" />
-          </div>
-        </div>
-
-        <div class="footer-note">
-          Este documento integra a rastreabilidade visual, técnica e institucional do projeto,
-          vinculando material, aplicação, cuidado e identidade documental em padrão premium.
-        </div>
-      </div>
-
-      <div class="certificate-bottom-logo">
-        ${logoHtml}
       </div>
     </div>
   </section>
@@ -1481,6 +1568,7 @@ const server = http.createServer(async (req, res) => {
         materialCategory: "Granito",
         materialFinish: "Polido",
         materialUsage: "Bancada em L",
+        materialCareText: "Uso interno • vedado • limpeza controlada",
         certificateFamily: "Granito",
         certificateOrigin: "Brasil",
         certificateBatch: "AM",
