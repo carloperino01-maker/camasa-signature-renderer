@@ -234,7 +234,7 @@ function buildHtml(data: RenderPayload): string {
     html, body {
       margin: 0;
       padding: 0;
-      background: #121214;
+      background: #151517;
       color: #f3e8d1;
       font-family: "Helvetica Neue", Arial, sans-serif;
     }
@@ -242,7 +242,7 @@ function buildHtml(data: RenderPayload): string {
     body {
       background:
         radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 24%),
-        linear-gradient(180deg, #151517 0%, #1a1a1d 100%);
+        linear-gradient(180deg, #18181b 0%, #202025 100%);
     }
 
     .page {
@@ -253,8 +253,8 @@ function buildHtml(data: RenderPayload): string {
       overflow: hidden;
       page-break-after: always;
       background:
-        radial-gradient(circle at 48% 10%, rgba(255,255,255,0.025), transparent 18%),
-        linear-gradient(180deg, #17171a 0%, #202025 100%);
+        radial-gradient(circle at 48% 10%, rgba(255,255,255,0.02), transparent 18%),
+        linear-gradient(180deg, #1a1a1d 0%, #24242a 100%);
     }
 
     .page:last-child {
@@ -266,65 +266,64 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 12% 18%, rgba(214,178,107,0.10), transparent 16%),
-        radial-gradient(circle at 82% 14%, rgba(214,178,107,0.09), transparent 14%),
-        radial-gradient(circle at 84% 88%, rgba(214,178,107,0.10), transparent 18%),
-        radial-gradient(circle at 18% 84%, rgba(255,255,255,0.03), transparent 16%),
+        radial-gradient(circle at 12% 18%, rgba(214,178,107,0.12), transparent 16%),
+        radial-gradient(circle at 82% 14%, rgba(214,178,107,0.10), transparent 15%),
+        radial-gradient(circle at 84% 88%, rgba(214,178,107,0.12), transparent 18%),
         linear-gradient(118deg,
           transparent 0%,
-          rgba(255,255,255,0.018) 8%,
+          rgba(255,255,255,0.02) 8%,
           transparent 14%,
           transparent 20%,
-          rgba(214,178,107,0.07) 26%,
+          rgba(214,178,107,0.08) 26%,
           transparent 33%,
           transparent 43%,
-          rgba(255,255,255,0.018) 49%,
+          rgba(255,255,255,0.02) 49%,
           transparent 56%,
           transparent 68%,
-          rgba(214,178,107,0.06) 74%,
+          rgba(214,178,107,0.07) 74%,
           transparent 80%,
           transparent 100%
         ),
         linear-gradient(24deg,
           transparent 0%,
           transparent 14%,
-          rgba(255,255,255,0.015) 19%,
+          rgba(255,255,255,0.018) 19%,
           transparent 25%,
           transparent 38%,
-          rgba(214,178,107,0.06) 44%,
+          rgba(214,178,107,0.08) 44%,
           transparent 50%,
           transparent 63%,
           rgba(255,255,255,0.016) 68%,
           transparent 73%,
           transparent 88%,
-          rgba(214,178,107,0.04) 93%,
+          rgba(214,178,107,0.05) 93%,
           transparent 100%
         ),
         linear-gradient(144deg,
-          rgba(255,255,255,0.014) 0%,
+          rgba(255,255,255,0.015) 0%,
           transparent 5%,
           transparent 17%,
-          rgba(214,178,107,0.038) 21%,
+          rgba(214,178,107,0.045) 21%,
           transparent 28%,
           transparent 39%,
-          rgba(255,255,255,0.014) 44%,
+          rgba(255,255,255,0.015) 44%,
           transparent 51%,
           transparent 67%,
-          rgba(214,178,107,0.04) 72%,
+          rgba(214,178,107,0.045) 72%,
           transparent 79%,
           transparent 100%
         ),
         repeating-linear-gradient(
           104deg,
-          rgba(255,255,255,0.010) 0px,
-          rgba(255,255,255,0.010) 1px,
+          rgba(255,255,255,0.012) 0px,
+          rgba(255,255,255,0.012) 1px,
           transparent 1px,
           transparent 120px
         ),
         repeating-linear-gradient(
           77deg,
-          rgba(214,178,107,0.020) 0px,
-          rgba(214,178,107,0.020) 1px,
+          rgba(214,178,107,0.022) 0px,
+          rgba(214,178,107,0.022) 1px,
           transparent 1px,
           transparent 150px
         );
@@ -337,10 +336,10 @@ function buildHtml(data: RenderPayload): string {
       content: "";
       position: absolute;
       inset: 7mm;
-      border: 1px solid rgba(214,178,107,0.10);
+      border: 1px solid rgba(214,178,107,0.09);
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.010),
-        inset 0 0 90px rgba(0,0,0,0.16);
+        inset 0 0 0 1px rgba(255,255,255,0.008),
+        inset 0 0 90px rgba(0,0,0,0.14);
       pointer-events: none;
     }
 
@@ -361,13 +360,13 @@ function buildHtml(data: RenderPayload): string {
     .cover-main {
       min-height: 258mm;
       position: relative;
-      border: 1px solid rgba(214,178,107,0.14);
+      border: 1px solid rgba(214,178,107,0.12);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.014), transparent 18%, transparent 82%, rgba(255,255,255,0.008)),
-        linear-gradient(180deg, rgba(32,32,36,0.72), rgba(18,18,21,0.82));
+        linear-gradient(180deg, rgba(255,255,255,0.012), transparent 18%, transparent 82%, rgba(255,255,255,0.007)),
+        linear-gradient(180deg, rgba(36,36,40,0.70), rgba(20,20,23,0.80));
       box-shadow:
-        inset 0 0 90px rgba(0,0,0,0.26),
-        0 18px 44px rgba(0,0,0,0.14);
+        inset 0 0 90px rgba(0,0,0,0.24),
+        0 18px 44px rgba(0,0,0,0.12);
       padding: 13mm 12mm 10mm 12mm;
       overflow: hidden;
     }
@@ -385,11 +384,11 @@ function buildHtml(data: RenderPayload): string {
     .cover-main::after {
       content: "";
       position: absolute;
-      left: 11mm;
-      top: 11mm;
-      right: 11mm;
-      bottom: 11mm;
-      border: 1px solid rgba(214,178,107,0.07);
+      left: 12mm;
+      top: 12mm;
+      right: 12mm;
+      bottom: 12mm;
+      border: 1px solid rgba(214,178,107,0.06);
       pointer-events: none;
     }
 
@@ -397,13 +396,13 @@ function buildHtml(data: RenderPayload): string {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      min-height: 38mm;
+      min-height: 40mm;
       margin-bottom: 5mm;
     }
 
     .brand-logo {
-      max-width: 150mm;
-      max-height: 38mm;
+      max-width: 154mm;
+      max-height: 39mm;
       object-fit: contain;
       filter:
         drop-shadow(0 10px 24px rgba(0,0,0,0.34))
@@ -560,7 +559,7 @@ function buildHtml(data: RenderPayload): string {
 
     .grid-2 {
       display: grid;
-      grid-template-columns: 1.28fr 0.72fr;
+      grid-template-columns: 1.26fr 0.74fr;
       gap: 5mm;
     }
 
@@ -569,8 +568,8 @@ function buildHtml(data: RenderPayload): string {
       overflow: hidden;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.02), transparent 20%),
-        linear-gradient(180deg, rgba(27,27,30,0.66), rgba(16,16,18,0.76));
-      border: 1px solid rgba(214,178,107,0.13);
+        linear-gradient(180deg, rgba(30,30,34,0.66), rgba(18,18,21,0.76));
+      border: 1px solid rgba(214,178,107,0.12);
       border-radius: 4mm;
       padding: 5mm;
       box-shadow:
@@ -600,7 +599,7 @@ function buildHtml(data: RenderPayload): string {
       padding: 3mm 2.5mm;
       text-align: center;
       border-radius: 3.2mm;
-      border: 1px solid rgba(214,178,107,0.12);
+      border: 1px solid rgba(214,178,107,0.11);
       background:
         linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.006)),
         rgba(8,8,9,0.14);
@@ -633,7 +632,7 @@ function buildHtml(data: RenderPayload): string {
 
     .mini-two {
       display: grid;
-      grid-template-columns: 0.95fr 1.05fr;
+      grid-template-columns: 0.88fr 1.12fr;
       gap: 4mm;
     }
 
@@ -652,15 +651,22 @@ function buildHtml(data: RenderPayload): string {
       box-shadow: 0 0 16px rgba(214,178,107,0.10);
     }
 
+    .material-used-card {
+      min-height: 44mm;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
     .material-spot {
       display: grid;
-      grid-template-columns: 34mm 1fr;
+      grid-template-columns: 36mm minmax(0, 1fr);
       gap: 4mm;
       align-items: start;
     }
 
     .material-thumb {
-      min-height: 33mm;
+      min-height: 34mm;
       border-radius: 3mm;
       border: 1px solid rgba(214,178,107,0.14);
       background:
@@ -673,6 +679,7 @@ function buildHtml(data: RenderPayload): string {
     .material-info {
       min-width: 0;
       display: block;
+      overflow: hidden;
     }
 
     .material-title {
@@ -680,10 +687,9 @@ function buildHtml(data: RenderPayload): string {
       font-size: 13px;
       line-height: 1.35;
       margin-bottom: 1.6mm;
-      word-break: normal;
-      overflow-wrap: normal;
       white-space: normal;
-      max-width: 100%;
+      word-break: normal;
+      overflow-wrap: break-word;
     }
 
     .material-small {
@@ -1024,6 +1030,31 @@ function buildHtml(data: RenderPayload): string {
     .bullet.bad { color: #d98e85; }
     .bullet.alert { color: #e1c57a; }
 
+    .care-hero {
+      margin-top: 4mm;
+      margin-bottom: 5mm;
+      border: 1px solid rgba(214,178,107,0.14);
+      border-radius: 3mm;
+      padding: 5mm;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)),
+        rgba(10,10,10,0.10);
+    }
+
+    .care-hero-title {
+      color: #f8f1e3;
+      font-size: 15px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 2mm;
+    }
+
+    .care-hero-text {
+      color: #d6ccbb;
+      font-size: 10px;
+      line-height: 1.65;
+    }
+
     .pillars-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1033,7 +1064,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .pillar-card {
-      min-height: 36mm;
+      min-height: 40mm;
       border-radius: 3mm;
       border: 1px solid rgba(214,178,107,0.14);
       background:
@@ -1305,7 +1336,7 @@ function buildHtml(data: RenderPayload): string {
                 <div style="text-align:right; color:#d4c8b6; font-size:10px; margin-top:1.8mm;">${applicationPercent}%</div>
               </div>
 
-              <div class="card" style="margin:0; min-height:44mm;">
+              <div class="card material-used-card" style="margin:0;">
                 <div class="section-kicker">MATERIAIS UTILIZADOS</div>
                 <div class="material-spot">
                   <div class="material-thumb"></div>
@@ -1313,6 +1344,7 @@ function buildHtml(data: RenderPayload): string {
                     <div class="material-title">${material}</div>
                     <div class="material-small">${materialCategory} • ${materialFinish}</div>
                     <div class="material-small">${materialUsage}</div>
+                    <div class="material-small">${materialCareText}</div>
                   </div>
                 </div>
               </div>
@@ -1461,6 +1493,15 @@ function buildHtml(data: RenderPayload): string {
         nobres e obras de alto padrão.
       </div>
 
+      <div class="care-hero">
+        <div class="care-hero-title">Programa de cuidado contínuo</div>
+        <div class="care-hero-text">
+          O Camasa Care não substitui o uso correto; ele amplia a proteção estética da obra no longo prazo.
+          Seu papel é orientar, preservar leitura visual, reduzir desgaste prematuro e reforçar um padrão
+          superior de pós-venda para superfícies nobres.
+        </div>
+      </div>
+
       <div class="card">
         <div class="pillars-grid">
           ${buildCarePillars(carePillars)}
@@ -1468,7 +1509,7 @@ function buildHtml(data: RenderPayload): string {
 
         <div class="care-footer">
           A manutenção Camasa Care foi pensada para prolongar a estética da obra, reduzir desgaste
-          prematuro e manter coerência entre uso, cuidado e apresentação.
+          prematuro e manter coerência entre uso, cuidado, revisão e apresentação.
         </div>
       </div>
     </div>
@@ -1543,149 +1584,3 @@ function buildHtml(data: RenderPayload): string {
 </html>
   `;
 }
-
-function parseBody(rawBody: string): RenderPayload {
-  if (!rawBody || !rawBody.trim()) return {};
-  try {
-    return JSON.parse(rawBody) as RenderPayload;
-  } catch {
-    return {};
-  }
-}
-
-async function generatePdfBuffer(payload: RenderPayload): Promise<Buffer> {
-  const browser = await chromium.launch({
-    headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
-  });
-
-  try {
-    const page = await browser.newPage({
-      viewport: { width: 1600, height: 2200 },
-      deviceScaleFactor: 1.5,
-    });
-
-    const html = buildHtml(payload);
-
-    await page.setContent(html, {
-      waitUntil: "networkidle",
-      timeout: 120000,
-    });
-
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: {
-        top: "0",
-        right: "0",
-        bottom: "0",
-        left: "0",
-      },
-      preferCSSPageSize: true,
-    });
-
-    return Buffer.from(pdf);
-  } finally {
-    await browser.close();
-  }
-}
-
-const server = http.createServer(async (req, res) => {
-  try {
-    const method = req.method || "GET";
-    const url = req.url || "/";
-
-    if (method === "GET" && url === "/health") {
-      res.writeHead(200, { "Content-Type": "application/json" });
-      res.end(JSON.stringify({ ok: true }));
-      return;
-    }
-
-    if (method === "GET" && url === "/render-test") {
-      const pdf = await generatePdfBuffer({
-        signatureCode: "CSB-20260331-2344-XBGE",
-        documentType: "DOCUMENTO DE ENTREGA PREMIUM",
-        clientName: "Ana",
-        projectName: "Bancada em L",
-        material: "Granito Verde Ubatuba",
-        location: "São Paulo, SP",
-        issueDate: "2026-03-31",
-        progressPercent: 38,
-        completedSteps: 6,
-        currentStage: "Instalação",
-        remainingSteps: 8,
-        forecastDate: "2026-04-09",
-        applicationLabel: "Bancada em L",
-        applicationPercent: 100,
-        materialCategory: "Granito",
-        materialFinish: "Polido",
-        materialUsage: "Bancada em L",
-        materialCareText: "Uso interno • vedado • limpeza controlada",
-        certificateFamily: "Granito",
-        certificateOrigin: "Brasil",
-        certificateBatch: "AM",
-      });
-
-      res.writeHead(200, {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": 'inline; filename="camasa-signature-book-test.pdf"',
-        "Access-Control-Allow-Origin": "*",
-      });
-      res.end(pdf);
-      return;
-    }
-
-    if (method === "POST" && url === "/render") {
-      const chunks: Buffer[] = [];
-
-      req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-      req.on("end", async () => {
-        try {
-          const rawBody = Buffer.concat(chunks).toString("utf-8");
-          const payload = parseBody(rawBody);
-          const pdf = await generatePdfBuffer(payload);
-
-          res.writeHead(200, {
-            "Content-Type": "application/pdf",
-            "Content-Disposition": `inline; filename="${payload.projectId || "signature-book"}.pdf"`,
-            "Access-Control-Allow-Origin": "*",
-          });
-          res.end(pdf);
-        } catch (error) {
-          res.writeHead(500, {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-          });
-          res.end(
-            JSON.stringify({
-              error: "Erro ao gerar PDF.",
-              details: error instanceof Error ? error.message : String(error),
-            }),
-          );
-        }
-      });
-      return;
-    }
-
-    res.writeHead(404, {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    });
-    res.end(JSON.stringify({ error: "Rota não encontrada." }));
-  } catch (error) {
-    res.writeHead(500, {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-    });
-    res.end(
-      JSON.stringify({
-        error: "Erro interno no renderer.",
-        details: error instanceof Error ? error.message : String(error),
-      }),
-    );
-  }
-});
-
-server.listen(port, "0.0.0.0", () => {
-  console.log(`Camasa Signature Renderer running on port ${port}`);
-});
