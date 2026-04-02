@@ -252,8 +252,7 @@ function buildHtml(data: RenderPayload): string {
       position: relative;
       overflow: hidden;
       page-break-after: always;
-      background:
-        linear-gradient(180deg, #1a1a1d 0%, #26262c 100%);
+      background: linear-gradient(180deg, #1a1a1d 0%, #26262c 100%);
     }
 
     .page:last-child {
