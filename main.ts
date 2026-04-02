@@ -559,7 +559,7 @@ function buildHtml(data: RenderPayload): string {
 
     .grid-2 {
       display: grid;
-      grid-template-columns: 1.26fr 0.74fr;
+      grid-template-columns: 1.22fr 0.78fr;
       gap: 5mm;
     }
 
@@ -630,9 +630,9 @@ function buildHtml(data: RenderPayload): string {
       margin-top: 1.5mm;
     }
 
-    .mini-two {
+    .executive-lower-grid {
       display: grid;
-      grid-template-columns: 0.88fr 1.12fr;
+      grid-template-columns: 0.82fr 1.18fr;
       gap: 4mm;
     }
 
@@ -651,22 +651,15 @@ function buildHtml(data: RenderPayload): string {
       box-shadow: 0 0 16px rgba(214,178,107,0.10);
     }
 
-    .material-used-card {
-      min-height: 44mm;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-    }
-
-    .material-spot {
+    .executive-material-row {
       display: grid;
-      grid-template-columns: 36mm minmax(0, 1fr);
+      grid-template-columns: 38mm minmax(0, 1fr);
       gap: 4mm;
       align-items: start;
     }
 
-    .material-thumb {
-      min-height: 34mm;
+    .executive-material-thumb {
+      min-height: 38mm;
       border-radius: 3mm;
       border: 1px solid rgba(214,178,107,0.14);
       background:
@@ -676,23 +669,21 @@ function buildHtml(data: RenderPayload): string {
       box-shadow: inset 0 0 22px rgba(255,255,255,0.015);
     }
 
-    .material-info {
+    .executive-material-content {
       min-width: 0;
-      display: block;
-      overflow: hidden;
     }
 
-    .material-title {
+    .executive-material-name {
       color: #f8f2e6;
-      font-size: 13px;
-      line-height: 1.35;
-      margin-bottom: 1.6mm;
+      font-size: 15px;
+      line-height: 1.28;
+      margin-bottom: 2mm;
       white-space: normal;
-      word-break: normal;
+      word-break: keep-all;
       overflow-wrap: break-word;
     }
 
-    .material-small {
+    .executive-material-meta {
       color: #d0c6b5;
       font-size: 10px;
       line-height: 1.45;
@@ -916,6 +907,23 @@ function buildHtml(data: RenderPayload): string {
       font-size: 9px;
       color: #e9dcc2;
       background: rgba(255,255,255,0.018);
+    }
+
+    .material-title {
+      color: #f8f2e6;
+      font-size: 13px;
+      line-height: 1.35;
+      margin-bottom: 1.6mm;
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .material-small {
+      color: #d0c6b5;
+      font-size: 10px;
+      line-height: 1.45;
+      margin-bottom: 1mm;
     }
 
     .photo-panel {
@@ -1272,14 +1280,14 @@ function buildHtml(data: RenderPayload): string {
           <div class="cover-meta">${location}</div>
 
           <div class="qr-box">
-  <div class="qr-shell" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f3f3f3);">
-    <div style="width:24mm;height:24mm;border:2px solid #111;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1.2mm;padding:1.6mm;">
-      <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
-      <div style="background:#111;"></div><div style="background:#fff;border:1px solid #111;"></div><div style="background:#111;"></div>
-      <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
-    </div>
-  </div>
-</div>
+            <div class="qr-shell" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f3f3f3);">
+              <div style="width:24mm;height:24mm;border:2px solid #111;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1.2mm;padding:1.6mm;">
+                <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
+                <div style="background:#111;"></div><div style="background:#fff;border:1px solid #111;"></div><div style="background:#111;"></div>
+                <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
+              </div>
+            </div>
+          </div>
 
           <div class="code-pill">${signatureCode}</div>
         </div>
@@ -1326,25 +1334,25 @@ function buildHtml(data: RenderPayload): string {
               </div>
             </div>
 
-            <div class="mini-two">
-              <div class="card" style="margin:0; min-height:44mm;">
+            <div class="executive-lower-grid">
+              <div class="card" style="margin:0; min-height:46mm;">
                 <div class="section-kicker">DISTRIBUIÇÃO POR APLICAÇÃO</div>
-                <div style="color:#f7efdf; font-size:12px;">${applicationLabel}</div>
+                <div style="color:#f7efdf; font-size:12px; margin-bottom:3mm;">${applicationLabel}</div>
                 <div class="distribution-line">
                   <div class="distribution-fill" style="width:${applicationPercent}%"></div>
                 </div>
                 <div style="text-align:right; color:#d4c8b6; font-size:10px; margin-top:1.8mm;">${applicationPercent}%</div>
               </div>
 
-              <div class="card material-used-card" style="margin:0;">
+              <div class="card" style="margin:0; min-height:46mm;">
                 <div class="section-kicker">MATERIAIS UTILIZADOS</div>
-                <div class="material-spot">
-                  <div class="material-thumb"></div>
-                  <div class="material-info">
-                    <div class="material-title">${material}</div>
-                    <div class="material-small">${materialCategory} • ${materialFinish}</div>
-                    <div class="material-small">${materialUsage}</div>
-                    <div class="material-small">${materialCareText}</div>
+                <div class="executive-material-row">
+                  <div class="executive-material-thumb"></div>
+                  <div class="executive-material-content">
+                    <div class="executive-material-name">${material}</div>
+                    <div class="executive-material-meta">${materialCategory} • ${materialFinish}</div>
+                    <div class="executive-material-meta">${materialUsage}</div>
+                    <div class="executive-material-meta">${materialCareText}</div>
                   </div>
                 </div>
               </div>
@@ -1559,14 +1567,14 @@ function buildHtml(data: RenderPayload): string {
           </div>
 
           <div class="certificate-qr">
-  <div class="qr-shell" style="width:28mm;height:28mm;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f3f3f3);">
-    <div style="width:20mm;height:20mm;border:2px solid #111;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1mm;padding:1.2mm;">
-      <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
-      <div style="background:#111;"></div><div style="background:#fff;border:1px solid #111;"></div><div style="background:#111;"></div>
-      <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
-    </div>
-  </div>
-</div>
+            <div class="qr-shell" style="width:28mm;height:28mm;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f3f3f3);">
+              <div style="width:20mm;height:20mm;border:2px solid #111;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1mm;padding:1.2mm;">
+                <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
+                <div style="background:#111;"></div><div style="background:#fff;border:1px solid #111;"></div><div style="background:#111;"></div>
+                <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
+              </div>
+            </div>
+          </div>
 
           <div class="footer-note">
             Este documento integra rastreabilidade visual, técnica e institucional, vinculando material,
@@ -1584,6 +1592,7 @@ function buildHtml(data: RenderPayload): string {
 </html>
   `;
 }
+
 async function generatePdfBuffer(payload: RenderPayload): Promise<Buffer> {
   const browser = await chromium.launch({
     headless: true,
