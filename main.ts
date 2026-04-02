@@ -234,7 +234,7 @@ function buildHtml(data: RenderPayload): string {
     html, body {
       margin: 0;
       padding: 0;
-      background: #101012;
+      background: #121214;
       color: #f3e8d1;
       font-family: "Helvetica Neue", Arial, sans-serif;
     }
@@ -242,7 +242,7 @@ function buildHtml(data: RenderPayload): string {
     body {
       background:
         radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 24%),
-        linear-gradient(180deg, #111113 0%, #17171a 100%);
+        linear-gradient(180deg, #151517 0%, #1a1a1d 100%);
     }
 
     .page {
@@ -254,7 +254,7 @@ function buildHtml(data: RenderPayload): string {
       page-break-after: always;
       background:
         radial-gradient(circle at 48% 10%, rgba(255,255,255,0.025), transparent 18%),
-        linear-gradient(180deg, #151517 0%, #1b1b1e 100%);
+        linear-gradient(180deg, #17171a 0%, #202025 100%);
     }
 
     .page:last-child {
@@ -266,67 +266,67 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 12% 18%, rgba(214,178,107,0.09), transparent 17%),
-        radial-gradient(circle at 82% 14%, rgba(214,178,107,0.07), transparent 15%),
+        radial-gradient(circle at 12% 18%, rgba(214,178,107,0.10), transparent 16%),
+        radial-gradient(circle at 82% 14%, rgba(214,178,107,0.09), transparent 14%),
         radial-gradient(circle at 84% 88%, rgba(214,178,107,0.10), transparent 18%),
-        radial-gradient(circle at 18% 84%, rgba(255,255,255,0.03), transparent 15%),
+        radial-gradient(circle at 18% 84%, rgba(255,255,255,0.03), transparent 16%),
         linear-gradient(118deg,
           transparent 0%,
-          rgba(255,255,255,0.015) 8%,
+          rgba(255,255,255,0.018) 8%,
           transparent 14%,
-          transparent 21%,
-          rgba(214,178,107,0.06) 27%,
-          transparent 34%,
-          transparent 44%,
-          rgba(255,255,255,0.018) 50%,
+          transparent 20%,
+          rgba(214,178,107,0.07) 26%,
+          transparent 33%,
+          transparent 43%,
+          rgba(255,255,255,0.018) 49%,
           transparent 56%,
           transparent 68%,
-          rgba(214,178,107,0.05) 74%,
+          rgba(214,178,107,0.06) 74%,
           transparent 80%,
           transparent 100%
         ),
         linear-gradient(24deg,
           transparent 0%,
           transparent 14%,
-          rgba(255,255,255,0.012) 19%,
+          rgba(255,255,255,0.015) 19%,
           transparent 25%,
           transparent 38%,
-          rgba(214,178,107,0.05) 44%,
+          rgba(214,178,107,0.06) 44%,
           transparent 50%,
           transparent 63%,
-          rgba(255,255,255,0.014) 68%,
+          rgba(255,255,255,0.016) 68%,
           transparent 73%,
           transparent 88%,
-          rgba(214,178,107,0.035) 93%,
+          rgba(214,178,107,0.04) 93%,
           transparent 100%
         ),
         linear-gradient(144deg,
-          rgba(255,255,255,0.012) 0%,
+          rgba(255,255,255,0.014) 0%,
           transparent 5%,
           transparent 17%,
-          rgba(214,178,107,0.032) 21%,
+          rgba(214,178,107,0.038) 21%,
           transparent 28%,
           transparent 39%,
-          rgba(255,255,255,0.01) 44%,
+          rgba(255,255,255,0.014) 44%,
           transparent 51%,
           transparent 67%,
-          rgba(214,178,107,0.03) 72%,
+          rgba(214,178,107,0.04) 72%,
           transparent 79%,
           transparent 100%
         ),
         repeating-linear-gradient(
           104deg,
-          rgba(255,255,255,0.008) 0px,
-          rgba(255,255,255,0.008) 1px,
+          rgba(255,255,255,0.010) 0px,
+          rgba(255,255,255,0.010) 1px,
           transparent 1px,
           transparent 120px
         ),
         repeating-linear-gradient(
           77deg,
-          rgba(214,178,107,0.016) 0px,
-          rgba(214,178,107,0.016) 1px,
+          rgba(214,178,107,0.020) 0px,
+          rgba(214,178,107,0.020) 1px,
           transparent 1px,
-          transparent 160px
+          transparent 150px
         );
       opacity: 1;
       pointer-events: none;
@@ -337,10 +337,10 @@ function buildHtml(data: RenderPayload): string {
       content: "";
       position: absolute;
       inset: 7mm;
-      border: 1px solid rgba(214,178,107,0.11);
+      border: 1px solid rgba(214,178,107,0.10);
       box-shadow:
         inset 0 0 0 1px rgba(255,255,255,0.010),
-        inset 0 0 80px rgba(0,0,0,0.18);
+        inset 0 0 90px rgba(0,0,0,0.16);
       pointer-events: none;
     }
 
@@ -361,13 +361,13 @@ function buildHtml(data: RenderPayload): string {
     .cover-main {
       min-height: 258mm;
       position: relative;
-      border: 1px solid rgba(214,178,107,0.16);
+      border: 1px solid rgba(214,178,107,0.14);
       background:
         linear-gradient(180deg, rgba(255,255,255,0.014), transparent 18%, transparent 82%, rgba(255,255,255,0.008)),
-        linear-gradient(180deg, rgba(29,29,32,0.72), rgba(17,17,19,0.82));
+        linear-gradient(180deg, rgba(32,32,36,0.72), rgba(18,18,21,0.82));
       box-shadow:
-        inset 0 0 90px rgba(0,0,0,0.28),
-        0 20px 50px rgba(0,0,0,0.16);
+        inset 0 0 90px rgba(0,0,0,0.26),
+        0 18px 44px rgba(0,0,0,0.14);
       padding: 13mm 12mm 10mm 12mm;
       overflow: hidden;
     }
@@ -377,7 +377,7 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(132deg, transparent 0%, transparent 84%, rgba(214,178,107,0.10) 100%),
+        linear-gradient(132deg, transparent 0%, transparent 84%, rgba(214,178,107,0.08) 100%),
         linear-gradient(318deg, transparent 0%, transparent 84%, rgba(214,178,107,0.06) 100%);
       pointer-events: none;
     }
@@ -389,7 +389,7 @@ function buildHtml(data: RenderPayload): string {
       top: 11mm;
       right: 11mm;
       bottom: 11mm;
-      border: 1px solid rgba(214,178,107,0.08);
+      border: 1px solid rgba(214,178,107,0.07);
       pointer-events: none;
     }
 
@@ -397,16 +397,16 @@ function buildHtml(data: RenderPayload): string {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      min-height: 35mm;
+      min-height: 38mm;
       margin-bottom: 5mm;
     }
 
     .brand-logo {
-      max-width: 136mm;
-      max-height: 34mm;
+      max-width: 150mm;
+      max-height: 38mm;
       object-fit: contain;
       filter:
-        drop-shadow(0 10px 24px rgba(0,0,0,0.36))
+        drop-shadow(0 10px 24px rgba(0,0,0,0.34))
         drop-shadow(0 2px 2px rgba(255,255,255,0.04));
     }
 
@@ -560,7 +560,7 @@ function buildHtml(data: RenderPayload): string {
 
     .grid-2 {
       display: grid;
-      grid-template-columns: 1.12fr 0.88fr;
+      grid-template-columns: 1.28fr 0.72fr;
       gap: 5mm;
     }
 
@@ -570,12 +570,12 @@ function buildHtml(data: RenderPayload): string {
       background:
         linear-gradient(180deg, rgba(255,255,255,0.02), transparent 20%),
         linear-gradient(180deg, rgba(27,27,30,0.66), rgba(16,16,18,0.76));
-      border: 1px solid rgba(214,178,107,0.14);
+      border: 1px solid rgba(214,178,107,0.13);
       border-radius: 4mm;
       padding: 5mm;
       box-shadow:
         inset 0 0 36px rgba(255,255,255,0.01),
-        0 18px 30px rgba(0,0,0,0.12);
+        0 16px 28px rgba(0,0,0,0.10);
     }
 
     .card::after {
@@ -633,7 +633,7 @@ function buildHtml(data: RenderPayload): string {
 
     .mini-two {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 0.95fr 1.05fr;
       gap: 4mm;
     }
 
@@ -654,7 +654,7 @@ function buildHtml(data: RenderPayload): string {
 
     .material-spot {
       display: grid;
-      grid-template-columns: 34mm minmax(0, 1fr);
+      grid-template-columns: 34mm 1fr;
       gap: 4mm;
       align-items: start;
     }
@@ -670,13 +670,18 @@ function buildHtml(data: RenderPayload): string {
       box-shadow: inset 0 0 22px rgba(255,255,255,0.015);
     }
 
+    .material-info {
+      min-width: 0;
+      display: block;
+    }
+
     .material-title {
       color: #f8f2e6;
-      font-size: 12px;
-      line-height: 1.32;
-      margin-bottom: 1.4mm;
-      word-break: keep-all;
-      overflow-wrap: anywhere;
+      font-size: 13px;
+      line-height: 1.35;
+      margin-bottom: 1.6mm;
+      word-break: normal;
+      overflow-wrap: normal;
       white-space: normal;
       max-width: 100%;
     }
@@ -1125,8 +1130,8 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .certificate-top .brand-logo {
-      max-width: 120mm;
-      max-height: 32mm;
+      max-width: 132mm;
+      max-height: 34mm;
     }
 
     .certificate-title {
@@ -1208,8 +1213,8 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .certificate-bottom-logo .brand-logo {
-      max-width: 88mm;
-      max-height: 24mm;
+      max-width: 96mm;
+      max-height: 26mm;
       opacity: 0.96;
     }
   </style>
@@ -1291,7 +1296,7 @@ function buildHtml(data: RenderPayload): string {
             </div>
 
             <div class="mini-two">
-              <div class="card" style="margin:0; min-height:36mm;">
+              <div class="card" style="margin:0; min-height:44mm;">
                 <div class="section-kicker">DISTRIBUIÇÃO POR APLICAÇÃO</div>
                 <div style="color:#f7efdf; font-size:12px;">${applicationLabel}</div>
                 <div class="distribution-line">
@@ -1300,11 +1305,11 @@ function buildHtml(data: RenderPayload): string {
                 <div style="text-align:right; color:#d4c8b6; font-size:10px; margin-top:1.8mm;">${applicationPercent}%</div>
               </div>
 
-              <div class="card" style="margin:0; min-height:36mm;">
+              <div class="card" style="margin:0; min-height:44mm;">
                 <div class="section-kicker">MATERIAIS UTILIZADOS</div>
                 <div class="material-spot">
                   <div class="material-thumb"></div>
-                  <div>
+                  <div class="material-info">
                     <div class="material-title">${material}</div>
                     <div class="material-small">${materialCategory} • ${materialFinish}</div>
                     <div class="material-small">${materialUsage}</div>
@@ -1682,5 +1687,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(port, "0.0.0.0", () => {
-  console.log(`Camasa Signature Renderer running on port ${port}`);
+  console.log(\`Camasa Signature Renderer running on port \${port}\`);
 });
