@@ -103,21 +103,14 @@ function normalizePillars(
   }
 
   return [
-    { title: "Preservar", subtitle: "Limpeza correta e rotina adequada" },
-    { title: "Proteger", subtitle: "Uso consciente e prevenção de manchas" },
-    { title: "Revisar", subtitle: "Acompanhamento e manutenção preventiva" },
+    { title: "PRESERVAR", subtitle: "Rotina correta de limpeza e conservação" },
+    { title: "PROTEGER", subtitle: "Uso consciente e prevenção de manchas" },
+    { title: "REVISAR", subtitle: "Acompanhamento técnico e manutenção visual" },
   ];
 }
 
 function buildSteps(percent: number): string {
-  const steps = [
-    "Projeto",
-    "Medição",
-    "Acabamento",
-    "Instalação",
-    "Finalização",
-  ];
-
+  const steps = ["Projeto", "Medição", "Acabamento", "Instalação", "Finalização"];
   const activeIndex =
     percent >= 100
       ? steps.length - 1
@@ -126,11 +119,7 @@ function buildSteps(percent: number): string {
   return steps
     .map((label, index) => {
       const state =
-        index < activeIndex
-          ? "done"
-          : index === activeIndex
-            ? "current"
-            : "pending";
+        index < activeIndex ? "done" : index === activeIndex ? "current" : "pending";
 
       return `
         <div class="timeline-step ${state}">
@@ -155,12 +144,12 @@ function buildCarePillars(items: Array<{ title: string; subtitle: string }>): st
   return items
     .map(
       (item) => `
-      <div class="pillar-card">
-        <div class="pillar-icon">◌</div>
-        <div class="pillar-title">${escapeHtml(item.title)}</div>
-        <div class="pillar-subtitle">${escapeHtml(item.subtitle)}</div>
-      </div>
-    `,
+        <div class="pillar-card">
+          <div class="pillar-icon">◌</div>
+          <div class="pillar-title">${escapeHtml(item.title)}</div>
+          <div class="pillar-subtitle">${escapeHtml(item.subtitle)}</div>
+        </div>
+      `,
     )
     .join("");
 }
@@ -172,7 +161,7 @@ function buildHtml(data: RenderPayload): string {
     assetDataUri("assets/logotipo-camasa-process-system.png");
 
   const signatureCode = escapeHtml(data.signatureCode || "CSB-20260331-2344-XBGE");
-  const documentType = escapeHtml(data.documentType || "Camasa Signature Book");
+  const documentType = escapeHtml(data.documentType || "DOCUMENTO DE ENTREGA PREMIUM");
   const clientName = escapeHtml(data.clientName || "Ana");
   const projectName = escapeHtml(data.projectName || "Bancada em L");
   const material = escapeHtml(data.material || "Granito Verde Ubatuba");
@@ -184,10 +173,7 @@ function buildHtml(data: RenderPayload): string {
   const remainingSteps = Math.max(0, Number(data.remainingSteps ?? 8));
   const currentStage = escapeHtml(data.currentStage || "Instalação");
   const applicationLabel = escapeHtml(data.applicationLabel || "Bancada em L");
-  const applicationPercent = Math.max(
-    0,
-    Math.min(100, Number(data.applicationPercent ?? 100)),
-  );
+  const applicationPercent = Math.max(0, Math.min(100, Number(data.applicationPercent ?? 100)));
   const materialCategory = escapeHtml(data.materialCategory || "Granito");
   const materialFinish = escapeHtml(data.materialFinish || "Polido");
   const materialUsage = escapeHtml(data.materialUsage || "Bancada em L");
@@ -202,12 +188,12 @@ function buildHtml(data: RenderPayload): string {
     "Limpar com pano macio, água e detergente neutro.",
     "Secar a superfície após a limpeza ou contato com líquidos.",
     "Usar apoio para panelas, objetos quentes e peças metálicas.",
-    "Manter rotina de inspeção visual em quinas e áreas de uso intenso.",
+    "Manter inspeção visual periódica em quinas e áreas críticas.",
   ]);
 
   const dontList = normalizeArray(data.dontList, [
     "Não usar ácido, cloro, saponáceo ou produto abrasivo.",
-    "Não apoiar panelas superaquecidas diretamente sobre a peça.",
+    "Não apoiar panelas superaquecidas diretamente na peça.",
     "Não deixar vinho, café, óleo ou pigmentos por tempo prolongado.",
     "Não usar lâmina, palha de aço ou solvente agressivo.",
   ]);
@@ -248,15 +234,15 @@ function buildHtml(data: RenderPayload): string {
     html, body {
       margin: 0;
       padding: 0;
-      background: #070707;
-      color: #f4ead7;
+      background: #080808;
+      color: #f3e8d1;
       font-family: "Helvetica Neue", Arial, sans-serif;
     }
 
     body {
       background:
         radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 24%),
-        linear-gradient(180deg, #060606 0%, #111111 100%);
+        linear-gradient(180deg, #070707 0%, #111111 100%);
     }
 
     .page {
@@ -267,10 +253,8 @@ function buildHtml(data: RenderPayload): string {
       overflow: hidden;
       page-break-after: always;
       background:
-        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.035), transparent 22%),
-        radial-gradient(circle at 20% 18%, rgba(208,171,99,0.06), transparent 16%),
-        radial-gradient(circle at 80% 12%, rgba(208,171,99,0.05), transparent 14%),
-        linear-gradient(180deg, #0a0a0b 0%, #111113 100%);
+        radial-gradient(circle at 50% 8%, rgba(255,255,255,0.03), transparent 20%),
+        linear-gradient(180deg, #0a0a0b 0%, #101012 100%);
     }
 
     .page:last-child {
@@ -282,22 +266,49 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.015), transparent 16%, transparent 84%, rgba(255,255,255,0.012)),
-        repeating-linear-gradient(
-          90deg,
-          rgba(255,255,255,0.006) 0px,
-          rgba(255,255,255,0.006) 1px,
-          transparent 1px,
-          transparent 90px
+        radial-gradient(circle at 12% 20%, rgba(201,165,93,0.06), transparent 18%),
+        radial-gradient(circle at 78% 18%, rgba(201,165,93,0.05), transparent 16%),
+        linear-gradient(115deg,
+          transparent 0%,
+          rgba(194,160,96,0.04) 10%,
+          transparent 18%,
+          transparent 28%,
+          rgba(255,255,255,0.016) 34%,
+          transparent 40%,
+          transparent 52%,
+          rgba(194,160,96,0.04) 58%,
+          transparent 64%,
+          transparent 78%,
+          rgba(255,255,255,0.012) 84%,
+          transparent 92%
+        ),
+        linear-gradient(25deg,
+          transparent 0%,
+          transparent 18%,
+          rgba(255,255,255,0.012) 24%,
+          transparent 30%,
+          transparent 46%,
+          rgba(194,160,96,0.035) 52%,
+          transparent 57%,
+          transparent 70%,
+          rgba(255,255,255,0.01) 78%,
+          transparent 86%
         ),
         repeating-linear-gradient(
-          0deg,
-          rgba(255,255,255,0.004) 0px,
-          rgba(255,255,255,0.004) 1px,
+          103deg,
+          rgba(255,255,255,0.008) 0px,
+          rgba(255,255,255,0.008) 1px,
           transparent 1px,
-          transparent 80px
+          transparent 130px
+        ),
+        repeating-linear-gradient(
+          77deg,
+          rgba(194,160,96,0.012) 0px,
+          rgba(194,160,96,0.012) 1px,
+          transparent 1px,
+          transparent 170px
         );
-      opacity: 0.38;
+      opacity: 0.95;
       pointer-events: none;
     }
 
@@ -305,10 +316,10 @@ function buildHtml(data: RenderPayload): string {
       content: "";
       position: absolute;
       inset: 8mm;
-      border: 1px solid rgba(208,171,99,0.14);
+      border: 1px solid rgba(201,165,93,0.15);
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.015),
-        inset 0 0 60px rgba(0,0,0,0.20);
+        inset 0 0 0 1px rgba(255,255,255,0.012),
+        inset 0 0 60px rgba(0,0,0,0.22);
       pointer-events: none;
     }
 
@@ -320,31 +331,25 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .cover .page-inner {
-      padding: 15mm 14mm 13mm 14mm;
       display: flex;
       flex-direction: column;
-      min-height: 297mm;
       justify-content: space-between;
-    }
-
-    .cover {
-      background:
-        radial-gradient(circle at 50% 14%, rgba(255,255,255,0.05), transparent 18%),
-        linear-gradient(180deg, #090909 0%, #101011 100%);
+      padding: 15mm 14mm 13mm 14mm;
     }
 
     .cover-main {
-      border: 1px solid rgba(208,171,99,0.18);
       min-height: 258mm;
       position: relative;
-      padding: 14mm 12mm 10mm 12mm;
-      box-shadow:
-        inset 0 0 80px rgba(0,0,0,0.28),
-        0 20px 50px rgba(0,0,0,0.20);
+      border: 1px solid rgba(201,165,93,0.20);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.018), transparent 22%, transparent 78%, rgba(255,255,255,0.01)),
-        radial-gradient(circle at 50% 6%, rgba(255,255,255,0.035), transparent 22%),
-        linear-gradient(180deg, rgba(18,18,19,0.82), rgba(10,10,11,0.88));
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 18%, transparent 82%, rgba(255,255,255,0.01)),
+        radial-gradient(circle at 50% 8%, rgba(255,255,255,0.03), transparent 20%),
+        linear-gradient(180deg, rgba(18,18,20,0.82), rgba(10,10,11,0.90));
+      box-shadow:
+        inset 0 0 80px rgba(0,0,0,0.34),
+        0 20px 50px rgba(0,0,0,0.22);
+      padding: 14mm 12mm 10mm 12mm;
+      overflow: hidden;
     }
 
     .cover-main::before {
@@ -352,8 +357,8 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(135deg, transparent 0%, transparent 84%, rgba(208,171,99,0.10) 100%),
-        linear-gradient(315deg, transparent 0%, transparent 84%, rgba(208,171,99,0.08) 100%);
+        linear-gradient(132deg, transparent 0%, transparent 85%, rgba(201,165,93,0.12) 100%),
+        linear-gradient(318deg, transparent 0%, transparent 85%, rgba(201,165,93,0.08) 100%);
       pointer-events: none;
     }
 
@@ -364,7 +369,7 @@ function buildHtml(data: RenderPayload): string {
       top: 9mm;
       right: 9mm;
       bottom: 9mm;
-      border: 1px solid rgba(208,171,99,0.10);
+      border: 1px solid rgba(201,165,93,0.10);
       pointer-events: none;
     }
 
@@ -372,16 +377,16 @@ function buildHtml(data: RenderPayload): string {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      min-height: 36mm;
-      margin-bottom: 5mm;
+      min-height: 38mm;
+      margin-bottom: 6mm;
     }
 
     .brand-logo {
-      max-width: 126mm;
-      max-height: 32mm;
+      max-width: 138mm;
+      max-height: 36mm;
       object-fit: contain;
       filter:
-        drop-shadow(0 8px 20px rgba(0,0,0,0.45))
+        drop-shadow(0 10px 24px rgba(0,0,0,0.46))
         drop-shadow(0 2px 2px rgba(255,255,255,0.05));
     }
 
@@ -389,18 +394,18 @@ function buildHtml(data: RenderPayload): string {
       display: flex;
       align-items: center;
       gap: 8px;
-      color: #f7f1e5;
+      color: #f6f1e7;
     }
 
     .brand-fallback-cps {
-      font-size: 30px;
+      font-size: 34px;
       font-weight: 800;
       color: #d0ab63;
       letter-spacing: 1px;
     }
 
     .brand-fallback-camasa {
-      font-size: 19px;
+      font-size: 20px;
       font-weight: 700;
       letter-spacing: 1px;
     }
@@ -414,8 +419,8 @@ function buildHtml(data: RenderPayload): string {
     .gold-divider {
       width: 100%;
       height: 2px;
-      background: linear-gradient(90deg, rgba(0,0,0,0), #d0ab63 16%, #f0d292 50%, #d0ab63 84%, rgba(0,0,0,0));
-      box-shadow: 0 0 20px rgba(208,171,99,0.12);
+      background: linear-gradient(90deg, rgba(0,0,0,0), #c79d4f 18%, #efd08d 50%, #c79d4f 82%, rgba(0,0,0,0));
+      box-shadow: 0 0 18px rgba(201,165,93,0.16);
       margin: 4mm 0 10mm 0;
     }
 
@@ -424,38 +429,30 @@ function buildHtml(data: RenderPayload): string {
       flex-direction: column;
       align-items: center;
       text-align: center;
-      margin-top: 4mm;
       flex: 1;
       justify-content: center;
-    }
-
-    .cover-kicker {
-      color: #d4b16b;
-      font-size: 10px;
-      letter-spacing: 2.8px;
-      text-transform: uppercase;
-      margin-bottom: 5mm;
+      margin-top: 4mm;
     }
 
     .cover-title {
-      color: #f8f2e6;
-      font-size: 21px;
-      letter-spacing: 3px;
+      color: #f7f1e5;
+      font-size: 20px;
+      letter-spacing: 2.8px;
       text-transform: uppercase;
-      line-height: 1.3;
+      line-height: 1.25;
       margin-bottom: 2mm;
     }
 
     .cover-title strong {
       display: block;
-      font-size: 31px;
+      font-size: 30px;
+      font-weight: 500;
       letter-spacing: 2.4px;
       margin-top: 2mm;
-      font-weight: 500;
     }
 
     .cover-subtitle {
-      color: #d8cdb8;
+      color: #d5cab6;
       font-size: 10px;
       letter-spacing: 1.8px;
       text-transform: uppercase;
@@ -487,7 +484,7 @@ function buildHtml(data: RenderPayload): string {
       border-radius: 4.5mm;
       background: #fff;
       padding: 2.4mm;
-      border: 1px solid rgba(208,171,99,0.50);
+      border: 1px solid rgba(201,165,93,0.50);
       box-shadow:
         0 16px 34px rgba(0,0,0,0.30),
         inset 0 0 0 1px rgba(255,255,255,0.10);
@@ -495,7 +492,7 @@ function buildHtml(data: RenderPayload): string {
 
     .code-pill {
       display: inline-block;
-      border: 1px solid rgba(208,171,99,0.34);
+      border: 1px solid rgba(201,165,93,0.34);
       border-radius: 3.2mm;
       padding: 3.4mm 8mm;
       background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
@@ -515,7 +512,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .section-kicker {
-      color: #d0ab63;
+      color: #cfa65c;
       font-size: 10px;
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -525,13 +522,14 @@ function buildHtml(data: RenderPayload): string {
     .section-title {
       color: #f8f2e6;
       font-size: 18px;
-      letter-spacing: 1.6px;
+      letter-spacing: 1.8px;
       text-transform: uppercase;
-      margin-bottom: 2.4mm;
+      margin-bottom: 2.2mm;
+      font-weight: 500;
     }
 
     .section-subtitle {
-      color: #d4cab8;
+      color: #d5cab7;
       font-size: 11px;
       line-height: 1.65;
       max-width: 126mm;
@@ -545,24 +543,26 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .card {
+      position: relative;
+      overflow: hidden;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.025), transparent 20%),
-        linear-gradient(180deg, rgba(22,22,24,0.78), rgba(11,11,12,0.90));
-      border: 1px solid rgba(208,171,99,0.18);
+        linear-gradient(180deg, rgba(20,20,22,0.82), rgba(10,10,11,0.92));
+      border: 1px solid rgba(201,165,93,0.18);
       border-radius: 4mm;
       padding: 5mm;
       box-shadow:
-        inset 0 0 30px rgba(255,255,255,0.015),
-        0 18px 34px rgba(0,0,0,0.18);
-      position: relative;
-      overflow: hidden;
+        inset 0 0 32px rgba(255,255,255,0.015),
+        0 18px 34px rgba(0,0,0,0.20);
     }
 
     .card::after {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent 24%);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.012), transparent 24%),
+        linear-gradient(115deg, transparent 0%, transparent 75%, rgba(201,165,93,0.04) 100%);
       pointer-events: none;
     }
 
@@ -578,7 +578,7 @@ function buildHtml(data: RenderPayload): string {
       padding: 3mm 2.5mm;
       text-align: center;
       border-radius: 3.2mm;
-      border: 1px solid rgba(208,171,99,0.16);
+      border: 1px solid rgba(201,165,93,0.16);
       background:
         linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008)),
         rgba(8,8,9,0.26);
@@ -589,7 +589,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .metric-icon {
-      color: #d0ab63;
+      color: #cfa65c;
       font-size: 12px;
       margin-bottom: 2mm;
     }
@@ -626,21 +626,21 @@ function buildHtml(data: RenderPayload): string {
 
     .distribution-fill {
       height: 100%;
-      background: linear-gradient(90deg, #b38d49 0%, #e6c983 45%, #d0ab63 100%);
-      box-shadow: 0 0 20px rgba(208,171,99,0.14);
+      background: linear-gradient(90deg, #b38d49 0%, #e6c983 45%, #cfa65c 100%);
+      box-shadow: 0 0 20px rgba(201,165,93,0.14);
     }
 
     .material-spot {
       display: grid;
-      grid-template-columns: 33mm 1fr;
+      grid-template-columns: 37mm 1fr;
       gap: 4mm;
       align-items: stretch;
     }
 
     .material-thumb {
-      min-height: 31mm;
+      min-height: 34mm;
       border-radius: 3mm;
-      border: 1px solid rgba(208,171,99,0.16);
+      border: 1px solid rgba(201,165,93,0.16);
       background:
         radial-gradient(circle at 28% 24%, rgba(255,255,255,0.14), transparent 11%),
         radial-gradient(circle at 62% 34%, rgba(255,255,255,0.10), transparent 9%),
@@ -651,7 +651,10 @@ function buildHtml(data: RenderPayload): string {
     .material-title {
       color: #f8f2e6;
       font-size: 13px;
+      line-height: 1.35;
       margin-bottom: 1.2mm;
+      word-break: normal;
+      overflow-wrap: break-word;
     }
 
     .material-small {
@@ -674,7 +677,7 @@ function buildHtml(data: RenderPayload): string {
       border-radius: 50%;
       background:
         radial-gradient(circle at center, #0d0d10 50%, transparent 51%),
-        conic-gradient(#d0ab63 calc(var(--p) * 1%), rgba(255,255,255,0.08) 0);
+        conic-gradient(#cfa65c calc(var(--p) * 1%), rgba(255,255,255,0.08) 0);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -698,7 +701,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .ring-side-title {
-      color: #d0ab63;
+      color: #cfa65c;
       font-size: 8px;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -731,7 +734,7 @@ function buildHtml(data: RenderPayload): string {
       border-radius: 50%;
       background:
         radial-gradient(circle at center, #0d0d10 44%, transparent 45%),
-        conic-gradient(#d0ab63 calc(var(--p) * 1%), rgba(255,255,255,0.09) 0);
+        conic-gradient(#cfa65c calc(var(--p) * 1%), rgba(255,255,255,0.09) 0);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -786,11 +789,11 @@ function buildHtml(data: RenderPayload): string {
       width: 6mm;
       height: 6mm;
       border-radius: 50%;
-      border: 1px solid rgba(208,171,99,0.44);
+      border: 1px solid rgba(201,165,93,0.44);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: #d0ab63;
+      color: #cfa65c;
       font-size: 9px;
       background: rgba(255,255,255,0.03);
       flex: 0 0 auto;
@@ -815,7 +818,7 @@ function buildHtml(data: RenderPayload): string {
       left: calc(50% + 4mm);
       width: calc(100% - 8mm);
       height: 1px;
-      background: rgba(208,171,99,0.32);
+      background: rgba(201,165,93,0.32);
     }
 
     .timeline-dot {
@@ -823,12 +826,12 @@ function buildHtml(data: RenderPayload): string {
       height: 7mm;
       margin: 0 auto 2mm auto;
       border-radius: 50%;
-      border: 1px solid rgba(208,171,99,0.44);
+      border: 1px solid rgba(201,165,93,0.44);
       display: flex;
       align-items: center;
       justify-content: center;
       background: rgba(255,255,255,0.03);
-      color: #d0ab63;
+      color: #cfa65c;
       font-size: 9px;
       position: relative;
       z-index: 2;
@@ -836,8 +839,8 @@ function buildHtml(data: RenderPayload): string {
 
     .timeline-step.done .timeline-dot,
     .timeline-step.current .timeline-dot {
-      background: radial-gradient(circle at center, rgba(208,171,99,0.25), rgba(0,0,0,0.36));
-      box-shadow: 0 0 14px rgba(208,171,99,0.15);
+      background: radial-gradient(circle at center, rgba(201,165,93,0.25), rgba(0,0,0,0.36));
+      box-shadow: 0 0 14px rgba(201,165,93,0.15);
     }
 
     .timeline-label {
@@ -855,7 +858,7 @@ function buildHtml(data: RenderPayload): string {
     .material-sheet {
       min-height: 64mm;
       border-radius: 3mm;
-      border: 1px solid rgba(208,171,99,0.18);
+      border: 1px solid rgba(201,165,93,0.18);
       background:
         radial-gradient(circle at 22% 20%, rgba(255,255,255,0.12), transparent 10%),
         radial-gradient(circle at 60% 26%, rgba(255,255,255,0.08), transparent 8%),
@@ -872,7 +875,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .badge {
-      border: 1px solid rgba(208,171,99,0.25);
+      border: 1px solid rgba(201,165,93,0.25);
       border-radius: 999px;
       padding: 1.3mm 3mm;
       font-size: 9px;
@@ -883,30 +886,39 @@ function buildHtml(data: RenderPayload): string {
     .photo-panel {
       min-height: 65mm;
       border-radius: 3mm;
-      border: 1px solid rgba(208,171,99,0.18);
-      background:
-        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05), transparent 18%),
-        linear-gradient(160deg, #131313 0%, #1e1e20 18%, #0d0d0e 40%, #252527 64%, #0b0b0c 100%);
+      border: 1px solid rgba(201,165,93,0.18);
       position: relative;
       overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 22%, rgba(255,255,255,0.08), transparent 10%),
+        linear-gradient(155deg,
+          #0d0d0e 0%,
+          #171718 16%,
+          #0b0b0c 34%,
+          #232325 51%,
+          #0b0b0c 67%,
+          #181819 82%,
+          #0a0a0a 100%
+        );
+      box-shadow: inset 0 0 30px rgba(255,255,255,0.02);
     }
 
     .photo-panel::before {
       content: "";
       position: absolute;
-      inset: 10%;
-      border: 1px solid rgba(208,171,99,0.12);
-      transform: rotate(-6deg);
+      inset: 8%;
+      border: 1px solid rgba(201,165,93,0.18);
+      transform: rotate(-5deg);
     }
 
     .photo-panel::after {
-      content: "CAMASA";
+      content: "";
       position: absolute;
-      right: 8mm;
-      bottom: 7mm;
-      color: rgba(208,171,99,0.20);
-      font-size: 18px;
-      letter-spacing: 3px;
+      inset: 0;
+      background:
+        linear-gradient(120deg, transparent 0%, transparent 76%, rgba(201,165,93,0.06) 100%),
+        linear-gradient(28deg, transparent 0%, transparent 22%, rgba(255,255,255,0.02) 28%, transparent 34%, transparent 64%, rgba(201,165,93,0.04) 70%, transparent 76%);
+      pointer-events: none;
     }
 
     .panel-caption {
@@ -954,7 +966,7 @@ function buildHtml(data: RenderPayload): string {
       width: 5mm;
       height: 5mm;
       border-radius: 50%;
-      border: 1px solid rgba(208,171,99,0.30);
+      border: 1px solid rgba(201,165,93,0.30);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -977,7 +989,7 @@ function buildHtml(data: RenderPayload): string {
     .pillar-card {
       min-height: 36mm;
       border-radius: 3mm;
-      border: 1px solid rgba(208,171,99,0.18);
+      border: 1px solid rgba(201,165,93,0.18);
       background:
         linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
         rgba(10,10,10,0.18);
@@ -990,7 +1002,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .pillar-icon {
-      color: #d0ab63;
+      color: #cfa65c;
       font-size: 14px;
       margin-bottom: 2mm;
     }
@@ -1011,7 +1023,7 @@ function buildHtml(data: RenderPayload): string {
 
     .care-footer {
       margin-top: 4mm;
-      border: 1px solid rgba(208,171,99,0.18);
+      border: 1px solid rgba(201,165,93,0.18);
       border-radius: 3mm;
       padding: 4mm;
       color: #d6ccbb;
@@ -1020,16 +1032,14 @@ function buildHtml(data: RenderPayload): string {
       line-height: 1.6;
     }
 
-    .certificate {
-      background:
-        radial-gradient(circle at 50% 8%, rgba(255,255,255,0.05), transparent 20%),
-        linear-gradient(180deg, #090909 0%, #111113 100%);
+    .certificate .page-inner {
+      padding-top: 15mm;
     }
 
     .certificate-shell {
       position: relative;
       min-height: 258mm;
-      border: 1px solid rgba(208,171,99,0.20);
+      border: 1px solid rgba(201,165,93,0.20);
       padding: 10mm;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.018), transparent 18%),
@@ -1040,6 +1050,7 @@ function buildHtml(data: RenderPayload): string {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      overflow: hidden;
     }
 
     .certificate-shell::before,
@@ -1054,15 +1065,15 @@ function buildHtml(data: RenderPayload): string {
     .certificate-shell::before {
       top: 6mm;
       left: 6mm;
-      border-top: 1px solid rgba(208,171,99,0.40);
-      border-left: 1px solid rgba(208,171,99,0.40);
+      border-top: 1px solid rgba(201,165,93,0.40);
+      border-left: 1px solid rgba(201,165,93,0.40);
     }
 
     .certificate-shell::after {
       right: 6mm;
       bottom: 6mm;
-      border-right: 1px solid rgba(208,171,99,0.40);
-      border-bottom: 1px solid rgba(208,171,99,0.40);
+      border-right: 1px solid rgba(201,165,93,0.40);
+      border-bottom: 1px solid rgba(201,165,93,0.40);
     }
 
     .certificate-top {
@@ -1073,8 +1084,8 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .certificate-top .brand-logo {
-      max-width: 108mm;
-      max-height: 28mm;
+      max-width: 120mm;
+      max-height: 32mm;
     }
 
     .certificate-title {
@@ -1084,11 +1095,12 @@ function buildHtml(data: RenderPayload): string {
       text-transform: uppercase;
       letter-spacing: 2px;
       margin-bottom: 2mm;
+      font-weight: 500;
     }
 
     .certificate-sub {
       text-align: center;
-      color: #d0ab63;
+      color: #cfa65c;
       font-size: 10px;
       letter-spacing: 1.6px;
       text-transform: uppercase;
@@ -1113,12 +1125,12 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .certificate-field {
-      border-bottom: 1px solid rgba(208,171,99,0.18);
+      border-bottom: 1px solid rgba(201,165,93,0.18);
       padding-bottom: 2mm;
     }
 
     .field-label {
-      color: #d0ab63;
+      color: #cfa65c;
       font-size: 8px;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -1155,8 +1167,8 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .certificate-bottom-logo .brand-logo {
-      max-width: 82mm;
-      max-height: 22mm;
+      max-width: 88mm;
+      max-height: 24mm;
       opacity: 0.96;
     }
   </style>
@@ -1172,15 +1184,11 @@ function buildHtml(data: RenderPayload): string {
         <div class="gold-divider"></div>
 
         <div class="cover-content">
-          <div class="cover-kicker">Camasa Process System</div>
           <div class="cover-title">
-            Camasa
-            <strong>Signature Book</strong>
+            CAMASA
+            <strong>SIGNATURE BOOK</strong>
           </div>
-          <div class="cover-subtitle">
-            ${documentType}<br />
-            Documento de entrega premium
-          </div>
+          <div class="cover-subtitle">${documentType}</div>
 
           <div class="cover-project-name">${projectName}</div>
           <div class="cover-meta">${clientName}</div>
@@ -1200,7 +1208,7 @@ function buildHtml(data: RenderPayload): string {
         </div>
 
         <div class="cover-footer">
-          Gerado em ${issueDate}
+          GERADO EM ${issueDate}
         </div>
       </div>
     </div>
@@ -1208,11 +1216,11 @@ function buildHtml(data: RenderPayload): string {
 
   <section class="page">
     <div class="page-inner">
-      <div class="section-kicker">Resumo Executivo</div>
-      <div class="section-title">${projectName}</div>
+      <div class="section-title">RESUMO EXECUTIVO</div>
+      <div style="color:#f7f0e2;font-size:20px;margin-bottom:2mm;">${projectName}</div>
       <div class="section-subtitle">
-        Documento de garantia, rastreabilidade e orientação de uso do projeto.
-        Composição premium para leitura institucional, técnica e visual.
+        Documento de garantia, conexão estética e leitura executiva do projeto,
+        organizado em padrão premium para acompanhamento técnico e visual.
       </div>
 
       <div class="grid-2">
@@ -1221,29 +1229,29 @@ function buildHtml(data: RenderPayload): string {
             <div class="metric-grid">
               <div class="metric-card">
                 <div class="metric-icon">♡</div>
-                <div class="metric-label">Materiais Certificados</div>
+                <div class="metric-label">MATERIAIS CERTIFICADOS</div>
                 <div class="metric-value">1</div>
               </div>
               <div class="metric-card">
                 <div class="metric-icon">⌂</div>
-                <div class="metric-label">Categorias Técnicas</div>
+                <div class="metric-label">CATEGORIAS TÉCNICAS</div>
                 <div class="metric-value">1</div>
               </div>
               <div class="metric-card">
                 <div class="metric-icon">▣</div>
-                <div class="metric-label">Blocos de Orientação</div>
+                <div class="metric-label">BLOCOS DE ORIENTAÇÃO</div>
                 <div class="metric-value">1</div>
               </div>
               <div class="metric-card">
                 <div class="metric-icon">◎</div>
-                <div class="metric-label">Registro Premium</div>
-                <div class="metric-value">1</div>
+                <div class="metric-label">PROGRESSO GERAL</div>
+                <div class="metric-value">${progressPercent}%</div>
               </div>
             </div>
 
             <div class="mini-two">
               <div class="card" style="margin:0; min-height:36mm;">
-                <div class="section-kicker" style="margin-bottom:1.5mm;">Distribuição por aplicação</div>
+                <div class="section-kicker">DISTRIBUIÇÃO POR APLICAÇÃO</div>
                 <div style="color:#f7efdf; font-size:12px;">${applicationLabel}</div>
                 <div class="distribution-line">
                   <div class="distribution-fill" style="width:${applicationPercent}%"></div>
@@ -1252,7 +1260,7 @@ function buildHtml(data: RenderPayload): string {
               </div>
 
               <div class="card" style="margin:0; min-height:36mm;">
-                <div class="section-kicker" style="margin-bottom:1.5mm;">Material Utilizado</div>
+                <div class="section-kicker">MATERIAIS UTILIZADOS</div>
                 <div class="material-spot">
                   <div class="material-thumb"></div>
                   <div>
@@ -1273,16 +1281,16 @@ function buildHtml(data: RenderPayload): string {
                 <div class="ring-inner">${progressPercent}%</div>
               </div>
               <div>
-                <div class="ring-side-title">Progresso Geral</div>
-                <div class="ring-side-line">${progressPercent}% concluído</div>
-                <div class="ring-side-small">Etapa atual: ${currentStage}</div>
+                <div class="ring-side-title">PROGRESSO GERAL</div>
+                <div class="ring-side-line">${currentStage}</div>
                 <div class="ring-side-small">Documento emitido em ${issueDate}</div>
+                <div class="ring-side-small">Previsão de entrega ${forecastDate}</div>
               </div>
             </div>
           </div>
 
           <div class="card" style="margin-top:5mm;">
-            <div class="section-kicker">Informações centrais</div>
+            <div class="section-kicker">INFORMAÇÕES CENTRAIS</div>
             <div class="ring-side-small">Cliente: ${clientName}</div>
             <div class="ring-side-small">Projeto: ${projectName}</div>
             <div class="ring-side-small">Local: ${location}</div>
@@ -1296,28 +1304,27 @@ function buildHtml(data: RenderPayload): string {
 
   <section class="page">
     <div class="page-inner">
-      <div class="section-kicker">Etapas da Obra</div>
-      <div class="section-title">Acompanhamento e rastreabilidade</div>
+      <div class="section-title">ETAPAS DA OBRA</div>
       <div class="section-subtitle">
-        Visão executiva das etapas principais do projeto, progresso realizado
-        e previsão de entrega.
+        Visão executiva das etapas principais, percentual realizado,
+        etapa em andamento e previsão de entrega.
       </div>
 
       <div class="card">
         <div class="big-ring-area">
           <div>
             <div class="status-list">
-              <div class="status-row"><span class="status-icon">✓</span><span>Etapas concluídas <strong style="margin-left:3px;">${completedSteps}</strong></span></div>
-              <div class="status-row"><span class="status-icon">◔</span><span>Etapa em andamento <strong style="margin-left:3px;">${currentStage}</strong></span></div>
-              <div class="status-row"><span class="status-icon"></span><span>Etapas restantes <strong style="margin-left:3px;">${remainingSteps}</strong></span></div>
-              <div class="status-row"><span class="status-icon">⌛</span><span>Previsão de entrega <strong style="margin-left:3px;">${forecastDate}</strong></span></div>
+              <div class="status-row"><span class="status-icon">✓</span><span>ETAPAS CONCLUÍDAS <strong style="margin-left:3px;">${completedSteps}</strong></span></div>
+              <div class="status-row"><span class="status-icon">◔</span><span>ETAPA EM ANDAMENTO <strong style="margin-left:3px;">${currentStage}</strong></span></div>
+              <div class="status-row"><span class="status-icon"></span><span>ETAPAS RESTANTES <strong style="margin-left:3px;">${remainingSteps}</strong></span></div>
+              <div class="status-row"><span class="status-icon">⌛</span><span>PREVISÃO DE ENTREGA <strong style="margin-left:3px;">${forecastDate}</strong></span></div>
             </div>
           </div>
 
           <div class="ring-big" style="--p:${progressPercent}">
             <div class="ring-big-inner">
               <div class="ring-big-percent">${progressPercent}%</div>
-              <div class="ring-big-caption">Concluído</div>
+              <div class="ring-big-caption">CONCLUÍDO</div>
             </div>
           </div>
         </div>
@@ -1331,11 +1338,10 @@ function buildHtml(data: RenderPayload): string {
 
   <section class="page">
     <div class="page-inner">
-      <div class="section-kicker">Painel de Materiais</div>
-      <div class="section-title">${material}</div>
+      <div class="section-title">PAINEL DE MATERIAIS</div>
       <div class="section-subtitle">
-        Referência cadastrada, categoria técnica, acabamento e aplicação principal
-        da peça especificada no projeto.
+        Identidade material do projeto, leitura visual e associação da peça
+        com a linguagem premium do documento.
       </div>
 
       <div class="material-panel-grid">
@@ -1353,13 +1359,14 @@ function buildHtml(data: RenderPayload): string {
         </div>
 
         <div class="card">
+          <div class="section-kicker">MATERIAIS CERTIFICADOS</div>
           <div class="photo-panel"></div>
           <div class="panel-caption">
-            Registro visual institucional do projeto e associação do material
-            com a linguagem premium do documento.
+            Registro visual referencial e posicionamento institucional do material
+            dentro do universo Camasa.
           </div>
           <div class="panel-caption">
-            Uso previsto: ${materialCareText}
+            ${materialCareText}
           </div>
         </div>
       </div>
@@ -1368,23 +1375,22 @@ function buildHtml(data: RenderPayload): string {
 
   <section class="page">
     <div class="page-inner">
-      <div class="section-kicker">Manual de Uso e Conservação</div>
-      <div class="section-title">Cuidados essenciais</div>
+      <div class="section-title">MANUAL DE USO E CONSERVAÇÃO</div>
       <div class="section-subtitle">
-        Orientações práticas para preservar estética, integridade e desempenho
-        da superfície ao longo do tempo.
+        Orientações práticas para preservar a estética, a integridade e a leitura
+        nobre da superfície ao longo do tempo.
       </div>
 
       <div class="list-grid">
         <div class="card list-card">
-          <div class="list-card-title">O que fazer</div>
+          <div class="list-card-title">O QUE FAZER</div>
           <ul>
             ${buildList(doList, "good")}
           </ul>
         </div>
 
         <div class="card list-card">
-          <div class="list-card-title">O que evitar</div>
+          <div class="list-card-title">O QUE EVITAR</div>
           <ul>
             ${buildList(dontList, "bad")}
           </ul>
@@ -1392,7 +1398,7 @@ function buildHtml(data: RenderPayload): string {
       </div>
 
       <div class="card list-card">
-        <div class="list-card-title">Alertas importantes</div>
+        <div class="list-card-title">ALERTAS IMPORTANTES</div>
         <ul>
           ${buildList(alerts, "alert")}
         </ul>
@@ -1402,11 +1408,11 @@ function buildHtml(data: RenderPayload): string {
 
   <section class="page">
     <div class="page-inner">
-      <div class="section-kicker">Camasa Care</div>
-      <div class="section-title">Preserve a beleza</div>
+      <div class="section-title">CAMASA CARE</div>
+      <div style="color:#f7f0e2;font-size:16px;margin-bottom:2mm;text-transform:uppercase;letter-spacing:1px;">PRESERVE A BELEZA</div>
       <div class="section-subtitle">
-        Conservação contínua, orientação preventiva e manutenção coerente com
-        materiais nobres e projetos de alto padrão.
+        Projeto de conservação contínua, orientação preventiva e manutenção coerente
+        com materiais nobres e obras de alto padrão.
       </div>
 
       <div class="card">
@@ -1432,35 +1438,35 @@ function buildHtml(data: RenderPayload): string {
 
           <div class="gold-divider" style="margin-top:0; margin-bottom:7mm;"></div>
 
-          <div class="certificate-title">Certificado de Autenticidade</div>
+          <div class="certificate-title">CERTIFICADO DE AUTENTICIDADE</div>
           <div class="certificate-sub">${material}</div>
-          <div class="certificate-sub">Projeto rastreado pelo Camasa Process System</div>
+          <div class="certificate-sub">PROJETO RASTREADO PELO CAMASA PROCESS SYSTEM</div>
 
           <div class="certificate-code">${signatureCode}</div>
 
           <div class="certificate-grid">
             <div class="certificate-field">
-              <div class="field-label">Projeto</div>
+              <div class="field-label">PROJETO</div>
               <div class="field-value">${projectName}</div>
             </div>
             <div class="certificate-field">
-              <div class="field-label">Cliente</div>
+              <div class="field-label">CLIENTE</div>
               <div class="field-value">${clientName}</div>
             </div>
             <div class="certificate-field">
-              <div class="field-label">Família</div>
+              <div class="field-label">FAMÍLIA</div>
               <div class="field-value">${certificateFamily}</div>
             </div>
             <div class="certificate-field">
-              <div class="field-label">Origem</div>
+              <div class="field-label">ORIGEM</div>
               <div class="field-value">${certificateOrigin}</div>
             </div>
             <div class="certificate-field">
-              <div class="field-label">Lote / Batch</div>
+              <div class="field-label">LOTE / BATCH</div>
               <div class="field-value">${certificateBatch}</div>
             </div>
             <div class="certificate-field">
-              <div class="field-label">Emissão</div>
+              <div class="field-label">EMISSÃO</div>
               <div class="field-value">${issueDate}</div>
             </div>
           </div>
@@ -1552,7 +1558,7 @@ const server = http.createServer(async (req, res) => {
     if (method === "GET" && url === "/render-test") {
       const pdf = await generatePdfBuffer({
         signatureCode: "CSB-20260331-2344-XBGE",
-        documentType: "Camasa Signature Book",
+        documentType: "DOCUMENTO DE ENTREGA PREMIUM",
         clientName: "Ana",
         projectName: "Bancada em L",
         material: "Granito Verde Ubatuba",
