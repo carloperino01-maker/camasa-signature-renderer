@@ -537,7 +537,7 @@ function buildHtml(data: RenderPayload): string {
 
     .grid-2 {
       display: grid;
-      grid-template-columns: 1.22fr 0.78fr;
+      grid-template-columns: 1.18fr 0.82fr;
       gap: 5mm;
     }
 
@@ -600,7 +600,7 @@ function buildHtml(data: RenderPayload): string {
 
     .executive-lower-grid {
       display: grid;
-      grid-template-columns: 0.82fr 1.18fr;
+      grid-template-columns: 0.76fr 1.24fr;
       gap: 4mm;
     }
 
@@ -619,15 +619,19 @@ function buildHtml(data: RenderPayload): string {
       box-shadow: 0 0 16px rgba(214,178,107,0.10);
     }
 
+    .executive-material-card {
+      min-height: 52mm;
+    }
+
     .executive-material-row {
       display: grid;
-      grid-template-columns: 38mm minmax(0, 1fr);
+      grid-template-columns: 44mm minmax(0, 1fr);
       gap: 4mm;
-      align-items: start;
+      align-items: stretch;
     }
 
     .executive-material-thumb {
-      min-height: 38mm;
+      min-height: 40mm;
       border-radius: 3mm;
       border: 1px solid rgba(214,178,107,0.14);
       background:
@@ -638,15 +642,18 @@ function buildHtml(data: RenderPayload): string {
 
     .executive-material-content {
       min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .executive-material-name {
       color: #f8f2e6;
-      font-size: 15px;
-      line-height: 1.28;
+      font-size: 16px;
+      line-height: 1.22;
       margin-bottom: 2mm;
       white-space: normal;
-      word-break: normal;
+      word-break: keep-all;
       overflow-wrap: break-word;
       hyphens: none;
     }
@@ -656,6 +663,13 @@ function buildHtml(data: RenderPayload): string {
       font-size: 10px;
       line-height: 1.45;
       margin-bottom: 1mm;
+      white-space: normal;
+      word-break: normal;
+      overflow-wrap: break-word;
+    }
+
+    .info-block .ring-side-small {
+      margin-bottom: 1.4mm;
     }
 
     .ring-wrap {
@@ -838,7 +852,7 @@ function buildHtml(data: RenderPayload): string {
 
     .material-panel-grid {
       display: grid;
-      grid-template-columns: 0.94fr 1.06fr;
+      grid-template-columns: 0.96fr 1.04fr;
       gap: 5mm;
     }
 
@@ -871,9 +885,9 @@ function buildHtml(data: RenderPayload): string {
 
     .material-title {
       color: #f8f2e6;
-      font-size: 13px;
-      line-height: 1.35;
-      margin-bottom: 1.6mm;
+      font-size: 14px;
+      line-height: 1.32;
+      margin-bottom: 1.8mm;
     }
 
     .material-small {
@@ -1246,8 +1260,7 @@ function buildHtml(data: RenderPayload): string {
       <div class="section-title">RESUMO EXECUTIVO</div>
       <div style="color:#f7f0e2;font-size:20px;margin-bottom:2mm;">${projectName}</div>
       <div class="section-subtitle">
-        Documento de garantia, conexão estética e leitura executiva do projeto, organizado em padrão
-        premium para acompanhamento técnico e visual.
+        Documento de garantia, conexão estética e leitura executiva do projeto, organizado em padrão premium para acompanhamento técnico e visual.
       </div>
 
       <div class="grid-2">
@@ -1277,7 +1290,7 @@ function buildHtml(data: RenderPayload): string {
             </div>
 
             <div class="executive-lower-grid">
-              <div class="card" style="margin:0; min-height:46mm;">
+              <div class="card" style="margin:0; min-height:52mm;">
                 <div class="section-kicker">DISTRIBUIÇÃO POR APLICAÇÃO</div>
                 <div style="color:#f7efdf; font-size:12px; margin-bottom:3mm;">${applicationLabel}</div>
                 <div class="distribution-line">
@@ -1286,7 +1299,7 @@ function buildHtml(data: RenderPayload): string {
                 <div style="text-align:right; color:#d4c8b6; font-size:10px; margin-top:1.8mm;">${applicationPercent}%</div>
               </div>
 
-              <div class="card" style="margin:0; min-height:46mm;">
+              <div class="card executive-material-card" style="margin:0;">
                 <div class="section-kicker">MATERIAIS UTILIZADOS</div>
                 <div class="executive-material-row">
                   <div class="executive-material-thumb"></div>
@@ -1317,7 +1330,7 @@ function buildHtml(data: RenderPayload): string {
             </div>
           </div>
 
-          <div class="card" style="margin-top:5mm;">
+          <div class="card info-block" style="margin-top:5mm;">
             <div class="section-kicker">INFORMAÇÕES CENTRAIS</div>
             <div class="ring-side-small">Cliente: ${clientName}</div>
             <div class="ring-side-small">Projeto: ${projectName}</div>
@@ -1334,8 +1347,7 @@ function buildHtml(data: RenderPayload): string {
     <div class="page-inner">
       <div class="section-title">ETAPAS DA OBRA</div>
       <div class="section-subtitle">
-        Visão executiva das etapas principais, percentual realizado, etapa em andamento e previsão de
-        entrega.
+        Visão executiva das etapas principais, percentual realizado, etapa em andamento e previsão de entrega.
       </div>
 
       <div class="card">
@@ -1368,8 +1380,7 @@ function buildHtml(data: RenderPayload): string {
     <div class="page-inner">
       <div class="section-title">PAINEL DE MATERIAIS</div>
       <div class="section-subtitle">
-        Identidade material do projeto, leitura visual e associação da peça com a linguagem premium do
-        documento.
+        Identidade material do projeto, leitura visual e associação da peça com a linguagem premium do documento.
       </div>
 
       <div class="material-panel-grid">
@@ -1404,8 +1415,7 @@ function buildHtml(data: RenderPayload): string {
     <div class="page-inner">
       <div class="section-title">MANUAL DE USO E CONSERVAÇÃO</div>
       <div class="section-subtitle">
-        Orientações práticas para preservar a estética, a integridade e a leitura nobre da superfície ao
-        longo do tempo.
+        Orientações práticas para preservar a estética, a integridade e a leitura nobre da superfície ao longo do tempo.
       </div>
 
       <div class="list-grid">
@@ -1438,16 +1448,14 @@ function buildHtml(data: RenderPayload): string {
       <div class="section-title">CAMASA CARE</div>
       <div style="color:#f7f0e2;font-size:16px;margin-bottom:2mm;text-transform:uppercase;letter-spacing:1px;">PRESERVE A BELEZA</div>
       <div class="section-subtitle">
-        Projeto de conservação contínua, orientação preventiva e manutenção coerente com materiais
-        nobres e obras de alto padrão.
+        Projeto de conservação contínua, orientação preventiva e manutenção coerente com materiais nobres e obras de alto padrão.
       </div>
 
       <div class="care-hero">
         <div class="care-hero-title">Programa de cuidado contínuo</div>
         <div class="care-hero-text">
           O Camasa Care não substitui o uso correto; ele amplia a proteção estética da obra no longo prazo.
-          Seu papel é orientar, preservar leitura visual, reduzir desgaste prematuro e reforçar um padrão
-          superior de pós-venda para superfícies nobres.
+          Seu papel é orientar, preservar leitura visual, reduzir desgaste prematuro e reforçar um padrão superior de pós-venda para superfícies nobres.
         </div>
       </div>
 
@@ -1457,8 +1465,7 @@ function buildHtml(data: RenderPayload): string {
         </div>
 
         <div class="care-footer">
-          A manutenção Camasa Care foi pensada para prolongar a estética da obra, reduzir desgaste
-          prematuro e manter coerência entre uso, cuidado, revisão e apresentação.
+          A manutenção Camasa Care foi pensada para prolongar a estética da obra, reduzir desgaste prematuro e manter coerência entre uso, cuidado, revisão e apresentação.
         </div>
       </div>
     </div>
@@ -1514,8 +1521,7 @@ function buildHtml(data: RenderPayload): string {
           </div>
 
           <div class="footer-note">
-            Este documento integra rastreabilidade visual, técnica e institucional, vinculando material,
-            aplicação, cuidado e identidade documental em padrão premium.
+            Este documento integra rastreabilidade visual, técnica e institucional, vinculando material, aplicação, cuidado e identidade documental em padrão premium.
           </div>
         </div>
 
@@ -1672,5 +1678,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(port, "0.0.0.0", () => {
-  console.log(`Camasa Signature Renderer running on port ${port}`);
+  console.log(\`Camasa Signature Renderer running on port \${port}\`);
 });
