@@ -1272,14 +1272,14 @@ function buildHtml(data: RenderPayload): string {
           <div class="cover-meta">${location}</div>
 
           <div class="qr-box">
-            <div class="qr-shell">
-              <img
-                src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(signatureCode)}"
-                alt="QR Code"
-                style="width:100%;height:100%;object-fit:cover;"
-              />
-            </div>
-          </div>
+  <div class="qr-shell" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f3f3f3);">
+    <div style="width:24mm;height:24mm;border:2px solid #111;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1.2mm;padding:1.6mm;">
+      <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
+      <div style="background:#111;"></div><div style="background:#fff;border:1px solid #111;"></div><div style="background:#111;"></div>
+      <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
+    </div>
+  </div>
+</div>
 
           <div class="code-pill">${signatureCode}</div>
         </div>
@@ -1559,14 +1559,14 @@ function buildHtml(data: RenderPayload): string {
           </div>
 
           <div class="certificate-qr">
-            <div class="qr-shell" style="width:28mm;height:28mm;">
-              <img
-                src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(signatureCode)}"
-                alt="QR Code"
-                style="width:100%;height:100%;object-fit:cover;"
-              />
-            </div>
-          </div>
+  <div class="qr-shell" style="width:28mm;height:28mm;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f3f3f3);">
+    <div style="width:20mm;height:20mm;border:2px solid #111;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1mm;padding:1.2mm;">
+      <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
+      <div style="background:#111;"></div><div style="background:#fff;border:1px solid #111;"></div><div style="background:#111;"></div>
+      <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
+    </div>
+  </div>
+</div>
 
           <div class="footer-note">
             Este documento integra rastreabilidade visual, técnica e institucional, vinculando material,
@@ -1584,3 +1584,148 @@ function buildHtml(data: RenderPayload): string {
 </html>
   `;
 }
+async function generatePdfBuffer(payload: RenderPayload): Promise<Buffer> {
+  const browser = await chromium.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
+  try {
+    const page = await browser.newPage({
+      viewport: { width: 1600, height: 2200 },
+      deviceScaleFactor: 1.5,
+    });
+
+    const html = buildHtml(payload);
+
+    await page.setContent(html, {
+      waitUntil: "domcontentloaded",
+      timeout: 30000,
+    });
+
+    const pdf = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: {
+        top: "0",
+        right: "0",
+        bottom: "0",
+        left: "0",
+      },
+      preferCSSPageSize: true,
+    });
+
+    return Buffer.from(pdf);
+  } finally {
+    await browser.close();
+  }
+}
+
+function parseBody(rawBody: string): RenderPayload {
+  if (!rawBody || !rawBody.trim()) return {};
+  try {
+    return JSON.parse(rawBody) as RenderPayload;
+  } catch {
+    return {};
+  }
+}
+
+const server = http.createServer(async (req, res) => {
+  try {
+    const method = req.method || "GET";
+    const url = req.url || "/";
+
+    if (method === "GET" && url === "/health") {
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify({ ok: true }));
+      return;
+    }
+
+    if (method === "GET" && url === "/render-test") {
+      const pdf = await generatePdfBuffer({
+        signatureCode: "CSB-20260331-2344-XBGE",
+        documentType: "DOCUMENTO DE ENTREGA PREMIUM",
+        clientName: "Ana",
+        projectName: "Bancada em L",
+        material: "Granito Verde Ubatuba",
+        location: "São Paulo, SP",
+        issueDate: "2026-03-31",
+        progressPercent: 38,
+        completedSteps: 6,
+        currentStage: "Instalação",
+        remainingSteps: 8,
+        forecastDate: "2026-04-09",
+        applicationLabel: "Bancada em L",
+        applicationPercent: 100,
+        materialCategory: "Granito",
+        materialFinish: "Polido",
+        materialUsage: "Bancada em L",
+        materialCareText: "Uso interno • vedado • limpeza controlada",
+        certificateFamily: "Granito",
+        certificateOrigin: "Brasil",
+        certificateBatch: "AM",
+      });
+
+      res.writeHead(200, {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": 'inline; filename="camasa-signature-book-test.pdf"',
+        "Access-Control-Allow-Origin": "*",
+      });
+      res.end(pdf);
+      return;
+    }
+
+    if (method === "POST" && url === "/render") {
+      const chunks: Buffer[] = [];
+
+      req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+      req.on("end", async () => {
+        try {
+          const rawBody = Buffer.concat(chunks).toString("utf-8");
+          const payload = parseBody(rawBody);
+          const pdf = await generatePdfBuffer(payload);
+
+          res.writeHead(200, {
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `inline; filename="${payload.projectId || "signature-book"}.pdf"`,
+            "Access-Control-Allow-Origin": "*",
+          });
+          res.end(pdf);
+        } catch (error) {
+          res.writeHead(500, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+          });
+          res.end(
+            JSON.stringify({
+              error: "Erro ao gerar PDF.",
+              details: error instanceof Error ? error.message : String(error),
+            }),
+          );
+        }
+      });
+      return;
+    }
+
+    res.writeHead(404, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    });
+    res.end(JSON.stringify({ error: "Rota não encontrada." }));
+  } catch (error) {
+    res.writeHead(500, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    });
+    res.end(
+      JSON.stringify({
+        error: "Erro interno no renderer.",
+        details: error instanceof Error ? error.message : String(error),
+      }),
+    );
+  }
+});
+
+server.listen(port, "0.0.0.0", () => {
+  console.log(`Camasa Signature Renderer running on port ${port}`);
+});
