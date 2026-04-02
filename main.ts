@@ -9,6 +9,11 @@ chromium.use(StealthPlugin());
 const port = Number(process.env.PORT || 8080);
 const __dirname = process.cwd();
 
+type CarePillar = {
+  title: string;
+  subtitle: string;
+};
+
 type RenderPayload = {
   projectId?: string;
   signatureCode?: string;
@@ -32,10 +37,7 @@ type RenderPayload = {
   doList?: string[];
   dontList?: string[];
   alerts?: string[];
-  carePillars?: Array<{
-    title: string;
-    subtitle: string;
-  }>;
+  carePillars?: CarePillar[];
   certificateFamily?: string;
   certificateOrigin?: string;
   certificateBatch?: string;
@@ -79,14 +81,12 @@ function normalizeArray(input: unknown, fallback: string[]): string[] {
     const cleaned = input
       .map((item) => String(item ?? "").trim())
       .filter(Boolean);
-    if (cleaned.length) return cleaned;
+    if (cleaned.length > 0) return cleaned;
   }
   return fallback;
 }
 
-function normalizePillars(
-  input: unknown,
-): Array<{ title: string; subtitle: string }> {
+function normalizePillars(input: unknown): CarePillar[] {
   if (Array.isArray(input)) {
     const cleaned = input
       .map((item) => {
@@ -97,15 +97,15 @@ function normalizePillars(
         if (!title) return null;
         return { title, subtitle };
       })
-      .filter(Boolean) as Array<{ title: string; subtitle: string }>;
+      .filter(Boolean) as CarePillar[];
 
-    if (cleaned.length) return cleaned;
+    if (cleaned.length > 0) return cleaned;
   }
 
   return [
-    { title: "PRESERVAR", subtitle: "Rotina correta de limpeza e conservação" },
-    { title: "PROTEGER", subtitle: "Uso consciente e prevenção de manchas" },
-    { title: "REVISAR", subtitle: "Acompanhamento técnico e manutenção visual" },
+    { title: "Preservar", subtitle: "Rotina correta de limpeza e conservação." },
+    { title: "Proteger", subtitle: "Uso consciente e prevenção de manchas." },
+    { title: "Revisar", subtitle: "Acompanhamento técnico e manutenção visual." },
   ];
 }
 
@@ -120,10 +120,10 @@ function buildSteps(percent: number): string {
     .map((label, index) => {
       const state =
         index < activeIndex ? "done" : index === activeIndex ? "current" : "pending";
-
+      const symbol = state === "done" ? "✓" : state === "current" ? "◔" : "";
       return `
         <div class="timeline-step ${state}">
-          <div class="timeline-dot">${state === "done" ? "✓" : state === "current" ? "◔" : ""}</div>
+          <div class="timeline-dot">${symbol}</div>
           <div class="timeline-label">${escapeHtml(label)}</div>
         </div>
       `;
@@ -132,15 +132,16 @@ function buildSteps(percent: number): string {
 }
 
 function buildList(items: string[], variant: "good" | "bad" | "alert"): string {
+  const icon = variant === "good" ? "✓" : variant === "bad" ? "✕" : "△";
   return items
-    .map((item) => {
-      const icon = variant === "good" ? "✓" : variant === "bad" ? "✕" : "△";
-      return `<li><span class="bullet ${variant}">${icon}</span><span>${escapeHtml(item)}</span></li>`;
-    })
+    .map(
+      (item) =>
+        `<li><span class="bullet ${variant}">${icon}</span><span>${escapeHtml(item)}</span></li>`,
+    )
     .join("");
 }
 
-function buildCarePillars(items: Array<{ title: string; subtitle: string }>): string {
+function buildCarePillars(items: CarePillar[]): string {
   return items
     .map(
       (item) => `
@@ -218,8 +219,7 @@ function buildHtml(data: RenderPayload): string {
       </div>
     `;
 
-  return `
-<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
@@ -234,15 +234,15 @@ function buildHtml(data: RenderPayload): string {
     html, body {
       margin: 0;
       padding: 0;
-      background: #151517;
-      color: #f3e8d1;
+      background: #17171a;
+      color: #f2e8d4;
       font-family: "Helvetica Neue", Arial, sans-serif;
     }
 
     body {
       background:
-        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 24%),
-        linear-gradient(180deg, #18181b 0%, #202025 100%);
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 22%),
+        linear-gradient(180deg, #17171a 0%, #222227 100%);
     }
 
     .page {
@@ -253,8 +253,7 @@ function buildHtml(data: RenderPayload): string {
       overflow: hidden;
       page-break-after: always;
       background:
-        radial-gradient(circle at 48% 10%, rgba(255,255,255,0.02), transparent 18%),
-        linear-gradient(180deg, #1a1a1d 0%, #24242a 100%);
+        linear-gradient(180deg, #1a1a1d 0%, #26262c 100%);
     }
 
     .page:last-child {
@@ -266,66 +265,52 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 12% 18%, rgba(214,178,107,0.12), transparent 16%),
-        radial-gradient(circle at 82% 14%, rgba(214,178,107,0.10), transparent 15%),
-        radial-gradient(circle at 84% 88%, rgba(214,178,107,0.12), transparent 18%),
+        radial-gradient(circle at 14% 16%, rgba(214,178,107,0.12), transparent 15%),
+        radial-gradient(circle at 82% 14%, rgba(214,178,107,0.10), transparent 14%),
+        radial-gradient(circle at 84% 86%, rgba(214,178,107,0.10), transparent 16%),
         linear-gradient(118deg,
           transparent 0%,
-          rgba(255,255,255,0.02) 8%,
-          transparent 14%,
-          transparent 20%,
-          rgba(214,178,107,0.08) 26%,
-          transparent 33%,
-          transparent 43%,
-          rgba(255,255,255,0.02) 49%,
+          rgba(255,255,255,0.018) 7%,
+          transparent 13%,
+          transparent 19%,
+          rgba(214,178,107,0.065) 24%,
+          transparent 30%,
+          transparent 45%,
+          rgba(255,255,255,0.018) 50%,
           transparent 56%,
-          transparent 68%,
-          rgba(214,178,107,0.07) 74%,
+          transparent 69%,
+          rgba(214,178,107,0.055) 74%,
           transparent 80%,
           transparent 100%
         ),
-        linear-gradient(24deg,
+        linear-gradient(26deg,
           transparent 0%,
-          transparent 14%,
-          rgba(255,255,255,0.018) 19%,
-          transparent 25%,
-          transparent 38%,
-          rgba(214,178,107,0.08) 44%,
+          transparent 16%,
+          rgba(255,255,255,0.015) 20%,
+          transparent 24%,
+          transparent 40%,
+          rgba(214,178,107,0.05) 45%,
           transparent 50%,
-          transparent 63%,
-          rgba(255,255,255,0.016) 68%,
-          transparent 73%,
+          transparent 64%,
+          rgba(255,255,255,0.012) 68%,
+          transparent 72%,
           transparent 88%,
-          rgba(214,178,107,0.05) 93%,
-          transparent 100%
-        ),
-        linear-gradient(144deg,
-          rgba(255,255,255,0.015) 0%,
-          transparent 5%,
-          transparent 17%,
-          rgba(214,178,107,0.045) 21%,
-          transparent 28%,
-          transparent 39%,
-          rgba(255,255,255,0.015) 44%,
-          transparent 51%,
-          transparent 67%,
-          rgba(214,178,107,0.045) 72%,
-          transparent 79%,
+          rgba(214,178,107,0.04) 93%,
           transparent 100%
         ),
         repeating-linear-gradient(
-          104deg,
-          rgba(255,255,255,0.012) 0px,
-          rgba(255,255,255,0.012) 1px,
+          102deg,
+          rgba(255,255,255,0.010) 0px,
+          rgba(255,255,255,0.010) 1px,
           transparent 1px,
-          transparent 120px
+          transparent 115px
         ),
         repeating-linear-gradient(
-          77deg,
-          rgba(214,178,107,0.022) 0px,
-          rgba(214,178,107,0.022) 1px,
+          76deg,
+          rgba(214,178,107,0.020) 0px,
+          rgba(214,178,107,0.020) 1px,
           transparent 1px,
-          transparent 150px
+          transparent 145px
         );
       opacity: 1;
       pointer-events: none;
@@ -336,9 +321,9 @@ function buildHtml(data: RenderPayload): string {
       content: "";
       position: absolute;
       inset: 7mm;
-      border: 1px solid rgba(214,178,107,0.09);
+      border: 1px solid rgba(214,178,107,0.08);
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.008),
+        inset 0 0 0 1px rgba(255,255,255,0.006),
         inset 0 0 90px rgba(0,0,0,0.14);
       pointer-events: none;
     }
@@ -346,39 +331,28 @@ function buildHtml(data: RenderPayload): string {
     .page-inner {
       position: relative;
       z-index: 2;
-      padding: 14mm;
       min-height: 297mm;
+      padding: 14mm;
     }
 
     .cover .page-inner {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
       padding: 15mm 14mm 13mm 14mm;
     }
 
     .cover-main {
       min-height: 258mm;
       position: relative;
-      border: 1px solid rgba(214,178,107,0.12);
+      border: 1px solid rgba(214,178,107,0.13);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.012), transparent 18%, transparent 82%, rgba(255,255,255,0.007)),
-        linear-gradient(180deg, rgba(36,36,40,0.70), rgba(20,20,23,0.80));
+        linear-gradient(180deg, rgba(255,255,255,0.012), transparent 18%, transparent 84%, rgba(255,255,255,0.006)),
+        linear-gradient(180deg, rgba(38,38,42,0.74), rgba(17,17,20,0.84));
       box-shadow:
-        inset 0 0 90px rgba(0,0,0,0.24),
+        inset 0 0 100px rgba(0,0,0,0.25),
         0 18px 44px rgba(0,0,0,0.12);
       padding: 13mm 12mm 10mm 12mm;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
-    }
-
-    .cover-main::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(132deg, transparent 0%, transparent 84%, rgba(214,178,107,0.08) 100%),
-        linear-gradient(318deg, transparent 0%, transparent 84%, rgba(214,178,107,0.06) 100%);
-      pointer-events: none;
     }
 
     .cover-main::after {
@@ -393,16 +367,14 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .brand-row {
+      min-height: 42mm;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
-      min-height: 40mm;
-      margin-bottom: 5mm;
     }
 
     .brand-logo {
-      max-width: 154mm;
-      max-height: 39mm;
+      max-width: 160mm;
+      max-height: 40mm;
       object-fit: contain;
       filter:
         drop-shadow(0 10px 24px rgba(0,0,0,0.34))
@@ -432,7 +404,6 @@ function buildHtml(data: RenderPayload): string {
     .brand-fallback-sub {
       font-size: 12px;
       color: #d9cfbd;
-      margin-top: 1px;
     }
 
     .gold-divider {
@@ -444,13 +415,12 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .cover-content {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      text-align: center;
-      flex: 1;
       justify-content: center;
-      margin-top: 2mm;
+      text-align: center;
     }
 
     .cover-title {
@@ -460,7 +430,6 @@ function buildHtml(data: RenderPayload): string {
       text-transform: uppercase;
       line-height: 1.25;
       margin-bottom: 2mm;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.02);
     }
 
     .cover-title strong {
@@ -476,12 +445,12 @@ function buildHtml(data: RenderPayload): string {
       font-size: 10px;
       letter-spacing: 2px;
       text-transform: uppercase;
-      margin-bottom: 12mm;
+      margin-bottom: 11mm;
     }
 
     .cover-project-name {
       color: #f7f0e2;
-      font-size: 21px;
+      font-size: 22px;
       margin-bottom: 3mm;
     }
 
@@ -491,23 +460,35 @@ function buildHtml(data: RenderPayload): string {
       margin-bottom: 1.5mm;
     }
 
-    .qr-box {
-      display: flex;
-      justify-content: center;
+    .tracking-box {
       margin-top: 10mm;
       margin-bottom: 8mm;
-    }
-
-    .qr-shell {
-      width: 33mm;
-      height: 33mm;
+      width: 42mm;
+      height: 42mm;
       border-radius: 4.5mm;
-      background: #fff;
-      padding: 2.4mm;
-      border: 1px solid rgba(214,178,107,0.42);
+      background: linear-gradient(180deg, #fcfcfc, #ececec);
+      border: 1px solid rgba(214,178,107,0.36);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       box-shadow:
         0 16px 34px rgba(0,0,0,0.24),
         inset 0 0 0 1px rgba(255,255,255,0.08);
+    }
+
+    .tracking-mark {
+      width: 28mm;
+      height: 28mm;
+      border: 2px solid #111;
+      border-radius: 3mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #111;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      text-transform: uppercase;
     }
 
     .code-pill {
@@ -519,7 +500,6 @@ function buildHtml(data: RenderPayload): string {
       color: #ecd59f;
       letter-spacing: 1px;
       font-size: 12px;
-      box-shadow: inset 0 0 14px rgba(255,255,255,0.015);
     }
 
     .cover-footer {
@@ -538,7 +518,6 @@ function buildHtml(data: RenderPayload): string {
       text-transform: uppercase;
       margin-bottom: 2.2mm;
       font-weight: 500;
-      text-shadow: 0 1px 0 rgba(255,255,255,0.02);
     }
 
     .section-kicker {
@@ -553,7 +532,7 @@ function buildHtml(data: RenderPayload): string {
       color: #d6cab6;
       font-size: 11px;
       line-height: 1.65;
-      max-width: 128mm;
+      max-width: 132mm;
       margin-bottom: 6mm;
     }
 
@@ -567,24 +546,14 @@ function buildHtml(data: RenderPayload): string {
       position: relative;
       overflow: hidden;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 20%),
-        linear-gradient(180deg, rgba(30,30,34,0.66), rgba(18,18,21,0.76));
+        linear-gradient(180deg, rgba(255,255,255,0.018), transparent 18%),
+        linear-gradient(180deg, rgba(31,31,35,0.72), rgba(18,18,21,0.78));
       border: 1px solid rgba(214,178,107,0.12);
       border-radius: 4mm;
       padding: 5mm;
       box-shadow:
         inset 0 0 36px rgba(255,255,255,0.01),
         0 16px 28px rgba(0,0,0,0.10);
-    }
-
-    .card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.010), transparent 24%),
-        linear-gradient(115deg, transparent 0%, transparent 75%, rgba(214,178,107,0.03) 100%);
-      pointer-events: none;
     }
 
     .metric-grid {
@@ -666,7 +635,6 @@ function buildHtml(data: RenderPayload): string {
         radial-gradient(circle at 28% 24%, rgba(255,255,255,0.12), transparent 11%),
         radial-gradient(circle at 62% 34%, rgba(255,255,255,0.08), transparent 9%),
         linear-gradient(145deg, #1d2023 0%, #414750 16%, #24272b 29%, #636b74 45%, #2d3237 60%, #1f2124 75%, #555c64 90%, #25282b 100%);
-      box-shadow: inset 0 0 22px rgba(255,255,255,0.015);
     }
 
     .executive-material-content {
@@ -679,8 +647,9 @@ function buildHtml(data: RenderPayload): string {
       line-height: 1.28;
       margin-bottom: 2mm;
       white-space: normal;
-      word-break: keep-all;
+      word-break: normal;
       overflow-wrap: break-word;
+      hyphens: none;
     }
 
     .executive-material-meta {
@@ -708,9 +677,6 @@ function buildHtml(data: RenderPayload): string {
       align-items: center;
       justify-content: center;
       margin: 0 auto;
-      box-shadow:
-        0 10px 22px rgba(0,0,0,0.18),
-        inset 0 0 10px rgba(255,255,255,0.02);
     }
 
     .ring-inner {
@@ -765,9 +731,6 @@ function buildHtml(data: RenderPayload): string {
       align-items: center;
       justify-content: center;
       margin-left: auto;
-      box-shadow:
-        0 14px 28px rgba(0,0,0,0.18),
-        inset 0 0 14px rgba(255,255,255,0.02);
     }
 
     .ring-big-inner {
@@ -866,7 +829,6 @@ function buildHtml(data: RenderPayload): string {
     .timeline-step.done .timeline-dot,
     .timeline-step.current .timeline-dot {
       background: radial-gradient(circle at center, rgba(214,178,107,0.18), rgba(0,0,0,0.22));
-      box-shadow: 0 0 10px rgba(214,178,107,0.10);
     }
 
     .timeline-label {
@@ -889,7 +851,6 @@ function buildHtml(data: RenderPayload): string {
         radial-gradient(circle at 22% 20%, rgba(255,255,255,0.10), transparent 10%),
         radial-gradient(circle at 60% 26%, rgba(255,255,255,0.07), transparent 8%),
         linear-gradient(145deg, #202327 0%, #444b54 16%, #292d31 30%, #67717b 46%, #33383d 63%, #222528 80%, #5d6670 92%, #2a2d31 100%);
-      box-shadow: inset 0 0 24px rgba(255,255,255,0.012);
       margin-bottom: 4mm;
     }
 
@@ -914,9 +875,6 @@ function buildHtml(data: RenderPayload): string {
       font-size: 13px;
       line-height: 1.35;
       margin-bottom: 1.6mm;
-      white-space: normal;
-      word-break: normal;
-      overflow-wrap: break-word;
     }
 
     .material-small {
@@ -935,15 +893,7 @@ function buildHtml(data: RenderPayload): string {
       background:
         radial-gradient(circle at 20% 18%, rgba(255,255,255,0.05), transparent 10%),
         radial-gradient(circle at 80% 82%, rgba(214,178,107,0.08), transparent 18%),
-        linear-gradient(155deg,
-          #1a1a1c 0%,
-          #252528 18%,
-          #171719 38%,
-          #2f2f33 58%,
-          #19191b 74%,
-          #242427 100%
-        );
-      box-shadow: inset 0 0 28px rgba(255,255,255,0.012);
+        linear-gradient(155deg, #1a1a1c 0%, #252528 18%, #171719 38%, #2f2f33 58%, #19191b 74%, #242427 100%);
     }
 
     .photo-panel::before {
@@ -952,33 +902,6 @@ function buildHtml(data: RenderPayload): string {
       inset: 8%;
       border: 1px solid rgba(214,178,107,0.14);
       transform: rotate(-5deg);
-    }
-
-    .photo-panel::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(118deg,
-          transparent 0%,
-          transparent 20%,
-          rgba(255,255,255,0.02) 25%,
-          transparent 31%,
-          transparent 56%,
-          rgba(214,178,107,0.04) 61%,
-          transparent 67%,
-          transparent 100%
-        ),
-        linear-gradient(28deg,
-          transparent 0%,
-          transparent 18%,
-          rgba(255,255,255,0.016) 22%,
-          transparent 28%,
-          transparent 70%,
-          rgba(214,178,107,0.03) 74%,
-          transparent 80%
-        );
-      pointer-events: none;
     }
 
     .panel-caption {
@@ -1227,11 +1150,37 @@ function buildHtml(data: RenderPayload): string {
       font-size: 12px;
     }
 
-    .certificate-qr {
+    .certificate-track {
       display: flex;
       justify-content: center;
       margin-top: 8mm;
       margin-bottom: 6mm;
+    }
+
+    .certificate-track-box {
+      width: 34mm;
+      height: 34mm;
+      border-radius: 4mm;
+      background: linear-gradient(180deg, #fcfcfc, #ededed);
+      border: 1px solid rgba(214,178,107,0.36);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .certificate-track-mark {
+      width: 22mm;
+      height: 22mm;
+      border: 2px solid #111;
+      border-radius: 3mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #111;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
     }
 
     .footer-note {
@@ -1279,14 +1228,8 @@ function buildHtml(data: RenderPayload): string {
           <div class="cover-meta">${clientName}</div>
           <div class="cover-meta">${location}</div>
 
-          <div class="qr-box">
-            <div class="qr-shell" style="display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f3f3f3);">
-              <div style="width:24mm;height:24mm;border:2px solid #111;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1.2mm;padding:1.6mm;">
-                <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
-                <div style="background:#111;"></div><div style="background:#fff;border:1px solid #111;"></div><div style="background:#111;"></div>
-                <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
-              </div>
-            </div>
+          <div class="tracking-box">
+            <div class="tracking-mark">CPS</div>
           </div>
 
           <div class="code-pill">${signatureCode}</div>
@@ -1448,8 +1391,7 @@ function buildHtml(data: RenderPayload): string {
           <div class="section-kicker">MATERIAIS CERTIFICADOS</div>
           <div class="photo-panel"></div>
           <div class="panel-caption">
-            Registro visual referencial e posicionamento institucional do material
-            dentro do universo Camasa.
+            Registro visual referencial e posicionamento institucional do material dentro do universo Camasa.
           </div>
           <div class="panel-caption">
             ${materialCareText}
@@ -1566,13 +1508,9 @@ function buildHtml(data: RenderPayload): string {
             </div>
           </div>
 
-          <div class="certificate-qr">
-            <div class="qr-shell" style="width:28mm;height:28mm;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#fff,#f3f3f3);">
-              <div style="width:20mm;height:20mm;border:2px solid #111;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1mm;padding:1.2mm;">
-                <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
-                <div style="background:#111;"></div><div style="background:#fff;border:1px solid #111;"></div><div style="background:#111;"></div>
-                <div style="background:#111;"></div><div style="background:#111;"></div><div style="background:#111;"></div>
-              </div>
+          <div class="certificate-track">
+            <div class="certificate-track-box">
+              <div class="certificate-track-mark">CPS</div>
             </div>
           </div>
 
@@ -1589,8 +1527,7 @@ function buildHtml(data: RenderPayload): string {
     </div>
   </section>
 </body>
-</html>
-  `;
+</html>`;
 }
 
 async function generatePdfBuffer(payload: RenderPayload): Promise<Buffer> {
