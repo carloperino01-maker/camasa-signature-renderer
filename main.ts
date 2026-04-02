@@ -234,7 +234,7 @@ function buildHtml(data: RenderPayload): string {
     html, body {
       margin: 0;
       padding: 0;
-      background: #080808;
+      background: #101012;
       color: #f3e8d1;
       font-family: "Helvetica Neue", Arial, sans-serif;
     }
@@ -242,7 +242,7 @@ function buildHtml(data: RenderPayload): string {
     body {
       background:
         radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 24%),
-        linear-gradient(180deg, #070707 0%, #111111 100%);
+        linear-gradient(180deg, #111113 0%, #17171a 100%);
     }
 
     .page {
@@ -253,8 +253,8 @@ function buildHtml(data: RenderPayload): string {
       overflow: hidden;
       page-break-after: always;
       background:
-        radial-gradient(circle at 50% 8%, rgba(255,255,255,0.03), transparent 20%),
-        linear-gradient(180deg, #0a0a0b 0%, #101012 100%);
+        radial-gradient(circle at 48% 10%, rgba(255,255,255,0.025), transparent 18%),
+        linear-gradient(180deg, #151517 0%, #1b1b1e 100%);
     }
 
     .page:last-child {
@@ -266,60 +266,81 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 12% 20%, rgba(201,165,93,0.06), transparent 18%),
-        radial-gradient(circle at 78% 18%, rgba(201,165,93,0.05), transparent 16%),
-        linear-gradient(115deg,
+        radial-gradient(circle at 12% 18%, rgba(214,178,107,0.09), transparent 17%),
+        radial-gradient(circle at 82% 14%, rgba(214,178,107,0.07), transparent 15%),
+        radial-gradient(circle at 84% 88%, rgba(214,178,107,0.10), transparent 18%),
+        radial-gradient(circle at 18% 84%, rgba(255,255,255,0.03), transparent 15%),
+        linear-gradient(118deg,
           transparent 0%,
-          rgba(194,160,96,0.04) 10%,
-          transparent 18%,
-          transparent 28%,
-          rgba(255,255,255,0.016) 34%,
-          transparent 40%,
-          transparent 52%,
-          rgba(194,160,96,0.04) 58%,
-          transparent 64%,
-          transparent 78%,
-          rgba(255,255,255,0.012) 84%,
-          transparent 92%
+          rgba(255,255,255,0.015) 8%,
+          transparent 14%,
+          transparent 21%,
+          rgba(214,178,107,0.06) 27%,
+          transparent 34%,
+          transparent 44%,
+          rgba(255,255,255,0.018) 50%,
+          transparent 56%,
+          transparent 68%,
+          rgba(214,178,107,0.05) 74%,
+          transparent 80%,
+          transparent 100%
         ),
-        linear-gradient(25deg,
+        linear-gradient(24deg,
           transparent 0%,
-          transparent 18%,
-          rgba(255,255,255,0.012) 24%,
-          transparent 30%,
-          transparent 46%,
-          rgba(194,160,96,0.035) 52%,
-          transparent 57%,
-          transparent 70%,
-          rgba(255,255,255,0.01) 78%,
-          transparent 86%
+          transparent 14%,
+          rgba(255,255,255,0.012) 19%,
+          transparent 25%,
+          transparent 38%,
+          rgba(214,178,107,0.05) 44%,
+          transparent 50%,
+          transparent 63%,
+          rgba(255,255,255,0.014) 68%,
+          transparent 73%,
+          transparent 88%,
+          rgba(214,178,107,0.035) 93%,
+          transparent 100%
+        ),
+        linear-gradient(144deg,
+          rgba(255,255,255,0.012) 0%,
+          transparent 5%,
+          transparent 17%,
+          rgba(214,178,107,0.032) 21%,
+          transparent 28%,
+          transparent 39%,
+          rgba(255,255,255,0.01) 44%,
+          transparent 51%,
+          transparent 67%,
+          rgba(214,178,107,0.03) 72%,
+          transparent 79%,
+          transparent 100%
         ),
         repeating-linear-gradient(
-          103deg,
+          104deg,
           rgba(255,255,255,0.008) 0px,
           rgba(255,255,255,0.008) 1px,
           transparent 1px,
-          transparent 130px
+          transparent 120px
         ),
         repeating-linear-gradient(
           77deg,
-          rgba(194,160,96,0.012) 0px,
-          rgba(194,160,96,0.012) 1px,
+          rgba(214,178,107,0.016) 0px,
+          rgba(214,178,107,0.016) 1px,
           transparent 1px,
-          transparent 170px
+          transparent 160px
         );
-      opacity: 0.95;
+      opacity: 1;
       pointer-events: none;
+      mix-blend-mode: screen;
     }
 
     .page::after {
       content: "";
       position: absolute;
-      inset: 8mm;
-      border: 1px solid rgba(201,165,93,0.15);
+      inset: 7mm;
+      border: 1px solid rgba(214,178,107,0.11);
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.012),
-        inset 0 0 60px rgba(0,0,0,0.22);
+        inset 0 0 0 1px rgba(255,255,255,0.010),
+        inset 0 0 80px rgba(0,0,0,0.18);
       pointer-events: none;
     }
 
@@ -340,15 +361,14 @@ function buildHtml(data: RenderPayload): string {
     .cover-main {
       min-height: 258mm;
       position: relative;
-      border: 1px solid rgba(201,165,93,0.20);
+      border: 1px solid rgba(214,178,107,0.16);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 18%, transparent 82%, rgba(255,255,255,0.01)),
-        radial-gradient(circle at 50% 8%, rgba(255,255,255,0.03), transparent 20%),
-        linear-gradient(180deg, rgba(18,18,20,0.82), rgba(10,10,11,0.90));
+        linear-gradient(180deg, rgba(255,255,255,0.014), transparent 18%, transparent 82%, rgba(255,255,255,0.008)),
+        linear-gradient(180deg, rgba(29,29,32,0.72), rgba(17,17,19,0.82));
       box-shadow:
-        inset 0 0 80px rgba(0,0,0,0.34),
-        0 20px 50px rgba(0,0,0,0.22);
-      padding: 14mm 12mm 10mm 12mm;
+        inset 0 0 90px rgba(0,0,0,0.28),
+        0 20px 50px rgba(0,0,0,0.16);
+      padding: 13mm 12mm 10mm 12mm;
       overflow: hidden;
     }
 
@@ -357,19 +377,19 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(132deg, transparent 0%, transparent 85%, rgba(201,165,93,0.12) 100%),
-        linear-gradient(318deg, transparent 0%, transparent 85%, rgba(201,165,93,0.08) 100%);
+        linear-gradient(132deg, transparent 0%, transparent 84%, rgba(214,178,107,0.10) 100%),
+        linear-gradient(318deg, transparent 0%, transparent 84%, rgba(214,178,107,0.06) 100%);
       pointer-events: none;
     }
 
     .cover-main::after {
       content: "";
       position: absolute;
-      left: 9mm;
-      top: 9mm;
-      right: 9mm;
-      bottom: 9mm;
-      border: 1px solid rgba(201,165,93,0.10);
+      left: 11mm;
+      top: 11mm;
+      right: 11mm;
+      bottom: 11mm;
+      border: 1px solid rgba(214,178,107,0.08);
       pointer-events: none;
     }
 
@@ -377,17 +397,17 @@ function buildHtml(data: RenderPayload): string {
       display: flex;
       align-items: center;
       justify-content: flex-start;
-      min-height: 38mm;
-      margin-bottom: 6mm;
+      min-height: 35mm;
+      margin-bottom: 5mm;
     }
 
     .brand-logo {
-      max-width: 138mm;
-      max-height: 36mm;
+      max-width: 136mm;
+      max-height: 34mm;
       object-fit: contain;
       filter:
-        drop-shadow(0 10px 24px rgba(0,0,0,0.46))
-        drop-shadow(0 2px 2px rgba(255,255,255,0.05));
+        drop-shadow(0 10px 24px rgba(0,0,0,0.36))
+        drop-shadow(0 2px 2px rgba(255,255,255,0.04));
     }
 
     .brand-fallback {
@@ -400,7 +420,7 @@ function buildHtml(data: RenderPayload): string {
     .brand-fallback-cps {
       font-size: 34px;
       font-weight: 800;
-      color: #d0ab63;
+      color: #d8b36c;
       letter-spacing: 1px;
     }
 
@@ -419,9 +439,9 @@ function buildHtml(data: RenderPayload): string {
     .gold-divider {
       width: 100%;
       height: 2px;
-      background: linear-gradient(90deg, rgba(0,0,0,0), #c79d4f 18%, #efd08d 50%, #c79d4f 82%, rgba(0,0,0,0));
-      box-shadow: 0 0 18px rgba(201,165,93,0.16);
-      margin: 4mm 0 10mm 0;
+      background: linear-gradient(90deg, rgba(0,0,0,0), #c79946 18%, #f0cd83 50%, #c79946 82%, rgba(0,0,0,0));
+      box-shadow: 0 0 16px rgba(214,178,107,0.12);
+      margin: 5mm 0 10mm 0;
     }
 
     .cover-content {
@@ -431,30 +451,31 @@ function buildHtml(data: RenderPayload): string {
       text-align: center;
       flex: 1;
       justify-content: center;
-      margin-top: 4mm;
+      margin-top: 2mm;
     }
 
     .cover-title {
       color: #f7f1e5;
-      font-size: 20px;
+      font-size: 21px;
       letter-spacing: 2.8px;
       text-transform: uppercase;
       line-height: 1.25;
       margin-bottom: 2mm;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.02);
     }
 
     .cover-title strong {
       display: block;
-      font-size: 30px;
+      font-size: 31px;
       font-weight: 500;
-      letter-spacing: 2.4px;
+      letter-spacing: 2.8px;
       margin-top: 2mm;
     }
 
     .cover-subtitle {
-      color: #d5cab6;
+      color: #d7ccb7;
       font-size: 10px;
-      letter-spacing: 1.8px;
+      letter-spacing: 2px;
       text-transform: uppercase;
       margin-bottom: 12mm;
     }
@@ -484,22 +505,22 @@ function buildHtml(data: RenderPayload): string {
       border-radius: 4.5mm;
       background: #fff;
       padding: 2.4mm;
-      border: 1px solid rgba(201,165,93,0.50);
+      border: 1px solid rgba(214,178,107,0.42);
       box-shadow:
-        0 16px 34px rgba(0,0,0,0.30),
-        inset 0 0 0 1px rgba(255,255,255,0.10);
+        0 16px 34px rgba(0,0,0,0.24),
+        inset 0 0 0 1px rgba(255,255,255,0.08);
     }
 
     .code-pill {
       display: inline-block;
-      border: 1px solid rgba(201,165,93,0.34);
+      border: 1px solid rgba(214,178,107,0.28);
       border-radius: 3.2mm;
       padding: 3.4mm 8mm;
-      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015));
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.012));
       color: #ecd59f;
       letter-spacing: 1px;
       font-size: 12px;
-      box-shadow: inset 0 0 14px rgba(255,255,255,0.02);
+      box-shadow: inset 0 0 14px rgba(255,255,255,0.015);
     }
 
     .cover-footer {
@@ -511,28 +532,29 @@ function buildHtml(data: RenderPayload): string {
       margin-top: 10mm;
     }
 
+    .section-title {
+      color: #f8f2e6;
+      font-size: 19px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 2.2mm;
+      font-weight: 500;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.02);
+    }
+
     .section-kicker {
-      color: #cfa65c;
+      color: #d8b36c;
       font-size: 10px;
       letter-spacing: 2px;
       text-transform: uppercase;
       margin-bottom: 2mm;
     }
 
-    .section-title {
-      color: #f8f2e6;
-      font-size: 18px;
-      letter-spacing: 1.8px;
-      text-transform: uppercase;
-      margin-bottom: 2.2mm;
-      font-weight: 500;
-    }
-
     .section-subtitle {
-      color: #d5cab7;
+      color: #d6cab6;
       font-size: 11px;
       line-height: 1.65;
-      max-width: 126mm;
+      max-width: 128mm;
       margin-bottom: 6mm;
     }
 
@@ -546,14 +568,14 @@ function buildHtml(data: RenderPayload): string {
       position: relative;
       overflow: hidden;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.025), transparent 20%),
-        linear-gradient(180deg, rgba(20,20,22,0.82), rgba(10,10,11,0.92));
-      border: 1px solid rgba(201,165,93,0.18);
+        linear-gradient(180deg, rgba(255,255,255,0.02), transparent 20%),
+        linear-gradient(180deg, rgba(27,27,30,0.66), rgba(16,16,18,0.76));
+      border: 1px solid rgba(214,178,107,0.14);
       border-radius: 4mm;
       padding: 5mm;
       box-shadow:
-        inset 0 0 32px rgba(255,255,255,0.015),
-        0 18px 34px rgba(0,0,0,0.20);
+        inset 0 0 36px rgba(255,255,255,0.01),
+        0 18px 30px rgba(0,0,0,0.12);
     }
 
     .card::after {
@@ -561,8 +583,8 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.012), transparent 24%),
-        linear-gradient(115deg, transparent 0%, transparent 75%, rgba(201,165,93,0.04) 100%);
+        linear-gradient(180deg, rgba(255,255,255,0.010), transparent 24%),
+        linear-gradient(115deg, transparent 0%, transparent 75%, rgba(214,178,107,0.03) 100%);
       pointer-events: none;
     }
 
@@ -578,10 +600,10 @@ function buildHtml(data: RenderPayload): string {
       padding: 3mm 2.5mm;
       text-align: center;
       border-radius: 3.2mm;
-      border: 1px solid rgba(201,165,93,0.16);
+      border: 1px solid rgba(214,178,107,0.12);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.008)),
-        rgba(8,8,9,0.26);
+        linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.006)),
+        rgba(8,8,9,0.14);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -589,7 +611,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .metric-icon {
-      color: #cfa65c;
+      color: #d8b36c;
       font-size: 12px;
       margin-bottom: 2mm;
     }
@@ -611,14 +633,14 @@ function buildHtml(data: RenderPayload): string {
 
     .mini-two {
       display: grid;
-      grid-template-columns: 1.02fr 0.98fr;
+      grid-template-columns: 1fr 1fr;
       gap: 4mm;
     }
 
     .distribution-line {
       width: 100%;
       height: 3mm;
-      background: rgba(255,255,255,0.07);
+      background: rgba(255,255,255,0.06);
       border-radius: 999px;
       overflow: hidden;
       margin-top: 2mm;
@@ -626,35 +648,37 @@ function buildHtml(data: RenderPayload): string {
 
     .distribution-fill {
       height: 100%;
-      background: linear-gradient(90deg, #b38d49 0%, #e6c983 45%, #cfa65c 100%);
-      box-shadow: 0 0 20px rgba(201,165,93,0.14);
+      background: linear-gradient(90deg, #b78f48 0%, #e8c77f 50%, #d8b36c 100%);
+      box-shadow: 0 0 16px rgba(214,178,107,0.10);
     }
 
     .material-spot {
       display: grid;
-      grid-template-columns: 37mm 1fr;
+      grid-template-columns: 34mm minmax(0, 1fr);
       gap: 4mm;
-      align-items: stretch;
+      align-items: start;
     }
 
     .material-thumb {
-      min-height: 34mm;
+      min-height: 33mm;
       border-radius: 3mm;
-      border: 1px solid rgba(201,165,93,0.16);
+      border: 1px solid rgba(214,178,107,0.14);
       background:
-        radial-gradient(circle at 28% 24%, rgba(255,255,255,0.14), transparent 11%),
-        radial-gradient(circle at 62% 34%, rgba(255,255,255,0.10), transparent 9%),
-        linear-gradient(145deg, #0f1112 0%, #2d3238 14%, #131517 29%, #515860 45%, #1a1d20 61%, #111214 76%, #454b53 90%, #16191b 100%);
-      box-shadow: inset 0 0 24px rgba(255,255,255,0.02);
+        radial-gradient(circle at 28% 24%, rgba(255,255,255,0.12), transparent 11%),
+        radial-gradient(circle at 62% 34%, rgba(255,255,255,0.08), transparent 9%),
+        linear-gradient(145deg, #1d2023 0%, #414750 16%, #24272b 29%, #636b74 45%, #2d3237 60%, #1f2124 75%, #555c64 90%, #25282b 100%);
+      box-shadow: inset 0 0 22px rgba(255,255,255,0.015);
     }
 
     .material-title {
       color: #f8f2e6;
-      font-size: 13px;
-      line-height: 1.35;
-      margin-bottom: 1.2mm;
-      word-break: normal;
-      overflow-wrap: break-word;
+      font-size: 12px;
+      line-height: 1.32;
+      margin-bottom: 1.4mm;
+      word-break: keep-all;
+      overflow-wrap: anywhere;
+      white-space: normal;
+      max-width: 100%;
     }
 
     .material-small {
@@ -676,22 +700,22 @@ function buildHtml(data: RenderPayload): string {
       height: 30mm;
       border-radius: 50%;
       background:
-        radial-gradient(circle at center, #0d0d10 50%, transparent 51%),
-        conic-gradient(#cfa65c calc(var(--p) * 1%), rgba(255,255,255,0.08) 0);
+        radial-gradient(circle at center, #161618 50%, transparent 51%),
+        conic-gradient(#d8b36c calc(var(--p) * 1%), rgba(255,255,255,0.07) 0);
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto;
       box-shadow:
-        0 12px 26px rgba(0,0,0,0.28),
-        inset 0 0 12px rgba(255,255,255,0.03);
+        0 10px 22px rgba(0,0,0,0.18),
+        inset 0 0 10px rgba(255,255,255,0.02);
     }
 
     .ring-inner {
       width: 18mm;
       height: 18mm;
       border-radius: 50%;
-      background: linear-gradient(180deg, rgba(18,18,19,0.98), rgba(8,8,9,0.96));
+      background: linear-gradient(180deg, rgba(28,28,30,0.98), rgba(18,18,20,0.98));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -701,7 +725,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .ring-side-title {
-      color: #cfa65c;
+      color: #d8b36c;
       font-size: 8px;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -733,22 +757,22 @@ function buildHtml(data: RenderPayload): string {
       height: 48mm;
       border-radius: 50%;
       background:
-        radial-gradient(circle at center, #0d0d10 44%, transparent 45%),
-        conic-gradient(#cfa65c calc(var(--p) * 1%), rgba(255,255,255,0.09) 0);
+        radial-gradient(circle at center, #161618 44%, transparent 45%),
+        conic-gradient(#d8b36c calc(var(--p) * 1%), rgba(255,255,255,0.08) 0);
       display: flex;
       align-items: center;
       justify-content: center;
       margin-left: auto;
       box-shadow:
-        0 16px 34px rgba(0,0,0,0.32),
-        inset 0 0 14px rgba(255,255,255,0.03);
+        0 14px 28px rgba(0,0,0,0.18),
+        inset 0 0 14px rgba(255,255,255,0.02);
     }
 
     .ring-big-inner {
       width: 24mm;
       height: 24mm;
       border-radius: 50%;
-      background: linear-gradient(180deg, rgba(18,18,19,0.98), rgba(8,8,9,0.98));
+      background: linear-gradient(180deg, rgba(29,29,31,0.98), rgba(18,18,20,0.98));
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -789,13 +813,13 @@ function buildHtml(data: RenderPayload): string {
       width: 6mm;
       height: 6mm;
       border-radius: 50%;
-      border: 1px solid rgba(201,165,93,0.44);
+      border: 1px solid rgba(214,178,107,0.34);
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: #cfa65c;
+      color: #d8b36c;
       font-size: 9px;
-      background: rgba(255,255,255,0.03);
+      background: rgba(255,255,255,0.02);
       flex: 0 0 auto;
     }
 
@@ -818,7 +842,7 @@ function buildHtml(data: RenderPayload): string {
       left: calc(50% + 4mm);
       width: calc(100% - 8mm);
       height: 1px;
-      background: rgba(201,165,93,0.32);
+      background: rgba(214,178,107,0.25);
     }
 
     .timeline-dot {
@@ -826,12 +850,12 @@ function buildHtml(data: RenderPayload): string {
       height: 7mm;
       margin: 0 auto 2mm auto;
       border-radius: 50%;
-      border: 1px solid rgba(201,165,93,0.44);
+      border: 1px solid rgba(214,178,107,0.34);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(255,255,255,0.03);
-      color: #cfa65c;
+      background: rgba(255,255,255,0.02);
+      color: #d8b36c;
       font-size: 9px;
       position: relative;
       z-index: 2;
@@ -839,8 +863,8 @@ function buildHtml(data: RenderPayload): string {
 
     .timeline-step.done .timeline-dot,
     .timeline-step.current .timeline-dot {
-      background: radial-gradient(circle at center, rgba(201,165,93,0.25), rgba(0,0,0,0.36));
-      box-shadow: 0 0 14px rgba(201,165,93,0.15);
+      background: radial-gradient(circle at center, rgba(214,178,107,0.18), rgba(0,0,0,0.22));
+      box-shadow: 0 0 10px rgba(214,178,107,0.10);
     }
 
     .timeline-label {
@@ -858,12 +882,12 @@ function buildHtml(data: RenderPayload): string {
     .material-sheet {
       min-height: 64mm;
       border-radius: 3mm;
-      border: 1px solid rgba(201,165,93,0.18);
+      border: 1px solid rgba(214,178,107,0.14);
       background:
-        radial-gradient(circle at 22% 20%, rgba(255,255,255,0.12), transparent 10%),
-        radial-gradient(circle at 60% 26%, rgba(255,255,255,0.08), transparent 8%),
-        linear-gradient(145deg, #111315 0%, #2e343a 14%, #15171a 30%, #59616a 46%, #202428 63%, #111214 80%, #484f58 92%, #181b1d 100%);
-      box-shadow: inset 0 0 26px rgba(255,255,255,0.02);
+        radial-gradient(circle at 22% 20%, rgba(255,255,255,0.10), transparent 10%),
+        radial-gradient(circle at 60% 26%, rgba(255,255,255,0.07), transparent 8%),
+        linear-gradient(145deg, #202327 0%, #444b54 16%, #292d31 30%, #67717b 46%, #33383d 63%, #222528 80%, #5d6670 92%, #2a2d31 100%);
+      box-shadow: inset 0 0 24px rgba(255,255,255,0.012);
       margin-bottom: 4mm;
     }
 
@@ -875,39 +899,39 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .badge {
-      border: 1px solid rgba(201,165,93,0.25);
+      border: 1px solid rgba(214,178,107,0.20);
       border-radius: 999px;
       padding: 1.3mm 3mm;
       font-size: 9px;
       color: #e9dcc2;
-      background: rgba(255,255,255,0.025);
+      background: rgba(255,255,255,0.018);
     }
 
     .photo-panel {
       min-height: 65mm;
       border-radius: 3mm;
-      border: 1px solid rgba(201,165,93,0.18);
+      border: 1px solid rgba(214,178,107,0.14);
       position: relative;
       overflow: hidden;
       background:
-        radial-gradient(circle at 18% 22%, rgba(255,255,255,0.08), transparent 10%),
+        radial-gradient(circle at 20% 18%, rgba(255,255,255,0.05), transparent 10%),
+        radial-gradient(circle at 80% 82%, rgba(214,178,107,0.08), transparent 18%),
         linear-gradient(155deg,
-          #0d0d0e 0%,
-          #171718 16%,
-          #0b0b0c 34%,
-          #232325 51%,
-          #0b0b0c 67%,
-          #181819 82%,
-          #0a0a0a 100%
+          #1a1a1c 0%,
+          #252528 18%,
+          #171719 38%,
+          #2f2f33 58%,
+          #19191b 74%,
+          #242427 100%
         );
-      box-shadow: inset 0 0 30px rgba(255,255,255,0.02);
+      box-shadow: inset 0 0 28px rgba(255,255,255,0.012);
     }
 
     .photo-panel::before {
       content: "";
       position: absolute;
       inset: 8%;
-      border: 1px solid rgba(201,165,93,0.18);
+      border: 1px solid rgba(214,178,107,0.14);
       transform: rotate(-5deg);
     }
 
@@ -916,8 +940,25 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        linear-gradient(120deg, transparent 0%, transparent 76%, rgba(201,165,93,0.06) 100%),
-        linear-gradient(28deg, transparent 0%, transparent 22%, rgba(255,255,255,0.02) 28%, transparent 34%, transparent 64%, rgba(201,165,93,0.04) 70%, transparent 76%);
+        linear-gradient(118deg,
+          transparent 0%,
+          transparent 20%,
+          rgba(255,255,255,0.02) 25%,
+          transparent 31%,
+          transparent 56%,
+          rgba(214,178,107,0.04) 61%,
+          transparent 67%,
+          transparent 100%
+        ),
+        linear-gradient(28deg,
+          transparent 0%,
+          transparent 18%,
+          rgba(255,255,255,0.016) 22%,
+          transparent 28%,
+          transparent 70%,
+          rgba(214,178,107,0.03) 74%,
+          transparent 80%
+        );
       pointer-events: none;
     }
 
@@ -966,7 +1007,7 @@ function buildHtml(data: RenderPayload): string {
       width: 5mm;
       height: 5mm;
       border-radius: 50%;
-      border: 1px solid rgba(201,165,93,0.30);
+      border: 1px solid rgba(214,178,107,0.24);
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -989,10 +1030,10 @@ function buildHtml(data: RenderPayload): string {
     .pillar-card {
       min-height: 36mm;
       border-radius: 3mm;
-      border: 1px solid rgba(201,165,93,0.18);
+      border: 1px solid rgba(214,178,107,0.14);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01)),
-        rgba(10,10,10,0.18);
+        linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.008)),
+        rgba(10,10,10,0.10);
       text-align: center;
       padding: 4mm 3mm;
       display: flex;
@@ -1002,7 +1043,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .pillar-icon {
-      color: #cfa65c;
+      color: #d8b36c;
       font-size: 14px;
       margin-bottom: 2mm;
     }
@@ -1023,12 +1064,12 @@ function buildHtml(data: RenderPayload): string {
 
     .care-footer {
       margin-top: 4mm;
-      border: 1px solid rgba(201,165,93,0.18);
+      border: 1px solid rgba(214,178,107,0.14);
       border-radius: 3mm;
       padding: 4mm;
       color: #d6ccbb;
       font-size: 10px;
-      background: rgba(255,255,255,0.02);
+      background: rgba(255,255,255,0.014);
       line-height: 1.6;
     }
 
@@ -1039,14 +1080,14 @@ function buildHtml(data: RenderPayload): string {
     .certificate-shell {
       position: relative;
       min-height: 258mm;
-      border: 1px solid rgba(201,165,93,0.20);
+      border: 1px solid rgba(214,178,107,0.15);
       padding: 10mm;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.018), transparent 18%),
-        linear-gradient(180deg, rgba(17,17,18,0.82), rgba(8,8,9,0.90));
+        linear-gradient(180deg, rgba(255,255,255,0.012), transparent 18%),
+        linear-gradient(180deg, rgba(29,29,32,0.70), rgba(17,17,19,0.82));
       box-shadow:
-        inset 0 0 80px rgba(0,0,0,0.30),
-        0 20px 44px rgba(0,0,0,0.18);
+        inset 0 0 90px rgba(0,0,0,0.24),
+        0 20px 44px rgba(0,0,0,0.12);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -1063,17 +1104,17 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .certificate-shell::before {
-      top: 6mm;
-      left: 6mm;
-      border-top: 1px solid rgba(201,165,93,0.40);
-      border-left: 1px solid rgba(201,165,93,0.40);
+      top: 7mm;
+      left: 7mm;
+      border-top: 1px solid rgba(214,178,107,0.26);
+      border-left: 1px solid rgba(214,178,107,0.26);
     }
 
     .certificate-shell::after {
-      right: 6mm;
-      bottom: 6mm;
-      border-right: 1px solid rgba(201,165,93,0.40);
-      border-bottom: 1px solid rgba(201,165,93,0.40);
+      right: 7mm;
+      bottom: 7mm;
+      border-right: 1px solid rgba(214,178,107,0.26);
+      border-bottom: 1px solid rgba(214,178,107,0.26);
     }
 
     .certificate-top {
@@ -1091,18 +1132,18 @@ function buildHtml(data: RenderPayload): string {
     .certificate-title {
       text-align: center;
       color: #f7f0e3;
-      font-size: 18px;
+      font-size: 19px;
       text-transform: uppercase;
-      letter-spacing: 2px;
+      letter-spacing: 2.2px;
       margin-bottom: 2mm;
       font-weight: 500;
     }
 
     .certificate-sub {
       text-align: center;
-      color: #cfa65c;
+      color: #d8b36c;
       font-size: 10px;
-      letter-spacing: 1.6px;
+      letter-spacing: 1.8px;
       text-transform: uppercase;
       margin-bottom: 1.5mm;
     }
@@ -1125,12 +1166,12 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .certificate-field {
-      border-bottom: 1px solid rgba(201,165,93,0.18);
+      border-bottom: 1px solid rgba(214,178,107,0.16);
       padding-bottom: 2mm;
     }
 
     .field-label {
-      color: #cfa65c;
+      color: #d8b36c;
       font-size: 8px;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -1219,8 +1260,8 @@ function buildHtml(data: RenderPayload): string {
       <div class="section-title">RESUMO EXECUTIVO</div>
       <div style="color:#f7f0e2;font-size:20px;margin-bottom:2mm;">${projectName}</div>
       <div class="section-subtitle">
-        Documento de garantia, conexão estética e leitura executiva do projeto,
-        organizado em padrão premium para acompanhamento técnico e visual.
+        Documento de garantia, conexão estética e leitura executiva do projeto, organizado em padrão
+        premium para acompanhamento técnico e visual.
       </div>
 
       <div class="grid-2">
@@ -1306,8 +1347,8 @@ function buildHtml(data: RenderPayload): string {
     <div class="page-inner">
       <div class="section-title">ETAPAS DA OBRA</div>
       <div class="section-subtitle">
-        Visão executiva das etapas principais, percentual realizado,
-        etapa em andamento e previsão de entrega.
+        Visão executiva das etapas principais, percentual realizado, etapa em andamento e previsão de
+        entrega.
       </div>
 
       <div class="card">
@@ -1340,8 +1381,8 @@ function buildHtml(data: RenderPayload): string {
     <div class="page-inner">
       <div class="section-title">PAINEL DE MATERIAIS</div>
       <div class="section-subtitle">
-        Identidade material do projeto, leitura visual e associação da peça
-        com a linguagem premium do documento.
+        Identidade material do projeto, leitura visual e associação da peça com a linguagem premium do
+        documento.
       </div>
 
       <div class="material-panel-grid">
@@ -1377,8 +1418,8 @@ function buildHtml(data: RenderPayload): string {
     <div class="page-inner">
       <div class="section-title">MANUAL DE USO E CONSERVAÇÃO</div>
       <div class="section-subtitle">
-        Orientações práticas para preservar a estética, a integridade e a leitura
-        nobre da superfície ao longo do tempo.
+        Orientações práticas para preservar a estética, a integridade e a leitura nobre da superfície ao
+        longo do tempo.
       </div>
 
       <div class="list-grid">
@@ -1411,8 +1452,8 @@ function buildHtml(data: RenderPayload): string {
       <div class="section-title">CAMASA CARE</div>
       <div style="color:#f7f0e2;font-size:16px;margin-bottom:2mm;text-transform:uppercase;letter-spacing:1px;">PRESERVE A BELEZA</div>
       <div class="section-subtitle">
-        Projeto de conservação contínua, orientação preventiva e manutenção coerente
-        com materiais nobres e obras de alto padrão.
+        Projeto de conservação contínua, orientação preventiva e manutenção coerente com materiais
+        nobres e obras de alto padrão.
       </div>
 
       <div class="card">
@@ -1421,8 +1462,8 @@ function buildHtml(data: RenderPayload): string {
         </div>
 
         <div class="care-footer">
-          A manutenção Camasa Care foi pensada para prolongar a estética da obra,
-          reduzir desgaste prematuro e manter coerência entre uso, cuidado e apresentação.
+          A manutenção Camasa Care foi pensada para prolongar a estética da obra, reduzir desgaste
+          prematuro e manter coerência entre uso, cuidado e apresentação.
         </div>
       </div>
     </div>
@@ -1482,8 +1523,8 @@ function buildHtml(data: RenderPayload): string {
           </div>
 
           <div class="footer-note">
-            Este documento integra rastreabilidade visual, técnica e institucional,
-            vinculando material, aplicação, cuidado e identidade documental em padrão premium.
+            Este documento integra rastreabilidade visual, técnica e institucional, vinculando material,
+            aplicação, cuidado e identidade documental em padrão premium.
           </div>
         </div>
 
