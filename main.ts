@@ -279,7 +279,7 @@ function buildHtml(data: RenderPayload): string {
 
     .page {
       width: 210mm;
-      min-height: 297mm;
+      height: 297mm;
       margin: 0 auto;
       position: relative;
       overflow: hidden;
@@ -333,8 +333,10 @@ function buildHtml(data: RenderPayload): string {
     .page-inner {
       position: relative;
       z-index: 2;
-      min-height: 297mm;
+      width: 100%;
+      height: 100%;
       padding: 14mm;
+      overflow: hidden;
     }
 
     .cover .page-inner {
@@ -342,7 +344,7 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .cover-main {
-      min-height: 258mm;
+      height: calc(297mm - 28mm);
       position: relative;
       border: 1px solid rgba(214,178,107,0.13);
       background:
@@ -372,6 +374,7 @@ function buildHtml(data: RenderPayload): string {
       min-height: 42mm;
       display: flex;
       align-items: center;
+      justify-content: flex-start;
     }
 
     .brand-logo {
@@ -424,6 +427,7 @@ function buildHtml(data: RenderPayload): string {
       align-items: center;
       justify-content: center;
       text-align: center;
+      min-height: 0;
     }
 
     .cover-title {
@@ -494,6 +498,7 @@ function buildHtml(data: RenderPayload): string {
       font-weight: 700;
       text-transform: uppercase;
       overflow: hidden;
+      background: #ffffff;
     }
 
     .qr-image {
@@ -589,6 +594,7 @@ function buildHtml(data: RenderPayload): string {
       display: grid;
       grid-template-columns: 1.18fr 0.82fr;
       gap: 5mm;
+      align-items: start;
     }
 
     .card {
@@ -604,6 +610,13 @@ function buildHtml(data: RenderPayload): string {
         inset 0 0 36px rgba(255,255,255,0.01),
         0 16px 28px rgba(0,0,0,0.10);
       break-inside: avoid;
+    }
+
+    .executive-page .content-frame {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 0;
+      height: 100%;
     }
 
     .metric-grid {
@@ -1146,7 +1159,7 @@ function buildHtml(data: RenderPayload): string {
 
     .certificate-shell {
       position: relative;
-      min-height: 258mm;
+      height: calc(297mm - 30mm);
       border: 1px solid rgba(214,178,107,0.15);
       padding: 10mm;
       background:
@@ -1337,67 +1350,67 @@ function buildHtml(data: RenderPayload): string {
     </div>
   </section>
 
-  <section class="page">
+  <section class="page executive-page">
     <div class="page-inner">
-      <div class="section-title">RESUMO EXECUTIVO</div>
-      <div style="color:#f7f0e2;font-size:20px;margin-bottom:2mm;">${projectName}</div>
-      <div class="section-subtitle">
-        Documento de garantia, conexão estética e leitura executiva do projeto, organizado em padrão premium para acompanhamento técnico e visual.
-      </div>
-
-      <div class="grid-2">
+      <div class="content-frame">
         <div>
-          <div class="card" style="margin-bottom:5mm;">
-            <div class="metric-grid">
-              <div class="metric-card">
-                <div class="metric-icon">M</div>
-                <div class="metric-label">MATERIAIS CERTIFICADOS</div>
-                <div class="metric-value">1</div>
+          <div class="section-title">RESUMO EXECUTIVO</div>
+          <div style="color:#f7f0e2;font-size:20px;margin-bottom:2mm;">${projectName}</div>
+          <div class="section-subtitle">
+            Documento de garantia, conexão estética e leitura executiva do projeto, organizado em padrão premium para acompanhamento técnico e visual.
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:5mm;">
+          <div class="metric-grid">
+            <div class="metric-card">
+              <div class="metric-icon">M</div>
+              <div class="metric-label">MATERIAIS CERTIFICADOS</div>
+              <div class="metric-value">1</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon">C</div>
+              <div class="metric-label">CATEGORIAS TÉCNICAS</div>
+              <div class="metric-value">1</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon">B</div>
+              <div class="metric-label">BLOCOS DE ORIENTAÇÃO</div>
+              <div class="metric-value">1</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon">P</div>
+              <div class="metric-label">PROGRESSO GERAL</div>
+              <div class="metric-value">${progressPercent}%</div>
+            </div>
+          </div>
+
+          <div class="executive-lower-grid">
+            <div class="card" style="margin:0; min-height:52mm;">
+              <div class="section-kicker">DISTRIBUIÇÃO POR APLICAÇÃO</div>
+              <div style="color:#f7efdf; font-size:12px; margin-bottom:3mm; overflow-wrap:break-word;">${applicationLabel}</div>
+              <div class="distribution-line">
+                <div class="distribution-fill" style="width:${applicationPercent}%"></div>
               </div>
-              <div class="metric-card">
-                <div class="metric-icon">C</div>
-                <div class="metric-label">CATEGORIAS TÉCNICAS</div>
-                <div class="metric-value">1</div>
-              </div>
-              <div class="metric-card">
-                <div class="metric-icon">B</div>
-                <div class="metric-label">BLOCOS DE ORIENTAÇÃO</div>
-                <div class="metric-value">1</div>
-              </div>
-              <div class="metric-card">
-                <div class="metric-icon">P</div>
-                <div class="metric-label">PROGRESSO GERAL</div>
-                <div class="metric-value">${progressPercent}%</div>
-              </div>
+              <div style="text-align:right; color:#d4c8b6; font-size:10px; margin-top:1.8mm;">${applicationPercent}%</div>
             </div>
 
-            <div class="executive-lower-grid">
-              <div class="card" style="margin:0; min-height:52mm;">
-                <div class="section-kicker">DISTRIBUIÇÃO POR APLICAÇÃO</div>
-                <div style="color:#f7efdf; font-size:12px; margin-bottom:3mm; overflow-wrap:break-word;">${applicationLabel}</div>
-                <div class="distribution-line">
-                  <div class="distribution-fill" style="width:${applicationPercent}%"></div>
-                </div>
-                <div style="text-align:right; color:#d4c8b6; font-size:10px; margin-top:1.8mm;">${applicationPercent}%</div>
-              </div>
-
-              <div class="card executive-material-card" style="margin:0;">
-                <div class="section-kicker">MATERIAIS UTILIZADOS</div>
-                <div class="executive-material-row">
-                  <div class="executive-material-thumb"></div>
-                  <div class="executive-material-content">
-                    <div class="executive-material-name">${material}</div>
-                    <div class="executive-material-meta">${materialCategory} • ${materialFinish}</div>
-                    <div class="executive-material-meta">${materialUsage}</div>
-                    <div class="executive-material-meta">${materialCareText}</div>
-                  </div>
+            <div class="card executive-material-card" style="margin:0;">
+              <div class="section-kicker">MATERIAIS UTILIZADOS</div>
+              <div class="executive-material-row">
+                <div class="executive-material-thumb"></div>
+                <div class="executive-material-content">
+                  <div class="executive-material-name">${material}</div>
+                  <div class="executive-material-meta">${materialCategory} • ${materialFinish}</div>
+                  <div class="executive-material-meta">${materialUsage}</div>
+                  <div class="executive-material-meta">${materialCareText}</div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div>
+        <div class="grid-2">
           <div class="card">
             <div class="ring-wrap">
               <div class="ring" style="--p:${progressPercent}">
@@ -1412,7 +1425,7 @@ function buildHtml(data: RenderPayload): string {
             </div>
           </div>
 
-          <div class="card info-block" style="margin-top:5mm;">
+          <div class="card info-block">
             <div class="section-kicker">INFORMAÇÕES CENTRAIS</div>
             <div class="ring-side-small">Cliente: ${clientName}</div>
             <div class="ring-side-small">Projeto: ${projectName}</div>
@@ -1658,8 +1671,12 @@ async function generatePdfBuffer(payload: RenderPayload): Promise<Buffer> {
         }),
       );
 
-      if ((document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts?.ready) {
-        await (document as Document & { fonts: { ready: Promise<unknown> } }).fonts.ready;
+      const docWithFonts = document as Document & {
+        fonts?: { ready?: Promise<unknown> };
+      };
+
+      if (docWithFonts.fonts?.ready) {
+        await docWithFonts.fonts.ready;
       }
     });
 
