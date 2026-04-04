@@ -41,6 +41,8 @@ type RenderPayload = {
   certificateFamily?: string;
   certificateOrigin?: string;
   certificateBatch?: string;
+  qrCodeDataUrl?: string;
+  dedicatedLink?: string;
 };
 
 function escapeHtml(value: unknown): string {
@@ -62,6 +64,7 @@ function assetDataUri(relativePath: string): string | null {
     if (ext === ".jpg" || ext === ".jpeg") mime = "image/jpeg";
     if (ext === ".png") mime = "image/png";
     if (ext === ".webp") mime = "image/webp";
+    if (ext === ".svg") mime = "image/svg+xml";
 
     return `data:${mime};base64,${buffer.toString("base64")}`;
   } catch {
@@ -120,10 +123,17 @@ function buildSteps(percent: number): string {
     .map((label, index) => {
       const state =
         index < activeIndex ? "done" : index === activeIndex ? "current" : "pending";
-      const symbol = state === "done" ? "✓" : state === "current" ? "◔" : "";
+
+      const marker =
+        state === "done"
+          ? "OK"
+          : state === "current"
+            ? "AT"
+            : "";
+
       return `
         <div class="timeline-step ${state}">
-          <div class="timeline-dot">${symbol}</div>
+          <div class="timeline-dot">${marker}</div>
           <div class="timeline-label">${escapeHtml(label)}</div>
         </div>
       `;
@@ -132,7 +142,7 @@ function buildSteps(percent: number): string {
 }
 
 function buildList(items: string[], variant: "good" | "bad" | "alert"): string {
-  const icon = variant === "good" ? "✓" : variant === "bad" ? "✕" : "△";
+  const icon = variant === "good" ? "+" : variant === "bad" ? "x" : "!";
   return items
     .map(
       (item) =>
@@ -146,7 +156,7 @@ function buildCarePillars(items: CarePillar[]): string {
     .map(
       (item) => `
         <div class="pillar-card">
-          <div class="pillar-icon">◌</div>
+          <div class="pillar-icon">C</div>
           <div class="pillar-title">${escapeHtml(item.title)}</div>
           <div class="pillar-subtitle">${escapeHtml(item.subtitle)}</div>
         </div>
@@ -159,7 +169,10 @@ function buildHtml(data: RenderPayload): string {
   const logoAsset =
     assetDataUri("assets/logotipo-camasa-process-system.jpg") ||
     assetDataUri("assets/logotipo-camasa-process-system.jpeg") ||
-    assetDataUri("assets/logotipo-camasa-process-system.png");
+    assetDataUri("assets/logotipo-camasa-process-system.png") ||
+    assetDataUri("public/images/logotipo-camasa-process-system.jpg") ||
+    assetDataUri("public/images/logotipo-camasa-process-system.jpeg") ||
+    assetDataUri("public/images/logotipo-camasa-process-system.png");
 
   const signatureCode = escapeHtml(data.signatureCode || "CSB-20260331-2344-XBGE");
   const documentType = escapeHtml(data.documentType || "DOCUMENTO DE ENTREGA PREMIUM");
@@ -179,11 +192,13 @@ function buildHtml(data: RenderPayload): string {
   const materialFinish = escapeHtml(data.materialFinish || "Polido");
   const materialUsage = escapeHtml(data.materialUsage || "Bancada em L");
   const materialCareText = escapeHtml(
-    data.materialCareText || "Uso interno • vedado • limpeza controlada",
+    data.materialCareText || "Uso interno, vedado e com limpeza controlada.",
   );
   const certificateFamily = escapeHtml(data.certificateFamily || "Granito");
   const certificateOrigin = escapeHtml(data.certificateOrigin || "Brasil");
   const certificateBatch = escapeHtml(data.certificateBatch || "AM");
+  const dedicatedLink = escapeHtml(data.dedicatedLink || "");
+  const qrCodeDataUrl = typeof data.qrCodeDataUrl === "string" ? data.qrCodeDataUrl.trim() : "";
 
   const doList = normalizeArray(data.doList, [
     "Limpar com pano macio, água e detergente neutro.",
@@ -219,6 +234,18 @@ function buildHtml(data: RenderPayload): string {
       </div>
     `;
 
+  const qrHtml = qrCodeDataUrl
+    ? `<img class="qr-image" src="${qrCodeDataUrl}" alt="QR Code do Signature Book" />`
+    : `
+      <div class="qr-fallback-shell">
+        <div class="qr-fallback-box">CPS</div>
+      </div>
+    `;
+
+  const dedicatedLinkHtml = dedicatedLink
+    ? `<div class="link-line">${dedicatedLink}</div>`
+    : "";
+
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -231,12 +258,17 @@ function buildHtml(data: RenderPayload): string {
       print-color-adjust: exact;
     }
 
+    @page {
+      size: A4;
+      margin: 0;
+    }
+
     html, body {
       margin: 0;
       padding: 0;
       background: #17171a;
       color: #f2e8d4;
-      font-family: "Helvetica Neue", Arial, sans-serif;
+      font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
     }
 
     body {
@@ -281,35 +313,6 @@ function buildHtml(data: RenderPayload): string {
           rgba(214,178,107,0.055) 74%,
           transparent 80%,
           transparent 100%
-        ),
-        linear-gradient(26deg,
-          transparent 0%,
-          transparent 16%,
-          rgba(255,255,255,0.015) 20%,
-          transparent 24%,
-          transparent 40%,
-          rgba(214,178,107,0.05) 45%,
-          transparent 50%,
-          transparent 64%,
-          rgba(255,255,255,0.012) 68%,
-          transparent 72%,
-          transparent 88%,
-          rgba(214,178,107,0.04) 93%,
-          transparent 100%
-        ),
-        repeating-linear-gradient(
-          102deg,
-          rgba(255,255,255,0.010) 0px,
-          rgba(255,255,255,0.010) 1px,
-          transparent 1px,
-          transparent 115px
-        ),
-        repeating-linear-gradient(
-          76deg,
-          rgba(214,178,107,0.020) 0px,
-          rgba(214,178,107,0.020) 1px,
-          transparent 1px,
-          transparent 145px
         );
       opacity: 1;
       pointer-events: none;
@@ -375,6 +378,7 @@ function buildHtml(data: RenderPayload): string {
       max-width: 160mm;
       max-height: 40mm;
       object-fit: contain;
+      display: block;
       filter:
         drop-shadow(0 10px 24px rgba(0,0,0,0.34))
         drop-shadow(0 2px 2px rgba(255,255,255,0.04));
@@ -473,9 +477,43 @@ function buildHtml(data: RenderPayload): string {
       box-shadow:
         0 16px 34px rgba(0,0,0,0.24),
         inset 0 0 0 1px rgba(255,255,255,0.08);
+      overflow: hidden;
     }
 
     .tracking-mark {
+      width: 28mm;
+      height: 28mm;
+      border: 2px solid #111;
+      border-radius: 3mm;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #111;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      overflow: hidden;
+    }
+
+    .qr-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #ffffff;
+    }
+
+    .qr-fallback-shell {
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .qr-fallback-box {
       width: 28mm;
       height: 28mm;
       border: 2px solid #111;
@@ -510,6 +548,18 @@ function buildHtml(data: RenderPayload): string {
       margin-top: 10mm;
     }
 
+    .link-line {
+      margin-top: 5mm;
+      text-align: center;
+      color: #cdbf9d;
+      font-size: 8.5px;
+      line-height: 1.45;
+      word-break: break-all;
+      max-width: 130mm;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
     .section-title {
       color: #f8f2e6;
       font-size: 19px;
@@ -531,7 +581,7 @@ function buildHtml(data: RenderPayload): string {
       color: #d6cab6;
       font-size: 11px;
       line-height: 1.65;
-      max-width: 132mm;
+      max-width: 170mm;
       margin-bottom: 6mm;
     }
 
@@ -553,6 +603,7 @@ function buildHtml(data: RenderPayload): string {
       box-shadow:
         inset 0 0 36px rgba(255,255,255,0.01),
         0 16px 28px rgba(0,0,0,0.10);
+      break-inside: avoid;
     }
 
     .metric-grid {
@@ -578,9 +629,19 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .metric-icon {
+      width: 8mm;
+      height: 8mm;
+      margin: 0 auto 2mm auto;
+      border-radius: 50%;
+      border: 1px solid rgba(214,178,107,0.34);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: #d8b36c;
-      font-size: 12px;
-      margin-bottom: 2mm;
+      font-size: 8px;
+      background: rgba(255,255,255,0.02);
+      text-transform: uppercase;
+      font-weight: 700;
     }
 
     .metric-label {
@@ -602,6 +663,7 @@ function buildHtml(data: RenderPayload): string {
       display: grid;
       grid-template-columns: 0.76fr 1.24fr;
       gap: 4mm;
+      align-items: stretch;
     }
 
     .distribution-line {
@@ -650,12 +712,11 @@ function buildHtml(data: RenderPayload): string {
     .executive-material-name {
       color: #f8f2e6;
       font-size: 16px;
-      line-height: 1.22;
+      line-height: 1.28;
       margin-bottom: 2mm;
       white-space: normal;
-      word-break: keep-all;
       overflow-wrap: break-word;
-      hyphens: none;
+      word-break: normal;
     }
 
     .executive-material-meta {
@@ -664,8 +725,8 @@ function buildHtml(data: RenderPayload): string {
       line-height: 1.45;
       margin-bottom: 1mm;
       white-space: normal;
-      word-break: normal;
       overflow-wrap: break-word;
+      word-break: normal;
     }
 
     .info-block .ring-side-small {
@@ -796,9 +857,11 @@ function buildHtml(data: RenderPayload): string {
       align-items: center;
       justify-content: center;
       color: #d8b36c;
-      font-size: 9px;
+      font-size: 8px;
+      font-weight: 700;
       background: rgba(255,255,255,0.02);
       flex: 0 0 auto;
+      text-transform: uppercase;
     }
 
     .timeline {
@@ -824,8 +887,8 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .timeline-dot {
-      width: 7mm;
-      height: 7mm;
+      width: 8mm;
+      height: 8mm;
       margin: 0 auto 2mm auto;
       border-radius: 50%;
       border: 1px solid rgba(214,178,107,0.34);
@@ -834,9 +897,11 @@ function buildHtml(data: RenderPayload): string {
       justify-content: center;
       background: rgba(255,255,255,0.02);
       color: #d8b36c;
-      font-size: 9px;
+      font-size: 7px;
+      font-weight: 700;
       position: relative;
       z-index: 2;
+      text-transform: uppercase;
     }
 
     .timeline-step.done .timeline-dot,
@@ -854,6 +919,7 @@ function buildHtml(data: RenderPayload): string {
       display: grid;
       grid-template-columns: 0.96fr 1.04fr;
       gap: 5mm;
+      align-items: start;
     }
 
     .material-sheet {
@@ -888,6 +954,7 @@ function buildHtml(data: RenderPayload): string {
       font-size: 14px;
       line-height: 1.32;
       margin-bottom: 1.8mm;
+      overflow-wrap: break-word;
     }
 
     .material-small {
@@ -895,6 +962,7 @@ function buildHtml(data: RenderPayload): string {
       font-size: 10px;
       line-height: 1.45;
       margin-bottom: 1mm;
+      overflow-wrap: break-word;
     }
 
     .photo-panel {
@@ -922,6 +990,7 @@ function buildHtml(data: RenderPayload): string {
       font-size: 10px;
       line-height: 1.55;
       margin-top: 3mm;
+      overflow-wrap: break-word;
     }
 
     .list-grid {
@@ -929,6 +998,7 @@ function buildHtml(data: RenderPayload): string {
       grid-template-columns: 1fr 1fr;
       gap: 5mm;
       margin-bottom: 5mm;
+      align-items: start;
     }
 
     .list-card-title {
@@ -955,6 +1025,7 @@ function buildHtml(data: RenderPayload): string {
       color: #d4c9b8;
       font-size: 10px;
       line-height: 1.45;
+      overflow-wrap: break-word;
     }
 
     .bullet {
@@ -967,7 +1038,9 @@ function buildHtml(data: RenderPayload): string {
       align-items: center;
       justify-content: center;
       font-size: 8px;
+      font-weight: 700;
       margin-top: 0.35mm;
+      text-transform: uppercase;
     }
 
     .bullet.good { color: #dcc67c; }
@@ -997,6 +1070,7 @@ function buildHtml(data: RenderPayload): string {
       color: #d6ccbb;
       font-size: 10px;
       line-height: 1.65;
+      overflow-wrap: break-word;
     }
 
     .pillars-grid {
@@ -1005,6 +1079,7 @@ function buildHtml(data: RenderPayload): string {
       gap: 4mm;
       margin-top: 4mm;
       margin-bottom: 4mm;
+      align-items: stretch;
     }
 
     .pillar-card {
@@ -1023,9 +1098,19 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .pillar-icon {
+      width: 8mm;
+      height: 8mm;
+      margin: 0 auto 2mm auto;
+      border-radius: 50%;
+      border: 1px solid rgba(214,178,107,0.34);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: #d8b36c;
-      font-size: 14px;
-      margin-bottom: 2mm;
+      font-size: 8px;
+      font-weight: 700;
+      background: rgba(255,255,255,0.02);
+      text-transform: uppercase;
     }
 
     .pillar-title {
@@ -1040,6 +1125,7 @@ function buildHtml(data: RenderPayload): string {
       color: #d3c9b7;
       font-size: 9px;
       line-height: 1.4;
+      overflow-wrap: break-word;
     }
 
     .care-footer {
@@ -1051,6 +1137,7 @@ function buildHtml(data: RenderPayload): string {
       font-size: 10px;
       background: rgba(255,255,255,0.014);
       line-height: 1.6;
+      overflow-wrap: break-word;
     }
 
     .certificate .page-inner {
@@ -1126,6 +1213,7 @@ function buildHtml(data: RenderPayload): string {
       letter-spacing: 1.8px;
       text-transform: uppercase;
       margin-bottom: 1.5mm;
+      overflow-wrap: break-word;
     }
 
     .certificate-code {
@@ -1134,6 +1222,7 @@ function buildHtml(data: RenderPayload): string {
       font-size: 19px;
       letter-spacing: 1px;
       margin: 7mm 0 8mm 0;
+      overflow-wrap: break-word;
     }
 
     .certificate-grid {
@@ -1148,6 +1237,7 @@ function buildHtml(data: RenderPayload): string {
     .certificate-field {
       border-bottom: 1px solid rgba(214,178,107,0.16);
       padding-bottom: 2mm;
+      min-width: 0;
     }
 
     .field-label {
@@ -1161,6 +1251,8 @@ function buildHtml(data: RenderPayload): string {
     .field-value {
       color: #f5ecdd;
       font-size: 12px;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .certificate-track {
@@ -1179,21 +1271,7 @@ function buildHtml(data: RenderPayload): string {
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .certificate-track-mark {
-      width: 22mm;
-      height: 22mm;
-      border: 2px solid #111;
-      border-radius: 3mm;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #111;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
+      overflow: hidden;
     }
 
     .footer-note {
@@ -1205,6 +1283,7 @@ function buildHtml(data: RenderPayload): string {
       max-width: 130mm;
       margin-left: auto;
       margin-right: auto;
+      overflow-wrap: break-word;
     }
 
     .certificate-bottom-logo {
@@ -1242,10 +1321,13 @@ function buildHtml(data: RenderPayload): string {
           <div class="cover-meta">${location}</div>
 
           <div class="tracking-box">
-            <div class="tracking-mark">CPS</div>
+            <div class="tracking-mark">
+              ${qrHtml}
+            </div>
           </div>
 
           <div class="code-pill">${signatureCode}</div>
+          ${dedicatedLinkHtml}
         </div>
 
         <div class="cover-footer">
@@ -1268,22 +1350,22 @@ function buildHtml(data: RenderPayload): string {
           <div class="card" style="margin-bottom:5mm;">
             <div class="metric-grid">
               <div class="metric-card">
-                <div class="metric-icon">♡</div>
+                <div class="metric-icon">M</div>
                 <div class="metric-label">MATERIAIS CERTIFICADOS</div>
                 <div class="metric-value">1</div>
               </div>
               <div class="metric-card">
-                <div class="metric-icon">⌂</div>
+                <div class="metric-icon">C</div>
                 <div class="metric-label">CATEGORIAS TÉCNICAS</div>
                 <div class="metric-value">1</div>
               </div>
               <div class="metric-card">
-                <div class="metric-icon">▣</div>
+                <div class="metric-icon">B</div>
                 <div class="metric-label">BLOCOS DE ORIENTAÇÃO</div>
                 <div class="metric-value">1</div>
               </div>
               <div class="metric-card">
-                <div class="metric-icon">◎</div>
+                <div class="metric-icon">P</div>
                 <div class="metric-label">PROGRESSO GERAL</div>
                 <div class="metric-value">${progressPercent}%</div>
               </div>
@@ -1292,7 +1374,7 @@ function buildHtml(data: RenderPayload): string {
             <div class="executive-lower-grid">
               <div class="card" style="margin:0; min-height:52mm;">
                 <div class="section-kicker">DISTRIBUIÇÃO POR APLICAÇÃO</div>
-                <div style="color:#f7efdf; font-size:12px; margin-bottom:3mm;">${applicationLabel}</div>
+                <div style="color:#f7efdf; font-size:12px; margin-bottom:3mm; overflow-wrap:break-word;">${applicationLabel}</div>
                 <div class="distribution-line">
                   <div class="distribution-fill" style="width:${applicationPercent}%"></div>
                 </div>
@@ -1354,10 +1436,10 @@ function buildHtml(data: RenderPayload): string {
         <div class="big-ring-area">
           <div>
             <div class="status-list">
-              <div class="status-row"><span class="status-icon">✓</span><span>ETAPAS CONCLUÍDAS <strong style="margin-left:3px;">${completedSteps}</strong></span></div>
-              <div class="status-row"><span class="status-icon">◔</span><span>ETAPA EM ANDAMENTO <strong style="margin-left:3px;">${currentStage}</strong></span></div>
-              <div class="status-row"><span class="status-icon"></span><span>ETAPAS RESTANTES <strong style="margin-left:3px;">${remainingSteps}</strong></span></div>
-              <div class="status-row"><span class="status-icon">⌛</span><span>PREVISÃO DE ENTREGA <strong style="margin-left:3px;">${forecastDate}</strong></span></div>
+              <div class="status-row"><span class="status-icon">OK</span><span>ETAPAS CONCLUÍDAS <strong style="margin-left:3px;">${completedSteps}</strong></span></div>
+              <div class="status-row"><span class="status-icon">AT</span><span>ETAPA EM ANDAMENTO <strong style="margin-left:3px;">${currentStage}</strong></span></div>
+              <div class="status-row"><span class="status-icon">R</span><span>ETAPAS RESTANTES <strong style="margin-left:3px;">${remainingSteps}</strong></span></div>
+              <div class="status-row"><span class="status-icon">P</span><span>PREVISÃO DE ENTREGA <strong style="margin-left:3px;">${forecastDate}</strong></span></div>
             </div>
           </div>
 
@@ -1516,13 +1598,15 @@ function buildHtml(data: RenderPayload): string {
 
           <div class="certificate-track">
             <div class="certificate-track-box">
-              <div class="certificate-track-mark">CPS</div>
+              ${qrHtml}
             </div>
           </div>
 
           <div class="footer-note">
             Este documento integra rastreabilidade visual, técnica e institucional, vinculando material, aplicação, cuidado e identidade documental em padrão premium.
           </div>
+
+          ${dedicatedLinkHtml}
         </div>
 
         <div class="certificate-bottom-logo">
@@ -1538,7 +1622,12 @@ function buildHtml(data: RenderPayload): string {
 async function generatePdfBuffer(payload: RenderPayload): Promise<Buffer> {
   const browser = await chromium.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--font-render-hinting=none",
+    ],
   });
 
   try {
@@ -1550,8 +1639,28 @@ async function generatePdfBuffer(payload: RenderPayload): Promise<Buffer> {
     const html = buildHtml(payload);
 
     await page.setContent(html, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "load",
       timeout: 30000,
+    });
+
+    await page.evaluate(async () => {
+      const images = Array.from(document.images);
+
+      await Promise.all(
+        images.map((img) => {
+          if (img.complete) return Promise.resolve();
+
+          return new Promise<void>((resolve) => {
+            const done = () => resolve();
+            img.addEventListener("load", done, { once: true });
+            img.addEventListener("error", done, { once: true });
+          });
+        }),
+      );
+
+      if ((document as Document & { fonts?: { ready?: Promise<unknown> } }).fonts?.ready) {
+        await (document as Document & { fonts: { ready: Promise<unknown> } }).fonts.ready;
+      }
     });
 
     const pdf = await page.pdf({
@@ -1611,7 +1720,7 @@ const server = http.createServer(async (req, res) => {
         materialCategory: "Granito",
         materialFinish: "Polido",
         materialUsage: "Bancada em L",
-        materialCareText: "Uso interno • vedado • limpeza controlada",
+        materialCareText: "Uso interno, vedado e com limpeza controlada.",
         certificateFamily: "Granito",
         certificateOrigin: "Brasil",
         certificateBatch: "AM",
