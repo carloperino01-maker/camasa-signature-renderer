@@ -84,8 +84,10 @@ function normalizeArray(input: unknown, fallback: string[]): string[] {
     const cleaned = input
       .map((item) => String(item ?? "").trim())
       .filter(Boolean);
+
     if (cleaned.length > 0) return cleaned;
   }
+
   return fallback;
 }
 
@@ -125,11 +127,7 @@ function buildSteps(percent: number): string {
         index < activeIndex ? "done" : index === activeIndex ? "current" : "pending";
 
       const marker =
-        state === "done"
-          ? "OK"
-          : state === "current"
-            ? "AT"
-            : "";
+        state === "done" ? "OK" : state === "current" ? "AT" : "";
 
       return `
         <div class="timeline-step ${state}">
@@ -143,6 +141,7 @@ function buildSteps(percent: number): string {
 
 function buildList(items: string[], variant: "good" | "bad" | "alert"): string {
   const icon = variant === "good" ? "+" : variant === "bad" ? "x" : "!";
+
   return items
     .map(
       (item) =>
@@ -273,8 +272,8 @@ function buildHtml(data: RenderPayload): string {
 
     body {
       background:
-        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.04), transparent 22%),
-        linear-gradient(180deg, #17171a 0%, #222227 100%);
+        radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03), transparent 20%),
+        linear-gradient(180deg, #111214 0%, #1a1b1f 45%, #121317 100%);
     }
 
     .page {
@@ -284,7 +283,8 @@ function buildHtml(data: RenderPayload): string {
       position: relative;
       overflow: hidden;
       page-break-after: always;
-      background: linear-gradient(180deg, #1a1a1d 0%, #26262c 100%);
+      background:
+        linear-gradient(145deg, #0f1013 0%, #17181c 18%, #111216 36%, #1d1f24 52%, #111216 68%, #1a1b20 84%, #0e0f12 100%);
     }
 
     .page:last-child {
@@ -296,24 +296,52 @@ function buildHtml(data: RenderPayload): string {
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 14% 16%, rgba(214,178,107,0.12), transparent 15%),
-        radial-gradient(circle at 82% 14%, rgba(214,178,107,0.10), transparent 14%),
-        radial-gradient(circle at 84% 86%, rgba(214,178,107,0.10), transparent 16%),
+        radial-gradient(circle at 18% 14%, rgba(255,255,255,0.05), transparent 10%),
+        radial-gradient(circle at 76% 22%, rgba(214,178,107,0.08), transparent 14%),
+        radial-gradient(circle at 82% 86%, rgba(255,255,255,0.03), transparent 12%),
+
         linear-gradient(118deg,
           transparent 0%,
-          rgba(255,255,255,0.018) 7%,
-          transparent 13%,
+          transparent 8%,
+          rgba(255,255,255,0.022) 11%,
+          transparent 14%,
+          transparent 24%,
+          rgba(214,178,107,0.055) 27%,
+          transparent 31%,
+          transparent 42%,
+          rgba(255,255,255,0.018) 45%,
+          transparent 49%,
+          transparent 63%,
+          rgba(214,178,107,0.04) 67%,
+          transparent 71%,
+          transparent 100%
+        ),
+
+        linear-gradient(104deg,
+          transparent 0%,
           transparent 19%,
-          rgba(214,178,107,0.065) 24%,
-          transparent 30%,
-          transparent 45%,
-          rgba(255,255,255,0.018) 50%,
-          transparent 56%,
-          transparent 69%,
-          rgba(214,178,107,0.055) 74%,
+          rgba(255,255,255,0.015) 22%,
+          transparent 26%,
+          transparent 46%,
+          rgba(214,178,107,0.035) 50%,
+          transparent 54%,
+          transparent 73%,
+          rgba(255,255,255,0.012) 76%,
           transparent 80%,
           transparent 100%
+        ),
+
+        linear-gradient(72deg,
+          transparent 0%,
+          transparent 12%,
+          rgba(255,255,255,0.01) 16%,
+          transparent 20%,
+          transparent 58%,
+          rgba(214,178,107,0.028) 62%,
+          transparent 66%,
+          transparent 100%
         );
+
       opacity: 1;
       pointer-events: none;
       mix-blend-mode: screen;
@@ -325,8 +353,9 @@ function buildHtml(data: RenderPayload): string {
       inset: 7mm;
       border: 1px solid rgba(214,178,107,0.08);
       box-shadow:
-        inset 0 0 0 1px rgba(255,255,255,0.006),
-        inset 0 0 90px rgba(0,0,0,0.14);
+        inset 0 0 0 1px rgba(255,255,255,0.004),
+        inset 0 0 120px rgba(0,0,0,0.22),
+        inset 0 0 40px rgba(214,178,107,0.03);
       pointer-events: none;
     }
 
@@ -348,10 +377,10 @@ function buildHtml(data: RenderPayload): string {
       position: relative;
       border: 1px solid rgba(214,178,107,0.13);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.012), transparent 18%, transparent 84%, rgba(255,255,255,0.006)),
-        linear-gradient(180deg, rgba(38,38,42,0.74), rgba(17,17,20,0.84));
+        linear-gradient(180deg, rgba(255,255,255,0.01), transparent 18%, transparent 84%, rgba(255,255,255,0.004)),
+        linear-gradient(145deg, rgba(19,20,24,0.88), rgba(10,11,14,0.94));
       box-shadow:
-        inset 0 0 100px rgba(0,0,0,0.25),
+        inset 0 0 120px rgba(0,0,0,0.28),
         0 18px 44px rgba(0,0,0,0.12);
       padding: 13mm 12mm 10mm 12mm;
       display: flex;
@@ -1163,10 +1192,10 @@ function buildHtml(data: RenderPayload): string {
       border: 1px solid rgba(214,178,107,0.15);
       padding: 10mm;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.012), transparent 18%),
-        linear-gradient(180deg, rgba(29,29,32,0.70), rgba(17,17,19,0.82));
+        linear-gradient(180deg, rgba(255,255,255,0.01), transparent 18%),
+        linear-gradient(145deg, rgba(18,19,23,0.9), rgba(10,11,14,0.95));
       box-shadow:
-        inset 0 0 90px rgba(0,0,0,0.24),
+        inset 0 0 120px rgba(0,0,0,0.26),
         0 20px 44px rgba(0,0,0,0.12);
       display: flex;
       flex-direction: column;
@@ -1756,6 +1785,7 @@ const server = http.createServer(async (req, res) => {
       const chunks: Buffer[] = [];
 
       req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+
       req.on("end", async () => {
         try {
           const rawBody = Buffer.concat(chunks).toString("utf-8");
@@ -1781,6 +1811,7 @@ const server = http.createServer(async (req, res) => {
           );
         }
       });
+
       return;
     }
 
