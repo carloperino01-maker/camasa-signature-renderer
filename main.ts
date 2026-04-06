@@ -114,25 +114,50 @@ function normalizePillars(input: unknown): CarePillar[] {
   ];
 }
 
-function buildSteps(percent: number): string {
+function toTitleCase(value: string): string {
+  const lower = value.toLowerCase();
+  return lower.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function normalizeLocation(value?: string): string {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "São Paulo, SP";
+
+  return raw
+    .replace(/\bSao\b/gi, "São")
+    .replace(/\bPaulo\b/gi, "Paulo")
+    .replace(/\bsp\b/g, "SP");
+}
+
+function normalizeCountry(value?: string): string {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "Brasil";
+  return raw.replace(/\bbrasil\b/gi, "Brasil");
+}
+
+function normalizeApplicationLabel(value?: string): string {
+  const raw = String(value ?? "").trim();
+  if (!raw) return "Bancada em L";
+  return raw.replace(/\bbancada em l\b/gi, "Bancada em L");
+}
+
+function buildSteps(completedSteps: number, totalSteps: number, displayCurrentStage: string): string {
   const steps = ["Projeto", "Medição", "Acabamento", "Instalação", "Finalização"];
-  const activeIndex =
-    percent >= 100
-      ? steps.length - 1
-      : Math.max(0, Math.min(steps.length - 1, Math.floor(percent / 20)));
+  const boundedCompleted = Math.max(0, Math.min(totalSteps, completedSteps));
+  const currentIndex = Math.min(steps.length - 1, boundedCompleted);
 
   return steps
     .map((label, index) => {
-      const state =
-        index < activeIndex ? "done" : index === activeIndex ? "current" : "pending";
-
-      const marker =
-        state === "done" ? "OK" : state === "current" ? "AT" : "";
+      const isDone = index < boundedCompleted;
+      const isCurrent = !isDone && boundedCompleted < totalSteps && index === currentIndex;
+      const state = isDone ? "done" : isCurrent ? "current" : "pending";
+      const marker = isDone ? "OK" : isCurrent ? "AT" : "";
 
       return `
         <div class="timeline-step ${state}">
           <div class="timeline-dot">${marker}</div>
           <div class="timeline-label">${escapeHtml(label)}</div>
+          ${isCurrent ? `<div class="timeline-stage-caption">${escapeHtml(displayCurrentStage)}</div>` : ""}
         </div>
       `;
     })
@@ -140,7 +165,7 @@ function buildSteps(percent: number): string {
 }
 
 function buildList(items: string[], variant: "good" | "bad" | "alert"): string {
-  const icon = variant === "good" ? "+" : variant === "bad" ? "x" : "!";
+  const icon = variant === "good" ? "+" : variant === "bad" ? "X" : "!";
 
   return items
     .map(
@@ -173,44 +198,63 @@ function buildHtml(data: RenderPayload): string {
     assetDataUri("public/images/logotipo-camasa-process-system.jpeg") ||
     assetDataUri("public/images/logotipo-camasa-process-system.png");
 
+  const totalSteps = 5;
+
+  const rawProgressPercent = Math.max(0, Math.min(100, Number(data.progressPercent ?? 38)));
+  const isCompleted = rawProgressPercent >= 100;
+
+  const safeCompletedSteps = isCompleted
+    ? totalSteps
+    : Math.max(0, Math.min(totalSteps, Number(data.completedSteps ?? 0)));
+
+  const safeRemainingSteps = isCompleted
+    ? 0
+    : Math.max(0, totalSteps - safeCompletedSteps);
+
+  const displayCurrentStage = isCompleted
+    ? "Concluído"
+    : escapeHtml(String(data.currentStage ?? "").trim() || "Em andamento");
+
+  const displayProgressLabel = isCompleted ? "CONCLUÍDO" : "EM ANDAMENTO";
+
   const signatureCode = escapeHtml(data.signatureCode || "CSB-20260331-2344-XBGE");
   const documentType = escapeHtml(data.documentType || "DOCUMENTO DE ENTREGA PREMIUM");
   const clientName = escapeHtml(data.clientName || "Ana");
-  const projectName = escapeHtml(data.projectName || "Bancada em L");
+  const projectName = escapeHtml(toTitleCase(String(data.projectName || "Bancada em L")));
   const material = escapeHtml(data.material || "Granito Verde Ubatuba");
-  const location = escapeHtml(data.location || "São Paulo, SP");
+  const location = escapeHtml(normalizeLocation(data.location));
   const issueDate = formatDatePtBr(data.issueDate || "2026-03-31");
   const forecastDate = formatDatePtBr(data.forecastDate || "2026-04-09");
-  const progressPercent = Math.max(0, Math.min(100, Number(data.progressPercent ?? 38)));
-  const completedSteps = Math.max(0, Number(data.completedSteps ?? 6));
-  const remainingSteps = Math.max(0, Number(data.remainingSteps ?? 8));
-  const currentStage = escapeHtml(data.currentStage || "Instalação");
-  const applicationLabel = escapeHtml(data.applicationLabel || "Bancada em L");
+  const applicationLabel = escapeHtml(normalizeApplicationLabel(data.applicationLabel));
   const applicationPercent = Math.max(0, Math.min(100, Number(data.applicationPercent ?? 100)));
-  const materialCategory = escapeHtml(data.materialCategory || "Granito");
-  const materialFinish = escapeHtml(data.materialFinish || "Polido");
-  const materialUsage = escapeHtml(data.materialUsage || "Bancada em L");
+  const materialCategory = escapeHtml(toTitleCase(String(data.materialCategory || "Pedras Naturais")));
+  const materialFinish = escapeHtml(toTitleCase(String(data.materialFinish || "Polido")));
+  const materialUsage = escapeHtml(normalizeApplicationLabel(data.materialUsage));
   const materialCareText = escapeHtml(
-    data.materialCareText || "Uso interno, vedado e com limpeza controlada.",
+    String(data.materialCareText || "Cuidados especiais com pedras naturais.")
+      .trim()
+      .replace(/\bcuidados especiais com pedras naturais\b/gi, "Cuidados especiais com pedras naturais."),
   );
-  const certificateFamily = escapeHtml(data.certificateFamily || "Granito");
-  const certificateOrigin = escapeHtml(data.certificateOrigin || "Brasil");
-  const certificateBatch = escapeHtml(data.certificateBatch || "AM");
-  const dedicatedLink = escapeHtml(data.dedicatedLink || "");
+  const certificateFamily = escapeHtml(
+    toTitleCase(String(data.certificateFamily || "Pedras Naturais")),
+  );
+  const certificateOrigin = escapeHtml(normalizeCountry(data.certificateOrigin));
+  const certificateBatch = escapeHtml(String(data.certificateBatch || signatureCode.slice(-6)).trim());
+  const dedicatedLink = escapeHtml(String(data.dedicatedLink || "").trim());
   const qrCodeDataUrl = typeof data.qrCodeDataUrl === "string" ? data.qrCodeDataUrl.trim() : "";
 
   const doList = normalizeArray(data.doList, [
-    "Limpar com pano macio, água e detergente neutro.",
-    "Secar a superfície após a limpeza ou contato com líquidos.",
-    "Usar apoio para panelas, objetos quentes e peças metálicas.",
-    "Manter inspeção visual periódica em quinas e áreas críticas.",
+    "Limpar com pano úmido e detergente neutro.",
+    "Secar após limpeza para evitar marcas de água.",
+    "Aplicar impermeabilizante conforme orientação técnica.",
+    "Usar protetores sob objetos que possam riscar.",
   ]);
 
   const dontList = normalizeArray(data.dontList, [
-    "Não usar ácido, cloro, saponáceo ou produto abrasivo.",
-    "Não apoiar panelas superaquecidas diretamente na peça.",
-    "Não deixar vinho, café, óleo ou pigmentos por tempo prolongado.",
-    "Não usar lâmina, palha de aço ou solvente agressivo.",
+    "Não usar produtos abrasivos que possam riscar a superfície.",
+    "Não aplicar ácidos fortes ou solventes agressivos.",
+    "Não apoiar panelas muito quentes diretamente.",
+    "Não usar a pedra como tábua de corte.",
   ]);
 
   const alerts = normalizeArray(data.alerts, [
@@ -241,8 +285,12 @@ function buildHtml(data: RenderPayload): string {
       </div>
     `;
 
-  const dedicatedLinkHtml = dedicatedLink
-    ? `<div class="link-line">${dedicatedLink}</div>`
+  const coverLinkHtml = dedicatedLink
+    ? `<div class="link-line subtle-link">${dedicatedLink}</div>`
+    : "";
+
+  const certificateLinkHtml = dedicatedLink
+    ? `<div class="link-line certificate-link">${dedicatedLink}</div>`
     : "";
 
   return `<!DOCTYPE html>
@@ -299,7 +347,6 @@ function buildHtml(data: RenderPayload): string {
         radial-gradient(circle at 18% 14%, rgba(255,255,255,0.05), transparent 10%),
         radial-gradient(circle at 76% 22%, rgba(214,178,107,0.08), transparent 14%),
         radial-gradient(circle at 82% 86%, rgba(255,255,255,0.03), transparent 12%),
-
         linear-gradient(118deg,
           transparent 0%,
           transparent 8%,
@@ -316,7 +363,6 @@ function buildHtml(data: RenderPayload): string {
           transparent 71%,
           transparent 100%
         ),
-
         linear-gradient(104deg,
           transparent 0%,
           transparent 19%,
@@ -330,7 +376,6 @@ function buildHtml(data: RenderPayload): string {
           transparent 80%,
           transparent 100%
         ),
-
         linear-gradient(72deg,
           transparent 0%,
           transparent 12%,
@@ -341,7 +386,6 @@ function buildHtml(data: RenderPayload): string {
           transparent 66%,
           transparent 100%
         );
-
       opacity: 1;
       pointer-events: none;
       mix-blend-mode: screen;
@@ -478,10 +522,10 @@ function buildHtml(data: RenderPayload): string {
 
     .cover-subtitle {
       color: #d7ccb7;
-      font-size: 10px;
-      letter-spacing: 2px;
+      font-size: 9px;
+      letter-spacing: 2.2px;
       text-transform: uppercase;
-      margin-bottom: 11mm;
+      margin-bottom: 10mm;
     }
 
     .cover-project-name {
@@ -497,11 +541,11 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .tracking-box {
-      margin-top: 10mm;
-      margin-bottom: 8mm;
-      width: 42mm;
-      height: 42mm;
-      border-radius: 4.5mm;
+      margin-top: 9mm;
+      margin-bottom: 7mm;
+      width: 38mm;
+      height: 38mm;
+      border-radius: 4.2mm;
       background: linear-gradient(180deg, #fcfcfc, #ececec);
       border: 1px solid rgba(214,178,107,0.36);
       display: flex;
@@ -514,8 +558,8 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .tracking-mark {
-      width: 28mm;
-      height: 28mm;
+      width: 26mm;
+      height: 26mm;
       border: 2px solid #111;
       border-radius: 3mm;
       display: flex;
@@ -548,8 +592,8 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .qr-fallback-box {
-      width: 28mm;
-      height: 28mm;
+      width: 26mm;
+      height: 26mm;
       border: 2px solid #111;
       border-radius: 3mm;
       display: flex;
@@ -583,15 +627,25 @@ function buildHtml(data: RenderPayload): string {
     }
 
     .link-line {
-      margin-top: 5mm;
       text-align: center;
-      color: #cdbf9d;
-      font-size: 8.5px;
+      color: #b3ab9b;
       line-height: 1.45;
       word-break: break-all;
       max-width: 130mm;
       margin-left: auto;
       margin-right: auto;
+    }
+
+    .subtle-link {
+      margin-top: 4mm;
+      font-size: 7px;
+      opacity: 0.72;
+    }
+
+    .certificate-link {
+      margin-top: 4mm;
+      font-size: 7px;
+      opacity: 0.72;
     }
 
     .section-title {
@@ -957,6 +1011,14 @@ function buildHtml(data: RenderPayload): string {
       line-height: 1.35;
     }
 
+    .timeline-stage-caption {
+      color: #aa9f87;
+      font-size: 6px;
+      line-height: 1.2;
+      margin-top: 1mm;
+      opacity: 0.8;
+    }
+
     .material-panel-grid {
       display: grid;
       grid-template-columns: 0.96fr 1.04fr;
@@ -1300,13 +1362,13 @@ function buildHtml(data: RenderPayload): string {
     .certificate-track {
       display: flex;
       justify-content: center;
-      margin-top: 8mm;
-      margin-bottom: 6mm;
+      margin-top: 7mm;
+      margin-bottom: 5mm;
     }
 
     .certificate-track-box {
-      width: 34mm;
-      height: 34mm;
+      width: 30mm;
+      height: 30mm;
       border-radius: 4mm;
       background: linear-gradient(180deg, #fcfcfc, #ededed);
       border: 1px solid rgba(214,178,107,0.36);
@@ -1314,6 +1376,7 @@ function buildHtml(data: RenderPayload): string {
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
     }
 
     .footer-note {
@@ -1332,12 +1395,13 @@ function buildHtml(data: RenderPayload): string {
       display: flex;
       justify-content: center;
       padding-top: 8mm;
+      opacity: 0.86;
     }
 
     .certificate-bottom-logo .brand-logo {
-      max-width: 96mm;
-      max-height: 26mm;
-      opacity: 0.96;
+      max-width: 86mm;
+      max-height: 22mm;
+      opacity: 0.9;
     }
   </style>
 </head>
@@ -1369,7 +1433,7 @@ function buildHtml(data: RenderPayload): string {
           </div>
 
           <div class="code-pill">${signatureCode}</div>
-          ${dedicatedLinkHtml}
+          ${coverLinkHtml}
         </div>
 
         <div class="cover-footer">
@@ -1410,7 +1474,7 @@ function buildHtml(data: RenderPayload): string {
             <div class="metric-card">
               <div class="metric-icon">P</div>
               <div class="metric-label">PROGRESSO GERAL</div>
-              <div class="metric-value">${progressPercent}%</div>
+              <div class="metric-value">${rawProgressPercent}%</div>
             </div>
           </div>
 
@@ -1442,12 +1506,12 @@ function buildHtml(data: RenderPayload): string {
         <div class="grid-2">
           <div class="card">
             <div class="ring-wrap">
-              <div class="ring" style="--p:${progressPercent}">
-                <div class="ring-inner">${progressPercent}%</div>
+              <div class="ring" style="--p:${rawProgressPercent}">
+                <div class="ring-inner">${rawProgressPercent}%</div>
               </div>
               <div>
                 <div class="ring-side-title">PROGRESSO GERAL</div>
-                <div class="ring-side-line">${currentStage}</div>
+                <div class="ring-side-line">${displayCurrentStage}</div>
                 <div class="ring-side-small">Documento emitido em ${issueDate}</div>
                 <div class="ring-side-small">Previsão de entrega ${forecastDate}</div>
               </div>
@@ -1478,23 +1542,23 @@ function buildHtml(data: RenderPayload): string {
         <div class="big-ring-area">
           <div>
             <div class="status-list">
-              <div class="status-row"><span class="status-icon">OK</span><span>ETAPAS CONCLUÍDAS <strong style="margin-left:3px;">${completedSteps}</strong></span></div>
-              <div class="status-row"><span class="status-icon">AT</span><span>ETAPA EM ANDAMENTO <strong style="margin-left:3px;">${currentStage}</strong></span></div>
-              <div class="status-row"><span class="status-icon">R</span><span>ETAPAS RESTANTES <strong style="margin-left:3px;">${remainingSteps}</strong></span></div>
+              <div class="status-row"><span class="status-icon">OK</span><span>ETAPAS CONCLUÍDAS <strong style="margin-left:3px;">${safeCompletedSteps}</strong></span></div>
+              <div class="status-row"><span class="status-icon">AT</span><span>ETAPA EM ANDAMENTO <strong style="margin-left:3px;">${displayCurrentStage}</strong></span></div>
+              <div class="status-row"><span class="status-icon">R</span><span>ETAPAS RESTANTES <strong style="margin-left:3px;">${safeRemainingSteps}</strong></span></div>
               <div class="status-row"><span class="status-icon">P</span><span>PREVISÃO DE ENTREGA <strong style="margin-left:3px;">${forecastDate}</strong></span></div>
             </div>
           </div>
 
-          <div class="ring-big" style="--p:${progressPercent}">
+          <div class="ring-big" style="--p:${rawProgressPercent}">
             <div class="ring-big-inner">
-              <div class="ring-big-percent">${progressPercent}%</div>
-              <div class="ring-big-caption">CONCLUÍDO</div>
+              <div class="ring-big-percent">${rawProgressPercent}%</div>
+              <div class="ring-big-caption">${displayProgressLabel}</div>
             </div>
           </div>
         </div>
 
         <div class="timeline">
-          ${buildSteps(progressPercent)}
+          ${buildSteps(safeCompletedSteps, totalSteps, displayCurrentStage)}
         </div>
       </div>
     </div>
@@ -1576,7 +1640,7 @@ function buildHtml(data: RenderPayload): string {
       </div>
 
       <div class="care-hero">
-        <div class="care-hero-title">Programa de cuidado contínuo</div>
+        <div class="care-hero-title">PROGRAMA DE CUIDADO CONTÍNUO</div>
         <div class="care-hero-text">
           O Camasa Care não substitui o uso correto; ele amplia a proteção estética da obra no longo prazo.
           Seu papel é orientar, preservar leitura visual, reduzir desgaste prematuro e reforçar um padrão superior de pós-venda para superfícies nobres.
@@ -1648,7 +1712,7 @@ function buildHtml(data: RenderPayload): string {
             Este documento integra rastreabilidade visual, técnica e institucional, vinculando material, aplicação, cuidado e identidade documental em padrão premium.
           </div>
 
-          ${dedicatedLinkHtml}
+          ${certificateLinkHtml}
         </div>
 
         <div class="certificate-bottom-logo">
@@ -1755,21 +1819,21 @@ const server = http.createServer(async (req, res) => {
         projectName: "Bancada em L",
         material: "Granito Verde Ubatuba",
         location: "São Paulo, SP",
-        issueDate: "2026-03-31",
-        progressPercent: 38,
-        completedSteps: 6,
-        currentStage: "Instalação",
-        remainingSteps: 8,
-        forecastDate: "2026-04-09",
+        issueDate: "2026-04-04",
+        progressPercent: 100,
+        completedSteps: 5,
+        currentStage: "Concluído",
+        remainingSteps: 0,
+        forecastDate: "10/04/2026",
         applicationLabel: "Bancada em L",
         applicationPercent: 100,
-        materialCategory: "Granito",
+        materialCategory: "Pedras Naturais",
         materialFinish: "Polido",
         materialUsage: "Bancada em L",
-        materialCareText: "Uso interno, vedado e com limpeza controlada.",
-        certificateFamily: "Granito",
+        materialCareText: "Cuidados especiais com pedras naturais.",
+        certificateFamily: "Pedras Naturais",
         certificateOrigin: "Brasil",
-        certificateBatch: "AM",
+        certificateBatch: "4-XBGE",
       });
 
       res.writeHead(200, {
