@@ -138,7 +138,20 @@ function normalizeCountry(value?: string): string {
 function normalizeApplicationLabel(value?: string): string {
   const raw = String(value ?? "").trim();
   if (!raw) return "Bancada em L";
-  return raw.replace(/\bbancada em l\b/gi, "Bancada em L");
+  return raw
+    .replace(/\bbancada em l\b/gi, "Bancada em L")
+    .replace(/\bBancada Em L\b/g, "Bancada em L");
+}
+
+function normalizeCareText(value?: string): string {
+  const raw = String(value ?? "Cuidados especiais com pedras naturais.")
+    .trim()
+    .replace(/\.{2,}/g, ".")
+    .replace(/\s+/g, " ");
+
+  if (!raw) return "Cuidados especiais com pedras naturais.";
+
+  return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
 function buildSteps(completedSteps: number, totalSteps: number, displayCurrentStage: string): string {
@@ -213,14 +226,14 @@ function buildHtml(data: RenderPayload): string {
 
   const displayCurrentStage = isCompleted
     ? "Concluído"
-    : escapeHtml(String(data.currentStage ?? "").trim() || "Em andamento");
+    : String(data.currentStage ?? "").trim() || "Em andamento";
 
   const displayProgressLabel = isCompleted ? "CONCLUÍDO" : "EM ANDAMENTO";
 
   const signatureCode = escapeHtml(data.signatureCode || "CSB-20260331-2344-XBGE");
   const documentType = escapeHtml(data.documentType || "DOCUMENTO DE ENTREGA PREMIUM");
   const clientName = escapeHtml(data.clientName || "Ana");
-  const projectName = escapeHtml(toTitleCase(String(data.projectName || "Bancada em L")));
+  const projectName = escapeHtml(normalizeApplicationLabel(data.projectName || "Bancada em L"));
   const material = escapeHtml(data.material || "Granito Verde Ubatuba");
   const location = escapeHtml(normalizeLocation(data.location));
   const issueDate = formatDatePtBr(data.issueDate || "2026-03-31");
@@ -230,18 +243,16 @@ function buildHtml(data: RenderPayload): string {
   const materialCategory = escapeHtml(toTitleCase(String(data.materialCategory || "Pedras Naturais")));
   const materialFinish = escapeHtml(toTitleCase(String(data.materialFinish || "Polido")));
   const materialUsage = escapeHtml(normalizeApplicationLabel(data.materialUsage));
-  const materialCareText = escapeHtml(
-    String(data.materialCareText || "Cuidados especiais com pedras naturais.")
-      .trim()
-      .replace(/\bcuidados especiais com pedras naturais\b/gi, "Cuidados especiais com pedras naturais."),
-  );
-  const certificateFamily = escapeHtml(
-    toTitleCase(String(data.certificateFamily || "Pedras Naturais")),
-  );
+  const materialCareText = escapeHtml(normalizeCareText(data.materialCareText));
+  const certificateFamily = escapeHtml(toTitleCase(String(data.certificateFamily || "Pedras Naturais")));
   const certificateOrigin = escapeHtml(normalizeCountry(data.certificateOrigin));
   const certificateBatch = escapeHtml(String(data.certificateBatch || signatureCode.slice(-6)).trim());
   const dedicatedLink = escapeHtml(String(data.dedicatedLink || "").trim());
-  const qrCodeDataUrl = typeof data.qrCodeDataUrl === "string" ? data.qrCodeDataUrl.trim() : "";
+
+  const qrCodeDataUrl =
+    typeof data.qrCodeDataUrl === "string" && data.qrCodeDataUrl.trim().startsWith("data:image/")
+      ? data.qrCodeDataUrl.trim()
+      : "";
 
   const doList = normalizeArray(data.doList, [
     "Limpar com pano úmido e detergente neutro.",
@@ -1511,7 +1522,7 @@ function buildHtml(data: RenderPayload): string {
               </div>
               <div>
                 <div class="ring-side-title">PROGRESSO GERAL</div>
-                <div class="ring-side-line">${displayCurrentStage}</div>
+                <div class="ring-side-line">${escapeHtml(displayCurrentStage)}</div>
                 <div class="ring-side-small">Documento emitido em ${issueDate}</div>
                 <div class="ring-side-small">Previsão de entrega ${forecastDate}</div>
               </div>
@@ -1543,7 +1554,7 @@ function buildHtml(data: RenderPayload): string {
           <div>
             <div class="status-list">
               <div class="status-row"><span class="status-icon">OK</span><span>ETAPAS CONCLUÍDAS <strong style="margin-left:3px;">${safeCompletedSteps}</strong></span></div>
-              <div class="status-row"><span class="status-icon">AT</span><span>ETAPA EM ANDAMENTO <strong style="margin-left:3px;">${displayCurrentStage}</strong></span></div>
+              <div class="status-row"><span class="status-icon">AT</span><span>ETAPA EM ANDAMENTO <strong style="margin-left:3px;">${escapeHtml(displayCurrentStage)}</strong></span></div>
               <div class="status-row"><span class="status-icon">R</span><span>ETAPAS RESTANTES <strong style="margin-left:3px;">${safeRemainingSteps}</strong></span></div>
               <div class="status-row"><span class="status-icon">P</span><span>PREVISÃO DE ENTREGA <strong style="margin-left:3px;">${forecastDate}</strong></span></div>
             </div>
