@@ -150,7 +150,6 @@ function normalizeCareText(value?: string): string {
     .replace(/\s+/g, " ");
 
   if (!raw) return "Cuidados especiais com pedras naturais.";
-
   return raw.charAt(0).toUpperCase() + raw.slice(1);
 }
 
@@ -200,6 +199,48 @@ function buildCarePillars(items: CarePillar[]): string {
       `,
     )
     .join("");
+}
+
+function buildProgressRingSvg(percent: number): string {
+  const safe = Math.max(0, Math.min(100, percent));
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - safe / 100);
+
+  return `
+    <svg class="progress-ring-svg" viewBox="0 0 120 120" aria-hidden="true">
+      <circle class="progress-ring-track" cx="60" cy="60" r="${radius}"></circle>
+      <circle
+        class="progress-ring-value"
+        cx="60"
+        cy="60"
+        r="${radius}"
+        stroke-dasharray="${circumference}"
+        stroke-dashoffset="${offset}"
+      ></circle>
+    </svg>
+  `;
+}
+
+function buildProgressRingBigSvg(percent: number): string {
+  const safe = Math.max(0, Math.min(100, percent));
+  const radius = 58;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference * (1 - safe / 100);
+
+  return `
+    <svg class="progress-ring-big-svg" viewBox="0 0 160 160" aria-hidden="true">
+      <circle class="progress-ring-big-track" cx="80" cy="80" r="${radius}"></circle>
+      <circle
+        class="progress-ring-big-value"
+        cx="80"
+        cy="80"
+        r="${radius}"
+        stroke-dasharray="${circumference}"
+        stroke-dashoffset="${offset}"
+      ></circle>
+    </svg>
+  `;
 }
 
 function buildHtml(data: RenderPayload): string {
@@ -842,7 +883,7 @@ function buildHtml(data: RenderPayload): string {
 
     .ring-wrap {
       display: grid;
-      grid-template-columns: 33mm 1fr;
+      grid-template-columns: 36mm 1fr;
       gap: 4mm;
       align-items: center;
     }
@@ -850,14 +891,11 @@ function buildHtml(data: RenderPayload): string {
     .ring {
       width: 30mm;
       height: 30mm;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at center, #161618 50%, transparent 51%),
-        conic-gradient(#d8b36c calc(var(--p) * 1%), rgba(255,255,255,0.07) 0);
+      position: relative;
+      margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto;
     }
 
     .ring-inner {
@@ -871,6 +909,30 @@ function buildHtml(data: RenderPayload): string {
       color: #f7eedb;
       font-size: 14px;
       font-weight: 600;
+      position: absolute;
+      z-index: 2;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.03);
+    }
+
+    .progress-ring-svg {
+      width: 30mm;
+      height: 30mm;
+      transform: rotate(-90deg);
+      overflow: visible;
+      display: block;
+    }
+
+    .progress-ring-track {
+      fill: none;
+      stroke: rgba(255,255,255,0.08);
+      stroke-width: 8;
+    }
+
+    .progress-ring-value {
+      fill: none;
+      stroke: #d8b36c;
+      stroke-width: 8;
+      stroke-linecap: round;
     }
 
     .ring-side-title {
@@ -896,27 +958,24 @@ function buildHtml(data: RenderPayload): string {
 
     .big-ring-area {
       display: grid;
-      grid-template-columns: 1fr 50mm;
+      grid-template-columns: 1fr 56mm;
       gap: 5mm;
       align-items: start;
     }
 
     .ring-big {
-      width: 48mm;
-      height: 48mm;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at center, #161618 44%, transparent 45%),
-        conic-gradient(#d8b36c calc(var(--p) * 1%), rgba(255,255,255,0.08) 0);
+      width: 52mm;
+      height: 52mm;
+      position: relative;
+      margin-left: auto;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: auto;
     }
 
     .ring-big-inner {
-      width: 24mm;
-      height: 24mm;
+      width: 25mm;
+      height: 25mm;
       border-radius: 50%;
       background: linear-gradient(180deg, rgba(29,29,31,0.98), rgba(18,18,20,0.98));
       display: flex;
@@ -925,6 +984,30 @@ function buildHtml(data: RenderPayload): string {
       justify-content: center;
       color: #f7eedb;
       text-align: center;
+      position: absolute;
+      z-index: 2;
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.03);
+    }
+
+    .progress-ring-big-svg {
+      width: 52mm;
+      height: 52mm;
+      transform: rotate(-90deg);
+      overflow: visible;
+      display: block;
+    }
+
+    .progress-ring-big-track {
+      fill: none;
+      stroke: rgba(255,255,255,0.08);
+      stroke-width: 10;
+    }
+
+    .progress-ring-big-value {
+      fill: none;
+      stroke: #d8b36c;
+      stroke-width: 10;
+      stroke-linecap: round;
     }
 
     .ring-big-percent {
@@ -1517,7 +1600,8 @@ function buildHtml(data: RenderPayload): string {
         <div class="grid-2">
           <div class="card">
             <div class="ring-wrap">
-              <div class="ring" style="--p:${rawProgressPercent}">
+              <div class="ring">
+                ${buildProgressRingSvg(rawProgressPercent)}
                 <div class="ring-inner">${rawProgressPercent}%</div>
               </div>
               <div>
@@ -1560,7 +1644,8 @@ function buildHtml(data: RenderPayload): string {
             </div>
           </div>
 
-          <div class="ring-big" style="--p:${rawProgressPercent}">
+          <div class="ring-big">
+            ${buildProgressRingBigSvg(rawProgressPercent)}
             <div class="ring-big-inner">
               <div class="ring-big-percent">${rawProgressPercent}%</div>
               <div class="ring-big-caption">${displayProgressLabel}</div>
@@ -1830,7 +1915,7 @@ const server = http.createServer(async (req, res) => {
         projectName: "Bancada em L",
         material: "Granito Verde Ubatuba",
         location: "São Paulo, SP",
-        issueDate: "2026-04-04",
+        issueDate: "2026-04-06",
         progressPercent: 100,
         completedSteps: 5,
         currentStage: "Concluído",
@@ -1838,11 +1923,11 @@ const server = http.createServer(async (req, res) => {
         forecastDate: "10/04/2026",
         applicationLabel: "Bancada em L",
         applicationPercent: 100,
-        materialCategory: "Pedras Naturais",
+        materialCategory: "Granito",
         materialFinish: "Polido",
         materialUsage: "Bancada em L",
         materialCareText: "Cuidados especiais com pedras naturais.",
-        certificateFamily: "Pedras Naturais",
+        certificateFamily: "Granito",
         certificateOrigin: "Brasil",
         certificateBatch: "4-XBGE",
       });
